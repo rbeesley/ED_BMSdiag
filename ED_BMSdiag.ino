@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------//
-// ED BMSdiag, v0.2
+// ED BMSdiag, v0.21
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -104,6 +104,8 @@ MCP_CAN CAN0(CS);                                // Set CS pin
 void setup()
 {  
   Serial.begin(115200);
+  while (!Serial); // while the serial stream is not open, do nothing:
+  Serial.println();
   
   pinMode(CS, OUTPUT);
   pinMode(CS_SD, OUTPUT);
@@ -123,6 +125,13 @@ void setup()
   Serial.println(SPACER); 
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
   Serial.println(SPACER);
+  
+  Serial.println(F("Connect to OBD port - Waiting for CAN-Bus "));
+  do {
+    Serial.print(F("."));
+    delay(1000);
+  } while (digitalRead(2));
+  Serial.println(F("CONNECTED"));
 }
 
 void WaitforSerial() {
@@ -477,7 +486,7 @@ void loop()
    //Wait for start via serial terminal
    WaitforSerial();
    clearSerialBuffer();
-   
+   Serial.println(SPACER);
    delay(500);
      
    fOK = ReadSOC();

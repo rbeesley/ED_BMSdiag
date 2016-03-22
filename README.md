@@ -31,4 +31,6 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 version  | comment
 -------- | ---------
 v0.2     | Initial Commit
-         | Tested with Arduino R3 and Sparkfun CAN-Bus shield.
+         | Tested with Arduino R3 and Sparkfun CAN-Bus shield
+v0.21    | Waiting for serial init
+         | Showing status of OBD port (CAN bus)

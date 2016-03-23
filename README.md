@@ -33,4 +33,4 @@ version  | comment
 v0.2     | Initial Commit
          | Tested with Arduino R3 and Sparkfun CAN-Bus shield
 v0.21    | Waiting for serial init
-         | Showing status of OBD port (CAN bus)
+         | Showing status of OBD port (CAN-Bus)

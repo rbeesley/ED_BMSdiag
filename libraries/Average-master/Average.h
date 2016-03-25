@@ -49,7 +49,9 @@ template <class T> class Average {
         // Private functions and variables here.  They can only be accessed
         // by functions within the class.
         T *_store;
-        T _sum;                                               // _sum variable for faster mean calculation
+        long _sum;                                           // _sum variable for faster mean calculation
+
+        
         uint32_t _position;                                   // _position variable for circular buffer
         uint32_t _count;
         uint32_t _size;
@@ -175,14 +177,16 @@ template <class T> T Average<T>::minimum(int *index) {
     }
 
 	minval = get(0);
-
+	
 	for(uint32_t i = 0; i < _count; i++) {
-		if(get(i) < minval) {
+	    if(get(i) < minval) {
 			minval = get(i);
-            if (index != NULL) { 
+
+              if (index != NULL) { 
                 *index = i;
-            }
-		}
+              }
+	    }
+
 	}
 	return minval;
 }
@@ -243,7 +247,7 @@ template <class T> T Average<T>::get(uint32_t index) {
     }
     int32_t cindex = _position-index;                         // position in circular buffer
     if (cindex < 0) cindex = _size + cindex;                  // need to loop around for negative cindex
-    return _store[cindex];
+    return _store[index];
 }
 
 template <class T> void Average<T>::leastSquares(float &m, float &c, float &r) {

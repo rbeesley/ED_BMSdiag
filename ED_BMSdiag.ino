@@ -1,5 +1,5 @@
-//--------------------------------------------------------------------------------//
-// ED BMSdiag, v0.21
+//--------------------------------------------------------------------------------
+// ED BMSdiag, v0.24
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -16,11 +16,19 @@
 // ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//--------------------------------------------------------------------------------//
+//--------------------------------------------------------------------------------
+//! \file    ED_BMSdiag.ino
+//! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
+//! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
+//! \brief   compatible hardware.
+//! \date    2016-March
+//! \author  My-Lab-odyssey
+//! \version 0.24
+//--------------------------------------------------------------------------------
 
-//#define DO_DEBUG_UPDATE
-#define RAW_VOLTAGES 0           // use RAW ADC values or calc offset
-#define VERBOSE 1                // VERBOSE mode will output individual cell data
+//#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
+#define RAW_VOLTAGES 0           //!< Use RAW values or calc ADC offset voltage
+#define VERBOSE 1                //!< VERBOSE mode will output individual cell data
 
 #ifndef DO_DEBUG_UPDATE
 #define DEBUG_UPDATE(...)
@@ -33,60 +41,59 @@
 #include <Timeout.h>
 #include <Average.h>
 
-#define DATALENGTH 456
-#define CELLVOLTAGE_OFFSET 90
-
+//Global definitions
+#define DATALENGTH 440
+#define CELLCOUNT 93
 #define SPACER F("-----------------------------------------")
+#define MSG_OK F("OK")
+#define MSG_FAIL F("FAIL")
 
+//Data arrays
+unsigned int data[DATALENGTH]; 
+Average <unsigned int> CellVoltage(CELLCOUNT);
+Average <unsigned int> CellCapacity(CELLCOUNT);
+
+//BMS data structure
+typedef struct {
+  //
+  unsigned int ADCCvolts_min;    //!< minimum cell voltage in mV, add offset +1500
+  unsigned int ADCCvolts_mean;   //!< average cell voltage in mV, no offset
+  unsigned int ADCCvolts_max;    //!< maxiimum cell voltage in mV, add offset +1500
+  int ADCvoltsOffset;            //!< calculated offset between RAW cell voltages and ADCref, about 90mV
+  unsigned int Cap_min_As;       //!< mininum cell capacity from measurement cycle
+  unsigned int Cap_mean_As;      //!< average cell capacity from measurement cycle
+  unsigned int Cap_max_As;       //!< maximum cell capacity from measurement cycle
+  
+  unsigned int Cvolts_min;       //!< voltage mininum in pack
+  float Cvolts_mean;             //!< calculated average from individual cell voltage query
+  unsigned int Cvolts_max;       //!< voltage maxinum in pack
+  float Cvolts_stdev;            //!< calculated standard deviation (populated)
+  unsigned int Ccap_min_As;      //!< cell capacity mininum in pack
+  unsigned int Ccap_mean_As;     //!< cell capacity calculated average
+  unsigned int Ccap_max_As;      //!< cell capacity maxinum in pack
+  
+  unsigned long HVoff_time;      //!< HighVoltage contactor off time in seconds
+  float Cap_meas_quality;        //!< some sort of estimation factor??? after measurement cycle
+  float Cap_combined_quality;    //!< some sort of estimation factor??? constantly updated
+  int LastMeas_days;             //!< days elapsed since last successful measurement
+  
+  float SOC;                     //!< State of Charge, as reported by vehicle dash
+  float HV;                      //!< total voltage of HV system in V
+  
+  unsigned int HVcontactState;   //!< contactor state: 0 := OFF, 2 := ON
+  long HVcontactCyclesLeft;      //!< counter related to ON/OFF cyles of the car
+  long HVcontactCyclesMax;       //!< static, seems to be maxiumum of contactor cycles
+  
+} BatteryDiag_t; 
+
+//CAN-Bus declarations
 long unsigned int rxID;
 unsigned char len = 0;
 unsigned char rxLength = 0;
 unsigned char rxBuf[8];
-char payload[100];
-
-unsigned int data[DATALENGTH];
-
-Average <long> CellVoltage(93);
-Average <int> CellCapacity(93);  
-
-typedef struct {
-  unsigned int Volts_min;
-  unsigned int Volts_mean;
-  unsigned int Volts_max;
-  int VoltsOffset;
-
-  unsigned int Cap_min_As;
-  unsigned int Cap_mean_As;
-  unsigned int Cap_max_As;
-  
-  unsigned long HVoff_time;
-  float Cap_meas_quality;
-  float Cap_combined_quality;
-  int LastMeas_days;
-  int SOH;
-  
-  float SOC;
-  float CAP;
-  float HV;
-  
-  unsigned int HVcontactState;
-  long HVcontactCyclesLeft;
-  long HVcontactCyclesMax;
-  
-} BatteryDiag_t;
-
-BatteryDiag_t BattDiag;
-
-int i = 0; int n = 0;
-boolean fDiagOK = 0;
-
-CTimeout CAN_Timeout(10000); 
-
-unsigned long timer = 0;
-
 unsigned char rqInit[8] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 unsigned char rqFlowControl[8] = {0x30, 0x08, 0x14, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
+byte rqFC_length = 8;            //!< Interval to send flow control messages (rqFC) 
 unsigned char rqBattADCref[8] = {0x03, 0x22, 0x02, 0x07, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattVolts[8] = {0x03, 0x22, 0x02, 0x08, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattCapacity[8] = {0x03, 0x22, 0x03, 0x10, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -94,13 +101,16 @@ unsigned char rqBattHVContactorCyclesLeft[8] = {0x03, 0x22, 0x03, 0x0B, 0xFF, 0x
 unsigned char rqBattHVContactorMax[8] = {0x03, 0x22, 0x03, 0x0C, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattHVContactorState[8] = {0x03, 0x22, 0xD0, 0x00, 0xFF, 0xFF, 0xFF, 0xFF};
 
-byte rqFC_length = 8;                            // Interval to send flow control (rqFC) 
+#define CS     10                //!< chip select pin of MCP2515 CAN-Controller
+#define CS_SD  8                 //!< CS for SD card, if you plan to use a logger...
+MCP_CAN CAN0(CS);                // Set CS pin
 
-#define CS     10                                // CS-Pin CAN-Controller
-#define CS_SD  8                                 // CS for SD card, if you plan to use a logger...
+BatteryDiag_t BattDiag;
+CTimeout CAN_Timeout(10000);     //!< Timeout value for CAN response in millis
 
-MCP_CAN CAN0(CS);                                // Set CS pin
-
+//--------------------------------------------------------------------------------
+//! \brief   SETUP()
+//--------------------------------------------------------------------------------
 void setup()
 {  
   Serial.begin(115200);
@@ -119,7 +129,7 @@ void setup()
     
   digitalWrite(CS, HIGH);
   
-  // Setting pin 2 for input, low if CAN messages are received
+  // MCP2515 read buffer: setting pin 2 for input, LOW if CAN messages are received
   pinMode(2, INPUT); 
   
   Serial.println(SPACER); 
@@ -134,17 +144,26 @@ void setup()
   Serial.println(F("CONNECTED"));
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Wait for serial data to be avaiable.
+//--------------------------------------------------------------------------------
 void WaitforSerial() {
   Serial.println(F("Press a key to start query..."));
-  while (!Serial.available()) {}                  // Wait for serial
+  while (!Serial.available()) {}                  // Wait for serial input to start
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read all queued charachers to clear input buffer.
+//--------------------------------------------------------------------------------
 void clearSerialBuffer() {
   do {                                            // Clear serial input buffer
       delay(10);
   } while (Serial.read() >= 0);
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Clear CAN ID filters.
+//--------------------------------------------------------------------------------
 void clearCAN_Filter(){
   CAN0.init_Mask(0, 0, 0x00000000);
   CAN0.init_Mask(1, 0, 0x00000000);
@@ -152,6 +171,9 @@ void clearCAN_Filter(){
   CAN0.setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Set all filters to one CAN ID.
+//--------------------------------------------------------------------------------
 void setCAN_Filter(unsigned long filter){
   filter = filter << 16;
   CAN0.init_Mask(0, 0, 0x07FF0000);
@@ -166,38 +188,46 @@ void setCAN_Filter(unsigned long filter){
   CAN0.setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Send diagnostic request to ECU.
+//! \param   unsigned char* rqQuery
+//! \see     rqInit, rqBattADCref ... rqBattVolts
+//! \return  received items count (unsigned int) of function #Get_RequestResponse
+//--------------------------------------------------------------------------------
 unsigned int Request_Diagnostics(unsigned char* rqQuery){  
-  // Reset Timeout-Timer
-  CAN_Timeout.Reset();
+  CAN_Timeout.Reset();                          // Reset Timeout-Timer
   
-  //Disable SD card
-  digitalWrite(CS_SD, HIGH);
+  digitalWrite(CS_SD, HIGH);                    // Disable SD card, or other SPI devices if nessesary
   
   //--- Diag Request Message ---
   DEBUG_UPDATE(F("Send Diag Request\n\r"));
-  // send data: Request diagnostics data
-  CAN0.sendMsgBuf(0x7E7, 0, 8, rqQuery);
-  //wait for response of first frame
-  return Get_RequestResponse();
+  CAN0.sendMsgBuf(0x7E7, 0, 8, rqQuery);        // send data: Request diagnostics data
+  
+  return Get_RequestResponse();                 // wait for response of first frame
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Wait and read initial diagnostic response
+//! \return  item count (unsigned int)
+//--------------------------------------------------------------------------------
 unsigned int Get_RequestResponse(){ 
     
+    int i;
     unsigned int items = 0;
     byte FC_length = rqFlowControl[1];    
     boolean fDataOK = false;
     
     do{
       //--- Read Frames ---
-      if(!digitalRead(2))                         // If pin 2 is low, read receive buffer
+      if(!digitalRead(2))                         // If pin 2 is LOW, read receive buffer
       {
         do{
           CAN0.readMsgBuf(&rxID, &len, rxBuf);    // Read data: len = data length, buf = data byte(s)       
-          //Serial.println(rxBuf[0], HEX);
+          
           if (rxID == 0x7EF) { 
             if(rxBuf[0] < 0x10) {
               if((rxBuf[1] != 0x7F)) {  
-                for (i = 0; i<len; i++) {         // read data bytes, offset +1, 1 to 7
+                for (i = 0; i<len; i++) {         // read data bytes: offset +1, 1 to 7
                     data[i] = rxBuf[i+1];       
                 }
                 DEBUG_UPDATE(F("SF reponse: "));
@@ -212,10 +242,10 @@ unsigned int Get_RequestResponse(){
             }
             if ((rxBuf[0] & 0xF0) == 0x10){
               items = (rxBuf[0] & 0x0F)*256 + rxBuf[1]; // six data bytes already read (+ two type and length)
-              for (i = 0; i<len; i++) {                 // read data bytes, offset +1, 1 to 7
+              for (i = 0; i<len; i++) {                 // read data bytes: offset +1, 1 to 7
                   data[i] = rxBuf[i+1];       
               }
-              // send rqFC: Request for more data
+              //--- send rqFC: Request for more data ---
               CAN0.sendMsgBuf(0x7E7, 0, 8, rqFlowControl);
               DEBUG_UPDATE(F("Resp, i:"));
               DEBUG_UPDATE(items - 6); DEBUG_UPDATE("\n\r");
@@ -236,24 +266,30 @@ unsigned int Get_RequestResponse(){
     } 
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read remaining data and sent corresponding Flow Control frames
+//! \param   items still to read (int)
+//! \return  fDiagOK (boolean)
+//--------------------------------------------------------------------------------
 boolean Read_FC_Response(int items){   
-    //Set wait timer
     CAN_Timeout.Reset();
     
+    int i;
     int n = 7;
     int FC_count = 0;
     byte FC_length = rqFlowControl[1];
+    boolean fDiagOK = false;
     
     do{
       //--- Read Frames ---
-      if(!digitalRead(2))                         // If pin 2 is low, read receive buffer
+      if(!digitalRead(2))                         // If pin 2 is LOW, read receive buffer
       {
         do{
           CAN0.readMsgBuf(&rxID, &len, rxBuf);    // Read data: len = data length, buf = data byte(s)       
           if((rxBuf[0] & 0xF0) == 0x20){
             FC_count++;
             items = items - len + 1;
-            for(i = 0; i<len; i++) {              // copy each byte of the data
+            for(i = 0; i<len; i++) {              // copy each byte of the rxBuffer to data-field
               if ((n < (DATALENGTH - 6)) && (i < 7)){
                 data[n+i] = rxBuf[i+1];
               }       
@@ -263,7 +299,6 @@ boolean Read_FC_Response(int items){
               // send rqFC: Request for more data
               CAN0.sendMsgBuf(0x7E7, 0, 8, rqFlowControl);
               DEBUG_UPDATE(F("FCrq\n\r"));
-   
             }
             n = n + 7;
           }      
@@ -271,17 +306,21 @@ boolean Read_FC_Response(int items){
       }
     } while (!CAN_Timeout.Expired(false) && items > 0);
     if (!CAN_Timeout.Expired(false)) {
-      fDiagOK = 1;
+      fDiagOK = true;
       DEBUG_UPDATE(F("Items left: ")); DEBUG_UPDATE(items); DEBUG_UPDATE("\n\r");
       DEBUG_UPDATE(F("FC count: ")); DEBUG_UPDATE(FC_count); DEBUG_UPDATE("\n\r");
     } else {
-      fDiagOK = 0;
+      fDiagOK = false;
       DEBUG_UPDATE(F("Event Timeout!\n\r"));
     } 
     ClearReadBuffer();    
     return fDiagOK;
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Output read buffer
+//! \param   items count (unsigned int)
+//--------------------------------------------------------------------------------
 void PrintReadBuffer(unsigned int items) {
   Serial.println(items);
   for(int i = 0; i < items; i++) {
@@ -299,8 +338,11 @@ void PrintReadBuffer(unsigned int items) {
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Cleanup after switcheng filters
+//--------------------------------------------------------------------------------
 void ClearReadBuffer(){
-  if(!digitalRead(2)) {                        // still messages? pin 2 is low, clear read receive buffer
+  if(!digitalRead(2)) {                        // still messages? pin 2 is LOW, clear the two rxBuffers by reading
     for (int i = 1; i <= 2; i++) {
       CAN0.readMsgBuf(&rxID, &len, rxBuf);
     }
@@ -308,40 +350,58 @@ void ClearReadBuffer(){
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Store two byte data in CellCapacity obj
+//--------------------------------------------------------------------------------
 void ReadCellCapacity(unsigned int data_in[], unsigned int highOffset, unsigned int length){
   for(int n = 0; n < (length * 2); n = n + 2){
-    CellCapacity.push(data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]);
+    CellCapacity.push((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Store two byte data in CellVoltage obj
+//--------------------------------------------------------------------------------
 void ReadCellVoltage(unsigned int data_in[], unsigned int highOffset, unsigned int length){
   for(int n = 0; n < (length * 2); n = n + 2){
-    CellVoltage.push(data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]);
+    CellVoltage.push((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Store two byte data
+//! \param   address to output data array (unsigned int)
+//! \param   address to input data array (unsigned int)
+//! \param   start of first high byte in data array (unsigned int)
+//! \param   length of data submitted (unsigned int)
+//--------------------------------------------------------------------------------
 void ReadDiagWord(unsigned int data_out[], unsigned int data_in[], unsigned int highOffset, unsigned int length){
   for(int n = 0; n < (length * 2); n = n + 2){
     data_out[n/2] = data_in[n + highOffset] * 256 + data_in[n + highOffset + 1];
-    //Serial.print("#"); Serial.print((n/2)+1); Serial.print(": ");
-    //Serial.println(data[n + highOffest] * 256 + data[n+5]);
-    //Serial.print(data[n+4],HEX); Serial.println(data[n+5],HEX);
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate capacity data
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean getBatteryCapacity(boolean debug_verbose) {
   unsigned int items = Request_Diagnostics(rqBattCapacity);
   if(items){
     if (debug_verbose) {
       PrintReadBuffer(items);
     }   
-    ReadCellCapacity(data,25,93);
+    CellCapacity.clear();
+    ReadCellCapacity(data,25,CELLCOUNT);
+    BattDiag.Ccap_min_As = CellCapacity.minimum();
+    BattDiag.Ccap_max_As = CellCapacity.maximum();
+    BattDiag.Ccap_mean_As = CellCapacity.mean();
 
     BattDiag.HVoff_time = (unsigned long) data[5] * 65535 + data[6] * 256 + data[7];
     ReadDiagWord(&BattDiag.Cap_min_As,data,21,1);
     ReadDiagWord(&BattDiag.Cap_mean_As,data,23,1);
     ReadDiagWord(&BattDiag.Cap_max_As,data,17,1);
-    BattDiag.SOH = data[14];
     BattDiag.LastMeas_days = data[428];
     unsigned int value;
     ReadDiagWord(&value,data,429,1);
@@ -354,6 +414,11 @@ boolean getBatteryCapacity(boolean debug_verbose) {
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate voltage data
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean getBatteryVoltage(boolean debug_verbose) {
   unsigned int items;
   items = Request_Diagnostics(rqBattVolts);
@@ -361,27 +426,23 @@ boolean getBatteryVoltage(boolean debug_verbose) {
     if (debug_verbose) {
       PrintReadBuffer(items);
     }   
-    ReadCellVoltage(data,4,93);
+    CellVoltage.clear();
+    ReadCellVoltage(data,4,CELLCOUNT);
+    BattDiag.Cvolts_min = CellVoltage.minimum();
+    BattDiag.Cvolts_max = CellVoltage.maximum();
+    BattDiag.Cvolts_mean = CellVoltage.mean();
+    BattDiag.Cvolts_stdev = CellVoltage.stddev();
     return true;
   } else {
     return false;
   }
 }
 
-boolean getBatteryVoltageMean(boolean debug_verbose) {
-  unsigned int items;
-  items = Request_Diagnostics(rqBattVolts);
-  if(items){
-    if (debug_verbose) {
-      PrintReadBuffer(items);
-    }   
-    ReadCellVoltage(data,4,93);
-    return true;
-  } else {
-    return false;
-  }
-}
-
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate ADC reference data
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean getBatteryADCref(boolean debug_verbose) {
   unsigned int items;
   items = Request_Diagnostics(rqBattADCref);
@@ -389,17 +450,17 @@ boolean getBatteryADCref(boolean debug_verbose) {
     if (debug_verbose) {
       PrintReadBuffer(items);
     }   
-    ReadDiagWord(&BattDiag.Volts_mean,data,8,1);
+    ReadDiagWord(&BattDiag.ADCCvolts_mean,data,8,1);
     
-    ReadDiagWord(&BattDiag.Volts_min,data,6,1);
-    BattDiag.Volts_min += 1500;
-    ReadDiagWord(&BattDiag.Volts_max,data,4,1);
-    BattDiag.Volts_max += 1500;
+    ReadDiagWord(&BattDiag.ADCCvolts_min,data,6,1);
+    BattDiag.ADCCvolts_min += 1500;
+    ReadDiagWord(&BattDiag.ADCCvolts_max,data,4,1);
+    BattDiag.ADCCvolts_max += 1500;
     
     if (RAW_VOLTAGES) {
-      BattDiag.VoltsOffset = 0;
+      BattDiag.ADCvoltsOffset = 0;
     } else {
-      BattDiag.VoltsOffset = (int) CellVoltage.mean() - BattDiag.Volts_mean;
+      BattDiag.ADCvoltsOffset = (int) BattDiag.Cvolts_mean - BattDiag.ADCCvolts_mean;
     }
     
     return true;
@@ -408,6 +469,11 @@ boolean getBatteryADCref(boolean debug_verbose) {
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate High Voltage contractor state
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean getHVcontactorState(boolean debug_verbose) {
   unsigned int items;
   boolean fValid = false;
@@ -444,6 +510,10 @@ boolean getHVcontactorState(boolean debug_verbose) {
   return fValid;
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate SOC
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean ReadSOC() {
   setCAN_Filter(0x518);
   CAN_Timeout.Reset();
@@ -452,7 +522,7 @@ boolean ReadSOC() {
     do {    
     CAN0.readMsgBuf(&rxID, &len, rxBuf); 
       if (rxID == 0x518 ) {
-        BattDiag.SOC = (float) rxBuf[7] / 2;      //soc = soc / 2;
+        BattDiag.SOC = (float) rxBuf[7] / 2;
         return true;
       }
     } while (!CAN_Timeout.Expired(false));
@@ -460,6 +530,10 @@ boolean ReadSOC() {
   return false;
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate system High Voltage
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
 boolean ReadHV() {
   setCAN_Filter(0x448);
   CAN_Timeout.Reset();
@@ -479,6 +553,9 @@ boolean ReadHV() {
   return false;
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   LOOP()
+//--------------------------------------------------------------------------------
 void loop()
 {       
    boolean fOK = false;
@@ -493,30 +570,44 @@ void loop()
    fOK = ReadHV();
    
    setCAN_Filter(0x7EF); 
-   Serial.print(F("Read Voltages..."));
-   if (fOK = getBatteryVoltage(false)) {
-     Serial.println(F("OK"));
-   } else {
-     Serial.println(F("FAIL"));
-   }
-   Serial.print(F("Read Capacity..."));
-   if (fOK = getBatteryCapacity(false)) {
-     Serial.println(F("OK"));
-   } else {
-     Serial.println(F("FAIL"));
-   }
-   Serial.print(F("Read ADCref. ..."));
-   if (fOK = getBatteryADCref(false)) {
-     Serial.println(F("OK"));
-   } else {
-     Serial.println(F("FAIL"));
-   }
-   Serial.print(F("Read HV state..."));
-   if (fOK = getHVcontactorState(false)) {
-     Serial.println(F("OK"));
-   } else {
-     Serial.println(F("FAIL"));
-   }
+   int testStep = 0;
+   do {
+      switch (testStep) {
+        case 0:
+           Serial.print(F("Read Voltages..."));
+           if (fOK = getBatteryVoltage(false)) {
+             Serial.println(MSG_OK);
+           } else {
+             Serial.println(MSG_FAIL);
+           }
+           break;
+        case 1:
+           Serial.print(F("Read Capacity..."));
+           if (fOK = getBatteryCapacity(false)) {
+             Serial.println(MSG_OK);
+           } else {
+             Serial.println(MSG_FAIL);
+           }
+           break;
+        case 2:
+           Serial.print(F("Read ADCref. ..."));
+           if (fOK = getBatteryADCref(false)) {
+             Serial.println(MSG_OK);
+           } else {
+             Serial.println(MSG_FAIL);
+           }
+           break;
+        case 3:
+           Serial.print(F("Read HV state..."));
+           if (fOK = getHVcontactorState(false)) {
+             Serial.println(MSG_OK);
+           } else {
+             Serial.println(MSG_FAIL);
+           }
+           break;
+      }
+      testStep++;
+   } while (fOK && testStep < 4);
     
    if (fOK) {
       digitalWrite(CS, HIGH);
@@ -524,10 +615,10 @@ void loop()
       Serial.print(F("SOC     : ")); Serial.print(BattDiag.SOC,1);
       Serial.print(F(" %,  HV: ")); Serial.print(BattDiag.HV,1); Serial.println(F(" V"));
       Serial.println(SPACER);
-      Serial.print(F("CV mean : ")); Serial.print(BattDiag.Volts_mean); Serial.print(F(" mV"));
-      Serial.print(F(", ∆ CV: ")); Serial.print(BattDiag.Volts_max - BattDiag.Volts_min); Serial.println(F(" mV"));
-      Serial.print(F("CV min  : ")); Serial.print(BattDiag.Volts_min); Serial.println(F(" mV"));
-      Serial.print(F("CV max  : ")); Serial.print(BattDiag.Volts_max); Serial.println(F(" mV"));
+      Serial.print(F("CV mean : ")); Serial.print(BattDiag.ADCCvolts_mean); Serial.print(F(" mV"));
+      Serial.print(F(", ∆ = ")); Serial.print(BattDiag.ADCCvolts_max - BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
+      Serial.print(F("CV min  : ")); Serial.print(BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
+      Serial.print(F("CV max  : ")); Serial.print(BattDiag.ADCCvolts_max); Serial.println(F(" mV"));
       Serial.println(SPACER);
       Serial.print(F("CAP mean: ")); Serial.print(BattDiag.Cap_mean_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Cap_mean_As / 360.0,1); Serial.println(F(" Ah"));
       Serial.print(F("CAP min : ")); Serial.print(BattDiag.Cap_min_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Cap_min_As / 360.0,1); Serial.println(F(" Ah"));
@@ -546,22 +637,29 @@ void loop()
       Serial.print(F("Meas. quality         : ")); Serial.println(BattDiag.Cap_meas_quality,3);
       Serial.print(F("Meas. quality combined: ")); Serial.println(BattDiag.Cap_combined_quality,3);
       Serial.println(SPACER);
-      
+ 
       if (VERBOSE) {
         Serial.println(F("# ;mV  ;As/10"));
-        for(n = 0; n < 93; n++){
+        for(int n = 0; n < CELLCOUNT; n++){
           if (n < 9) Serial.print(F("0"));
-          Serial.print(n+1); Serial.print(F(";")); Serial.print(CellVoltage.get(n) - BattDiag.VoltsOffset); Serial.print(F(";")); Serial.println(CellCapacity.get(n));
+          Serial.print(n+1); Serial.print(F(";")); Serial.print(CellVoltage.get(n) - BattDiag.ADCvoltsOffset); Serial.print(F(";")); Serial.println(CellCapacity.get(n));
         }
         Serial.println(SPACER);
-        Serial.print(F("CV mean : ")); Serial.print(CellVoltage.mean() - BattDiag.VoltsOffset,0); Serial.print(F(" mV"));
-        Serial.print(F(", ∆ CV: ")); Serial.print(CellVoltage.maximum() - CellVoltage.minimum()); Serial.println(F(" mV"));
-        Serial.print(F("CV min  : ")); Serial.print(CellVoltage.minimum() - BattDiag.VoltsOffset); Serial.println(F(" mV"));
-        Serial.print(F("CV max  : ")); Serial.print(CellVoltage.maximum() - BattDiag.VoltsOffset); Serial.println(F(" mV"));
+        Serial.println(F("Individual Cell Statistics:"));
+        Serial.println(SPACER);
+        Serial.print(F("CV mean : ")); Serial.print(BattDiag.Cvolts_mean - BattDiag.ADCvoltsOffset,0); Serial.print(F(" mV"));
+        Serial.print(F(", ∆ = ")); Serial.print(BattDiag.Cvolts_max - BattDiag.Cvolts_min); Serial.print(F(" mV"));
+        Serial.print(F(", σ = ")); Serial.print(BattDiag.Cvolts_stdev); Serial.println(F(" mV"));
+        Serial.print(F("CV min  : ")); Serial.print(BattDiag.Cvolts_min - BattDiag.ADCvoltsOffset); Serial.println(F(" mV"));
+        Serial.print(F("CV max  : ")); Serial.print(BattDiag.Cvolts_max - BattDiag.ADCvoltsOffset); Serial.println(F(" mV"));
+        Serial.println(SPACER);
+        Serial.print(F("CAP mean: ")); Serial.print(BattDiag.Ccap_mean_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_mean_As / 360.0,1); Serial.println(F(" Ah"));
+        Serial.print(F("CAP min : ")); Serial.print(BattDiag.Ccap_min_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_min_As / 360.0,1); Serial.println(F(" Ah"));
+        Serial.print(F("CAP max : ")); Serial.print(BattDiag.Ccap_max_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_max_As / 360.0,1); Serial.println(F(" Ah"));
         Serial.println(SPACER);
       }   
    } else {
-      Serial.println(F("Measurement failed"));
+      Serial.println(F("---------- Measurement failed !----------"));
       fOK = false;
    } 
    

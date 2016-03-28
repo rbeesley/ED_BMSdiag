@@ -15,7 +15,7 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 ## Get started
 Download the repo-ZIP, then
 
-* Copy the library-subfolders to your Arduino-library folder. Please also add the MCP-Library-Fork here: https://github.com/MyLab-odyssey/MCP_CAN_lib
+* Copy the library-subfolders to your Arduino-library folder. 
 * Copy the ED_BMSdiag-Folder to the Arduino-sketches folder. If the Arduino-IDE was running - restart it.
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.
 

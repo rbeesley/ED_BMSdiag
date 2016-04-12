@@ -19,6 +19,8 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.
 
+Please see the [wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki) for further information.
+
 ## Usage (on your own risk!)
 Connect the CAN shield to the OBDII-connector and power up the car.
 

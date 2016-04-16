@@ -32,6 +32,10 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.30    | Added more readout data and reformatted the output
+-        | ... ODO, 12V battery, HV-unit production date
+-        | ... temperatures of battery modules
+-        | ... # of cell at min, max (in individual cell data)
 v0.24    | Overall improvements
 -        | ... added Doxygen compatible comments
 -        | ... added standard deviation calc.

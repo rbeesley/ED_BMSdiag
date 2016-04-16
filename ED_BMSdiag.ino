@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.24
+// ED BMSdiag, v0.30
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -21,9 +21,9 @@
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2016-March
+//! \date    2016-April
 //! \author  My-Lab-odyssey
-//! \version 0.24
+//! \version 0.30
 //--------------------------------------------------------------------------------
 
 //#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
@@ -45,8 +45,8 @@
 #define DATALENGTH 440
 #define CELLCOUNT 93
 #define SPACER F("-----------------------------------------")
-#define MSG_OK F("OK")
-#define MSG_FAIL F("FAIL")
+#define MSG_OK F("OK   ")
+#define MSG_FAIL F("FAIL ")
 
 //Data arrays
 unsigned int data[DATALENGTH]; 
@@ -64,23 +64,38 @@ typedef struct {
   unsigned int Cap_mean_As;      //!< average cell capacity from measurement cycle
   unsigned int Cap_max_As;       //!< maximum cell capacity from measurement cycle
   
+  float Cvolts_mean;             //!< calculated average from individual cell voltage query  
   unsigned int Cvolts_min;       //!< voltage mininum in pack
-  float Cvolts_mean;             //!< calculated average from individual cell voltage query
-  unsigned int Cvolts_max;       //!< voltage maxinum in pack
+  int CV_min_at;                 //!< cell number with voltage mininum in pack
+  unsigned int Cvolts_max;       //!< voltage maximum in pack
+  int CV_max_at;                 //!< cell number with voltage maximum in pack
   float Cvolts_stdev;            //!< calculated standard deviation (populated)
-  unsigned int Ccap_min_As;      //!< cell capacity mininum in pack
   unsigned int Ccap_mean_As;     //!< cell capacity calculated average
-  unsigned int Ccap_max_As;      //!< cell capacity maxinum in pack
+  unsigned int Ccap_min_As;      //!< cell capacity mininum in pack
+  int CAP_min_at;                //!< cell number with capacity mininum in pack
+  unsigned int Ccap_max_As;      //!< cell capacity maximum in pack
+  int CAP_max_at;                //!< cell number with capacity maximum in pack
   
   unsigned long HVoff_time;      //!< HighVoltage contactor off time in seconds
+  unsigned long HV_lowcurrent;   //!< counter time of no current, reset e.g. with PLC heater or driving
+  unsigned int OCVtimer;         //!< counter time in seconds to reach OCV state
   float Cap_meas_quality;        //!< some sort of estimation factor??? after measurement cycle
   float Cap_combined_quality;    //!< some sort of estimation factor??? constantly updated
-  int LastMeas_days;             //!< days elapsed since last successful measurement
+  unsigned int LastMeas_days;    //!< days elapsed since last successful measurement
+  
+  byte Day;                      //!< day of battery production
+  byte Month;                    //!< month of battery production
+  byte Year;                     //!< year of battery production
   
   float SOC;                     //!< State of Charge, as reported by vehicle dash
   float HV;                      //!< total voltage of HV system in V
+  float LV;                      //!< 12V onboard voltage / LV system
+  long ODO;                      //!< Odometer count
   
-  unsigned int HVcontactState;   //!< contactor state: 0 := OFF, 2 := ON
+  int Temps[13];                 //!< three temperatures per battery unit (1 to 3)
+                                 //!< + max, min, mean and coolant-in temperatures
+  
+  byte HVcontactState;           //!< contactor state: 0 := OFF, 2 := ON
   long HVcontactCyclesLeft;      //!< counter related to ON/OFF cyles of the car
   long HVcontactCyclesMax;       //!< static, seems to be maxiumum of contactor cycles
   
@@ -91,11 +106,13 @@ long unsigned int rxID;
 unsigned char len = 0;
 unsigned char rxLength = 0;
 unsigned char rxBuf[8];
-unsigned char rqInit[8] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 unsigned char rqFlowControl[8] = {0x30, 0x08, 0x14, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 byte rqFC_length = 8;            //!< Interval to send flow control messages (rqFC) 
+unsigned char rqBattTemperatures[8] = {0x03, 0x22, 0x02, 0x01, 0xFF, 0xFF, 0xFF, 0xFF}; 
+unsigned char rqBattModuleTemperatures[8] = {0x03, 0x22, 0x02, 0x02, 0xFF, 0xFF, 0xFF, 0xFF}; 
 unsigned char rqBattADCref[8] = {0x03, 0x22, 0x02, 0x07, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattVolts[8] = {0x03, 0x22, 0x02, 0x08, 0xFF, 0xFF, 0xFF, 0xFF};
+unsigned char rqBattDate[8] = {0x03, 0x22, 0x03, 0x04, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattCapacity[8] = {0x03, 0x22, 0x03, 0x10, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattHVContactorCyclesLeft[8] = {0x03, 0x22, 0x03, 0x0B, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattHVContactorMax[8] = {0x03, 0x22, 0x03, 0x0C, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -103,7 +120,7 @@ unsigned char rqBattHVContactorState[8] = {0x03, 0x22, 0xD0, 0x00, 0xFF, 0xFF, 0
 
 #define CS     10                //!< chip select pin of MCP2515 CAN-Controller
 #define CS_SD  8                 //!< CS for SD card, if you plan to use a logger...
-MCP_CAN CAN0(CS);                // Set CS pin
+MCP_CAN CAN0(CS);                //!< Set CS pin
 
 BatteryDiag_t BattDiag;
 CTimeout CAN_Timeout(10000);     //!< Timeout value for CAN response in millis
@@ -136,12 +153,23 @@ void setup()
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
   Serial.println(SPACER);
   
+  //Serial.print(F("SRAM: ")); Serial.println(freeRam());
+  
   Serial.println(F("Connect to OBD port - Waiting for CAN-Bus "));
   do {
     Serial.print(F("."));
     delay(1000);
   } while (digitalRead(2));
   Serial.println(F("CONNECTED"));
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Memory available between Heap and Stack
+//--------------------------------------------------------------------------------
+int freeRam () {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 
 //--------------------------------------------------------------------------------
@@ -191,7 +219,7 @@ void setCAN_Filter(unsigned long filter){
 //--------------------------------------------------------------------------------
 //! \brief   Send diagnostic request to ECU.
 //! \param   unsigned char* rqQuery
-//! \see     rqInit, rqBattADCref ... rqBattVolts
+//! \see     rqBattADCref ... rqBattVolts
 //! \return  received items count (unsigned int) of function #Get_RequestResponse
 //--------------------------------------------------------------------------------
 unsigned int Request_Diagnostics(unsigned char* rqQuery){  
@@ -351,6 +379,15 @@ void ClearReadBuffer(){
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Store two byte data in temperature array
+//--------------------------------------------------------------------------------
+void ReadBatteryTemperatures(unsigned int data_in[], unsigned int highOffset, unsigned int length){
+  for(int n = 0; n < (length * 2); n = n + 2){
+    BattDiag.Temps[n/2] = ((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
+  }
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Store two byte data in CellCapacity obj
 //--------------------------------------------------------------------------------
 void ReadCellCapacity(unsigned int data_in[], unsigned int highOffset, unsigned int length){
@@ -382,6 +419,61 @@ void ReadDiagWord(unsigned int data_out[], unsigned int data_in[], unsigned int 
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Read and evaluate battery temperatures (values / 64 in deg C)
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean getBatteryTemperature(boolean debug_verbose) {
+  unsigned int items = Request_Diagnostics(rqBattTemperatures);
+  boolean fOK = false;
+  if(items){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    ReadBatteryTemperatures(data,4,7);
+    //Copy max, min, mean and coolant-in temp to end of array
+    for(byte n = 0; n < 4; n++) {
+      BattDiag.Temps[n + 9] = BattDiag.Temps[n];
+    }
+    fOK = true;
+  }
+  //Read three temperatures per module (á 31 cells)
+  items = Request_Diagnostics(rqBattModuleTemperatures);
+  if(items && fOK){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    ReadBatteryTemperatures(data,4,9);
+    fOK = true;
+  }
+  if(fOK){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate battery production date
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean getBatteryDate(boolean debug_verbose) {
+  unsigned int items = Request_Diagnostics(rqBattDate);
+  if(items){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    BattDiag.Year = data[4];
+    BattDiag.Month = data[5];
+    BattDiag.Day = data[6];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate capacity data
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
@@ -394,15 +486,18 @@ boolean getBatteryCapacity(boolean debug_verbose) {
     }   
     CellCapacity.clear();
     ReadCellCapacity(data,25,CELLCOUNT);
-    BattDiag.Ccap_min_As = CellCapacity.minimum();
-    BattDiag.Ccap_max_As = CellCapacity.maximum();
+    BattDiag.Ccap_min_As = CellCapacity.minimum(&BattDiag.CAP_min_at);
+    BattDiag.Ccap_max_As = CellCapacity.maximum(&BattDiag.CAP_max_at);
     BattDiag.Ccap_mean_As = CellCapacity.mean();
 
     BattDiag.HVoff_time = (unsigned long) data[5] * 65535 + data[6] * 256 + data[7];
+    BattDiag.HV_lowcurrent = (unsigned long) data[9] * 65535 + data[10] * 256 + data[11];
+    BattDiag.OCVtimer = (unsigned int) data[12] * 256 + data[13];
     ReadDiagWord(&BattDiag.Cap_min_As,data,21,1);
     ReadDiagWord(&BattDiag.Cap_mean_As,data,23,1);
     ReadDiagWord(&BattDiag.Cap_max_As,data,17,1);
-    BattDiag.LastMeas_days = data[428];
+    ReadDiagWord(&BattDiag.LastMeas_days,data,427,1);
+    //BattDiag.LastMeas_days = data[428];
     unsigned int value;
     ReadDiagWord(&value,data,429,1);
     BattDiag.Cap_meas_quality = value / 65535.0;
@@ -428,8 +523,8 @@ boolean getBatteryVoltage(boolean debug_verbose) {
     }   
     CellVoltage.clear();
     ReadCellVoltage(data,4,CELLCOUNT);
-    BattDiag.Cvolts_min = CellVoltage.minimum();
-    BattDiag.Cvolts_max = CellVoltage.maximum();
+    BattDiag.Cvolts_min = CellVoltage.minimum(&BattDiag.CV_min_at);
+    BattDiag.Cvolts_max = CellVoltage.maximum(&BattDiag.CV_max_at);
     BattDiag.Cvolts_mean = CellVoltage.mean();
     BattDiag.Cvolts_stdev = CellVoltage.stddev();
     return true;
@@ -521,7 +616,7 @@ boolean ReadSOC() {
   if(!digitalRead(2)) {    
     do {    
     CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x518 ) {
+      if (rxID == 0x518) {
         BattDiag.SOC = (float) rxBuf[7] / 2;
         return true;
       }
@@ -542,10 +637,53 @@ boolean ReadHV() {
   if(!digitalRead(2)) {    
     do {    
     CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x448 ) {
+      if (rxID == 0x448) {
         HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
         HV = HV / 10.0;
         BattDiag.HV = HV;
+        return true;
+      }
+    } while (!CAN_Timeout.Expired(false));
+  }
+  return false;
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate system Low Voltage (12V)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean ReadLV() {
+  setCAN_Filter(0x3D5);
+  CAN_Timeout.Reset();
+  
+  float LV;
+  if(!digitalRead(2)) {    
+    do {    
+    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+      if (rxID == 0x3D5) {
+        LV = ((float)rxBuf[3]);
+        LV = LV / 10.0;
+        BattDiag.LV = LV;
+        return true;
+      }
+    } while (!CAN_Timeout.Expired(false));
+  }
+  return false;
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate odometer
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean ReadODO() {
+  setCAN_Filter(0x412);
+  CAN_Timeout.Reset();
+  
+  if(!digitalRead(2)) {    
+    do {    
+    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+      if (rxID == 0x412) {
+        BattDiag.ODO = rxBuf[2] * 65535 + rxBuf[3] * 256 + rxBuf[4];
         return true;
       }
     } while (!CAN_Timeout.Expired(false));
@@ -568,74 +706,99 @@ void loop()
      
    fOK = ReadSOC();
    fOK = ReadHV();
+   fOK = ReadLV();
+   fOK = ReadODO();
    
-   setCAN_Filter(0x7EF); 
+   setCAN_Filter(0x7EF);
+  
    int testStep = 0;
    do {
       switch (testStep) {
         case 0:
-           Serial.print(F("Read Voltages..."));
-           if (fOK = getBatteryVoltage(false)) {
-             Serial.println(MSG_OK);
-           } else {
-             Serial.println(MSG_FAIL);
-           }
+           Serial.print(F("Read Voltages ..."));
+           fOK = getBatteryVoltage(false);
            break;
         case 1:
-           Serial.print(F("Read Capacity..."));
-           if (fOK = getBatteryCapacity(false)) {
-             Serial.println(MSG_OK);
-           } else {
-             Serial.println(MSG_FAIL);
-           }
+           Serial.print(F("Read Capacity ..."));
+           fOK = getBatteryCapacity(false);
            break;
         case 2:
-           Serial.print(F("Read ADCref. ..."));
-           if (fOK = getBatteryADCref(false)) {
-             Serial.println(MSG_OK);
-           } else {
-             Serial.println(MSG_FAIL);
-           }
+           Serial.print(F("Read ADCref.  ..."));
+           fOK = getBatteryADCref(false);
            break;
         case 3:
-           Serial.print(F("Read HV state..."));
-           if (fOK = getHVcontactorState(false)) {
-             Serial.println(MSG_OK);
-           } else {
-             Serial.println(MSG_FAIL);
-           }
+           Serial.print(F("Read HV state ..."));
+           fOK = getHVcontactorState(false);
+           break;
+        case 4:
+           Serial.print(F("Read Prod.Date..."));
+           fOK = getBatteryDate(false);
+           break;
+        case 5:
+           Serial.print(F("Read Batt.Temp..."));
+           fOK = getBatteryTemperature(false);
            break;
       }
+      if (fOK) {
+        Serial.print(MSG_OK);
+      } else {
+        Serial.print(MSG_FAIL);
+      }
       testStep++;
-   } while (fOK && testStep < 4);
+      if (testStep % 2 == 0) Serial.println();
+   } while (fOK && testStep < 6);
     
    if (fOK) {
       digitalWrite(CS, HIGH);
       Serial.println(SPACER);
-      Serial.print(F("SOC     : ")); Serial.print(BattDiag.SOC,1);
-      Serial.print(F(" %,  HV: ")); Serial.print(BattDiag.HV,1); Serial.println(F(" V"));
+      Serial.print(F("Battery-Production (Y/M/D): ")); Serial.print(2000 + BattDiag.Year); Serial.print(F("/"));
+      Serial.print(BattDiag.Month); Serial.print(F("/")); Serial.println(BattDiag.Day); 
+      Serial.println(SPACER);
+      Serial.print(F("SOC : ")); Serial.print(BattDiag.SOC,1);
+      Serial.print(F(" %, HV: ")); Serial.print(BattDiag.HV,1); Serial.print(F(" V"));
+      Serial.print(F(", LV: ")); Serial.print(BattDiag.LV,1); Serial.println(F(" V"));
+      Serial.print(F("ODO : ")); Serial.print(BattDiag.ODO); Serial.println(F(" km"));  
       Serial.println(SPACER);
       Serial.print(F("CV mean : ")); Serial.print(BattDiag.ADCCvolts_mean); Serial.print(F(" mV"));
       Serial.print(F(", ∆ = ")); Serial.print(BattDiag.ADCCvolts_max - BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
       Serial.print(F("CV min  : ")); Serial.print(BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
       Serial.print(F("CV max  : ")); Serial.print(BattDiag.ADCCvolts_max); Serial.println(F(" mV"));
+      Serial.print(F("OCVtimer: ")); Serial.print(BattDiag.OCVtimer); Serial.println(F(" s"));
       Serial.println(SPACER);
+      Serial.print(F("Last measurement      : ")); Serial.print(BattDiag.LastMeas_days); Serial.println(F(" day(s)"));
+      Serial.print(F("Measurement estimation: ")); Serial.println(BattDiag.Cap_meas_quality,3);
+      Serial.print(F("Actual estimation     : ")); Serial.println(BattDiag.Cap_combined_quality,3);
       Serial.print(F("CAP mean: ")); Serial.print(BattDiag.Cap_mean_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Cap_mean_As / 360.0,1); Serial.println(F(" Ah"));
       Serial.print(F("CAP min : ")); Serial.print(BattDiag.Cap_min_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Cap_min_As / 360.0,1); Serial.println(F(" Ah"));
       Serial.print(F("CAP max : ")); Serial.print(BattDiag.Cap_max_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Cap_max_As / 360.0,1); Serial.println(F(" Ah"));
-      Serial.print(F("Last measurement: ")); Serial.print(BattDiag.LastMeas_days); Serial.println(F(" day(s)"));
       Serial.println(SPACER);
+      Serial.print(F("HV contactor "));
       if (BattDiag.HVcontactState == 0x02) {
-        Serial.println(F("HV contactor state ON"));
+        Serial.print(F("state ON"));
+        Serial.print(F(", low current: ")); Serial.print(BattDiag.HV_lowcurrent); Serial.println(F(" s"));
       } else if (BattDiag.HVcontactState == 0x00) {
-        Serial.print(F("HV contactor state OFF"));
+        Serial.print(F("state OFF"));
         Serial.print(F(", for: ")); Serial.print(BattDiag.HVoff_time); Serial.println(F(" s"));
       }
-      Serial.print(F("HV contactor cycles left: ")); Serial.println(BattDiag.HVcontactCyclesLeft);
-      Serial.print(F("           of max cycles: ")); Serial.println(BattDiag.HVcontactCyclesMax);
+      Serial.print(F("cycles left   : ")); Serial.println(BattDiag.HVcontactCyclesLeft);
+      Serial.print(F("of max. cycles: ")); Serial.println(BattDiag.HVcontactCyclesMax);
       Serial.println(SPACER);
-      Serial.print(F("Meas. quality         : ")); Serial.println(BattDiag.Cap_meas_quality,3);
-      Serial.print(F("Meas. quality combined: ")); Serial.println(BattDiag.Cap_combined_quality,3);
+      Serial.println(F("Temperatures Battery-Unit /°C: "));
+      for (int n = 0; n < 9; n = n + 3) {
+        Serial.print(F("module ")); Serial.print((n / 3) + 1); Serial.print(F(": "));
+        for (int i = 0; i < 3; i++) {          
+          Serial.print((float) BattDiag.Temps[n + i] / 64, 1);
+          if ( i < 2) {
+            Serial.print(F(", "));
+          } else {
+            Serial.println();
+          }
+        }
+      }
+      Serial.print(F("   mean : ")); Serial.print((float) BattDiag.Temps[11] / 64, 1);
+      Serial.print(F(", min : ")); Serial.print((float) BattDiag.Temps[10] / 64, 1);
+      Serial.print(F(", max : ")); Serial.println((float) BattDiag.Temps[9] / 64, 1);
+      Serial.print(F("coolant : ")); Serial.println((float) BattDiag.Temps[12] / 64, 1);
       Serial.println(SPACER);
  
       if (VERBOSE) {
@@ -650,12 +813,12 @@ void loop()
         Serial.print(F("CV mean : ")); Serial.print(BattDiag.Cvolts_mean - BattDiag.ADCvoltsOffset,0); Serial.print(F(" mV"));
         Serial.print(F(", ∆ = ")); Serial.print(BattDiag.Cvolts_max - BattDiag.Cvolts_min); Serial.print(F(" mV"));
         Serial.print(F(", σ = ")); Serial.print(BattDiag.Cvolts_stdev); Serial.println(F(" mV"));
-        Serial.print(F("CV min  : ")); Serial.print(BattDiag.Cvolts_min - BattDiag.ADCvoltsOffset); Serial.println(F(" mV"));
-        Serial.print(F("CV max  : ")); Serial.print(BattDiag.Cvolts_max - BattDiag.ADCvoltsOffset); Serial.println(F(" mV"));
+        Serial.print(F("CV min  : ")); Serial.print(BattDiag.Cvolts_min - BattDiag.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BattDiag.CV_min_at + 1);
+        Serial.print(F("CV max  : ")); Serial.print(BattDiag.Cvolts_max - BattDiag.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BattDiag.CV_max_at + 1);
         Serial.println(SPACER);
         Serial.print(F("CAP mean: ")); Serial.print(BattDiag.Ccap_mean_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_mean_As / 360.0,1); Serial.println(F(" Ah"));
-        Serial.print(F("CAP min : ")); Serial.print(BattDiag.Ccap_min_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_min_As / 360.0,1); Serial.println(F(" Ah"));
-        Serial.print(F("CAP max : ")); Serial.print(BattDiag.Ccap_max_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_max_As / 360.0,1); Serial.println(F(" Ah"));
+        Serial.print(F("CAP min : ")); Serial.print(BattDiag.Ccap_min_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_min_As / 360.0,1); Serial.print(F(" Ah, # ")); Serial.println(BattDiag.CAP_min_at + 1);
+        Serial.print(F("CAP max : ")); Serial.print(BattDiag.Ccap_max_As); Serial.print(F(" As/10, ")); Serial.print(BattDiag.Ccap_max_As / 360.0,1); Serial.print(F(" Ah, # ")); Serial.println(BattDiag.CAP_max_at + 1);
         Serial.println(SPACER);
       }   
    } else {

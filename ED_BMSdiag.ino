@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.30
+// ED BMSdiag, v0.31
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -23,7 +23,7 @@
 //! \brief   compatible hardware.
 //! \date    2016-April
 //! \author  My-Lab-odyssey
-//! \version 0.30
+//! \version 0.31
 //--------------------------------------------------------------------------------
 
 //#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
@@ -90,7 +90,7 @@ typedef struct {
   float SOC;                     //!< State of Charge, as reported by vehicle dash
   float HV;                      //!< total voltage of HV system in V
   float LV;                      //!< 12V onboard voltage / LV system
-  long ODO;                      //!< Odometer count
+  unsigned long ODO;             //!< Odometer count
   
   int Temps[13];                 //!< three temperatures per battery unit (1 to 3)
                                  //!< + max, min, mean and coolant-in temperatures
@@ -683,7 +683,7 @@ boolean ReadODO() {
     do {    
     CAN0.readMsgBuf(&rxID, &len, rxBuf); 
       if (rxID == 0x412) {
-        BattDiag.ODO = rxBuf[2] * 65535 + rxBuf[3] * 256 + rxBuf[4];
+        BattDiag.ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
         return true;
       }
     } while (!CAN_Timeout.Expired(false));
@@ -760,7 +760,7 @@ void loop()
       Serial.print(F("ODO : ")); Serial.print(BattDiag.ODO); Serial.println(F(" km"));  
       Serial.println(SPACER);
       Serial.print(F("CV mean : ")); Serial.print(BattDiag.ADCCvolts_mean); Serial.print(F(" mV"));
-      Serial.print(F(", ∆ = ")); Serial.print(BattDiag.ADCCvolts_max - BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
+      Serial.print(F(", dV = ")); Serial.print(BattDiag.ADCCvolts_max - BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
       Serial.print(F("CV min  : ")); Serial.print(BattDiag.ADCCvolts_min); Serial.println(F(" mV"));
       Serial.print(F("CV max  : ")); Serial.print(BattDiag.ADCCvolts_max); Serial.println(F(" mV"));
       Serial.print(F("OCVtimer: ")); Serial.print(BattDiag.OCVtimer); Serial.println(F(" s"));
@@ -783,7 +783,7 @@ void loop()
       Serial.print(F("cycles left   : ")); Serial.println(BattDiag.HVcontactCyclesLeft);
       Serial.print(F("of max. cycles: ")); Serial.println(BattDiag.HVcontactCyclesMax);
       Serial.println(SPACER);
-      Serial.println(F("Temperatures Battery-Unit /°C: "));
+      Serial.println(F("Temperatures Battery-Unit /degC: "));
       for (int n = 0; n < 9; n = n + 3) {
         Serial.print(F("module ")); Serial.print((n / 3) + 1); Serial.print(F(": "));
         for (int i = 0; i < 3; i++) {          
@@ -811,8 +811,8 @@ void loop()
         Serial.println(F("Individual Cell Statistics:"));
         Serial.println(SPACER);
         Serial.print(F("CV mean : ")); Serial.print(BattDiag.Cvolts_mean - BattDiag.ADCvoltsOffset,0); Serial.print(F(" mV"));
-        Serial.print(F(", ∆ = ")); Serial.print(BattDiag.Cvolts_max - BattDiag.Cvolts_min); Serial.print(F(" mV"));
-        Serial.print(F(", σ = ")); Serial.print(BattDiag.Cvolts_stdev); Serial.println(F(" mV"));
+        Serial.print(F(", dV = ")); Serial.print(BattDiag.Cvolts_max - BattDiag.Cvolts_min); Serial.print(F(" mV"));
+        Serial.print(F(", s = ")); Serial.print(BattDiag.Cvolts_stdev); Serial.println(F(" mV"));
         Serial.print(F("CV min  : ")); Serial.print(BattDiag.Cvolts_min - BattDiag.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BattDiag.CV_min_at + 1);
         Serial.print(F("CV max  : ")); Serial.print(BattDiag.Cvolts_max - BattDiag.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BattDiag.CV_max_at + 1);
         Serial.println(SPACER);

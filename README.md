@@ -32,6 +32,8 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.31    | fixed overflow in ODO calc.
+-        | ... no special ASCII-characters for int. support
 v0.30    | Added more readout data and reformatted the output
 -        | ... ODO, 12V battery, HV-unit production date
 -        | ... temperatures of battery modules

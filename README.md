@@ -32,6 +32,10 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.35    | Added new readouts
+         | ... realSOC, current, power, time from BC
+         | ... EXPERIMENTAL: initial capacity & loss
+         | Changed data formatting and code cleanup
 v0.31    | fixed overflow in ODO calc.
 -        | ... no special ASCII-characters for int. support
 v0.30    | Added more readout data and reformatted the output

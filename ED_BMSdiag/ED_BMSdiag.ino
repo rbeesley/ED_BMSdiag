@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.35
+// ED BMSdiag, v0.35a
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -23,7 +23,7 @@
 //! \brief   compatible hardware.
 //! \date    2016-May
 //! \author  My-Lab-odyssey
-//! \version 0.35
+//! \version 0.35a
 //--------------------------------------------------------------------------------
 
 //#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
@@ -885,7 +885,7 @@ void loop()
         }
       }
       testStep++;
-   } while (fOK && testStep < 7);
+   } while (testStep < 7);
    
    
    //Get diagnostics data
@@ -952,7 +952,11 @@ void loop()
       Serial.print(F(", realSOC: ")); Serial.print((float) BattDiag.realSOC / 10.0, 1); Serial.println(F(" %"));
       Serial.print(F("HV  : ")); Serial.print(BattDiag.HV,1); Serial.print(F(" V, "));
       Serial.print((float) BattDiag.Amps/32.0, 2); Serial.print(F(" A, "));
-      Serial.print(((float) (BattDiag.Power / 8192.0) -1) * 300, 2); Serial.println(F(" kW"));
+      if (BattDiag.Power != 0) {
+        Serial.print(((float) (BattDiag.Power / 8192.0) -1) * 300, 2); Serial.println(F(" kW"));
+      } else {
+        Serial.println(F("0.00 kW"));
+      }
       Serial.print(F("LV  : ")); Serial.print(BattDiag.LV,1); Serial.println(F(" V"));
         
       Serial.println(SPACER);

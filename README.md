@@ -32,6 +32,8 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.35a   | Bugfix to continue reading messages if one was skipped
+         | ... show 0.00kW power instead of -300.00kW
 v0.35    | Added new readouts
          | ... realSOC, current, power, time from BC
          | ... EXPERIMENTAL: initial capacity & loss

@@ -39,19 +39,19 @@ v0.35    | Added new readouts
          | ... EXPERIMENTAL: initial capacity & loss
          | Changed data formatting and code cleanup
 v0.31    | fixed overflow in ODO calc.
--        | ... no special ASCII-characters for int. support
+         | ... no special ASCII-characters for int. support
 v0.30    | Added more readout data and reformatted the output
--        | ... ODO, 12V battery, HV-unit production date
--        | ... temperatures of battery modules
--        | ... # of cell at min, max (in individual cell data)
+         | ... ODO, 12V battery, HV-unit production date
+         | ... temperatures of battery modules
+         | ... # of cell at min, max (in individual cell data)
 v0.24    | Overall improvements
--        | ... added Doxygen compatible comments
--        | ... added standard deviation calc.
--        | ... changed formatting
--        | Average.h (**please reload library**)
--        | ... corrected vice versa cell mapping
--        | ... overflow corrected
+         | ... added Doxygen compatible comments
+         | ... added standard deviation calc.
+         | ... changed formatting
+         | Average.h (**please reload library**)
+         | ... corrected vice versa cell mapping
+         | ... overflow corrected
 v0.21    | Waiting for serial init
--        | Showing status of OBD port (CAN-Bus)
+         | Showing status of OBD port (CAN-Bus)
 v0.2     | Initial Commit
--        | Tested with Arduino R3 and Sparkfun CAN-Bus shield
+         | Tested with Arduino R3 and Sparkfun CAN-Bus shield

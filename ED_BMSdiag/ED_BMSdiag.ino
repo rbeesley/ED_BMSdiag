@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.35a
+// ED BMSdiag, v0.38
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -21,9 +21,9 @@
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2016-May
+//! \date    2016-June
 //! \author  My-Lab-odyssey
-//! \version 0.35a
+//! \version 0.38
 //--------------------------------------------------------------------------------
 
 //#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
@@ -42,7 +42,7 @@
 #include <Average.h>
 
 //Global definitions
-#define VERSION F("0.35")
+#define VERSION F("0.38")
 #define DATALENGTH 440
 #define CELLCOUNT 93
 #define SPACER F("-----------------------------------------")
@@ -54,6 +54,11 @@
 unsigned int data[DATALENGTH]; 
 Average <unsigned int> CellVoltage(CELLCOUNT);
 Average <unsigned int> CellCapacity(CELLCOUNT);
+
+//Data structure soft-/hardware-revision
+typedef struct {
+  byte rev[3];                   //!< year, week, patchlevel
+} Revision_t;
 
 //BMS data structure
 typedef struct {
@@ -90,6 +95,9 @@ typedef struct {
   byte Day;                      //!< day of battery production
   byte Month;                    //!< month of battery production
   byte Year;                     //!< year of battery production
+
+  Revision_t sw;
+  Revision_t hw;
   
   byte hour;                     //!< time in car: hour
   byte minutes;                  //!< time in car: minutes
@@ -107,6 +115,8 @@ typedef struct {
   
   int Temps[13];                 //!< three temperatures per battery unit (1 to 3)
                                  //!< + max, min, mean and coolant-in temperatures
+  unsigned int Isolation;        //!< Isolation in DC path, resistance in kOhm
+  unsigned int DCfault;          //!< Flag to show DC-isolation fault
   
   byte HVcontactState;           //!< contactor state: 0 := OFF, 2 := ON
   long HVcontactCyclesLeft;      //!< counter related to ON/OFF cyles of the car
@@ -120,10 +130,14 @@ unsigned char rxLength = 0;
 unsigned char rxBuf[8];
 byte rqFC_length = 8;            //!< Interval to send flow control messages (rqFC) 
 unsigned char rqFlowControl[8]               = {0x30, 0x08, 0x14, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+unsigned char rqBattHWrev[8]                 = {0x03, 0x22, 0xF1, 0x50, 0xFF, 0xFF, 0xFF, 0xFF};
+unsigned char rqBattSWrev[8]                 = {0x03, 0x22, 0xF1, 0x51, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattTemperatures[8]          = {0x03, 0x22, 0x02, 0x01, 0xFF, 0xFF, 0xFF, 0xFF}; 
-unsigned char rqBattModuleTemperatures[8]    = {0x03, 0x22, 0x02, 0x02, 0xFF, 0xFF, 0xFF, 0xFF}; 
+unsigned char rqBattModuleTemperatures[8]    = {0x03, 0x22, 0x02, 0x02, 0xFF, 0xFF, 0xFF, 0xFF};
+unsigned char rqBattHVstatus[8]              = {0x03, 0x22, 0x02, 0x04, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattADCref[8]                = {0x03, 0x22, 0x02, 0x07, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattVolts[8]                 = {0x03, 0x22, 0x02, 0x08, 0xFF, 0xFF, 0xFF, 0xFF};
+unsigned char rqBattIsolation[8]             = {0x03, 0x22, 0x02, 0x09, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattAmps[8]                  = {0x03, 0x22, 0x02, 0x03, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattDate[8]                  = {0x03, 0x22, 0x03, 0x04, 0xFF, 0xFF, 0xFF, 0xFF};
 unsigned char rqBattCapInit[8]               = {0x03, 0x22, 0x03, 0x05, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -138,7 +152,7 @@ unsigned char rqBattHVContactorState[8]      = {0x03, 0x22, 0xD0, 0x00, 0xFF, 0x
 MCP_CAN CAN0(CS);                //!< Set CS pin
 
 BatteryDiag_t BattDiag;
-CTimeout CAN_Timeout(15000);     //!< Timeout value for CAN response in millis
+CTimeout CAN_Timeout(5000);     //!< Timeout value for CAN response in millis
 
 //--------------------------------------------------------------------------------
 //! \brief   SETUP()
@@ -491,6 +505,85 @@ boolean getBatteryDate(boolean debug_verbose) {
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Read and evaluate battery soft-/hardware-revision
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean getBatteryRevision(boolean debug_verbose) {
+  unsigned int items = Request_Diagnostics(rqBattHWrev);
+  byte n;
+  boolean fOK = false;
+  if(items){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    for(n = 0; n < 3; n++) {
+      BattDiag.hw.rev[n] =  data[n + 3];
+    }
+    fOK = true;
+  }
+  items = Request_Diagnostics(rqBattSWrev);
+  if(items && fOK){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    byte offset = (data[0] - 3) + 1;
+    for(n = 0; n < 3; n++) {
+      BattDiag.sw.rev[n] =  data[n + offset];
+    }
+    fOK = true;
+  }
+  if(fOK){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate battery high voltage status
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean getHVstatus(boolean debug_verbose) {
+  unsigned int items = Request_Diagnostics(rqBattHVstatus);
+  unsigned int value;
+  if(items){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    if(BattDiag.HVcontactState != 0x02) {
+      ReadDiagWord(&value,data,12,1);
+      BattDiag.HV = (float) value/64.0;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate battery isolation resistance
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean getIsolationValue(boolean debug_verbose) {
+  unsigned int items = Request_Diagnostics(rqBattIsolation);
+  unsigned int value;
+  if(items){
+    if (debug_verbose) {
+      PrintReadBuffer(items);
+    } 
+    ReadDiagWord(&value,data,4,1);
+    BattDiag.Isolation = (signed) value;
+    BattDiag.DCfault = data[6];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate capacity data
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
@@ -692,61 +785,57 @@ boolean getHVcontactorState(boolean debug_verbose) {
 boolean ReadSOC() {
   setCAN_Filter(0x518);
   CAN_Timeout.Reset();
-  
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x518) {
-        BattDiag.SOC = (float) rxBuf[7] / 2;
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+     
+  do {    
+    if(!digitalRead(2)) { 
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x518) {
+          BattDiag.SOC = (float) rxBuf[7] / 2;
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate internal SOC - experimental
+//! \brief   Read and evaluate internal SOC
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean ReadSOCinternal() {
   setCAN_Filter(0x2D5);
-  CAN_Timeout.Reset();
+  CAN_Timeout.Reset(); 
+      
+  do {    
+    if(!digitalRead(2)) {
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x2D5) {
+          BattDiag.realSOC =  (unsigned int) rxBuf[4] * 256 + (unsigned int) rxBuf[5];
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x2D5) {
-        BattDiag.realSOC =  (unsigned int) rxBuf[4] * 256 + (unsigned int) rxBuf[5];
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
   return false;
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate internal SOC - experimental
+//! \brief   Read and evaluate power reading
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean ReadPower() {
   setCAN_Filter(0x508);
   CAN_Timeout.Reset();
-  
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x508) {
-        BattDiag.Power =  (unsigned int) (rxBuf[2] & 0x3F) * 256 + (unsigned int) rxBuf[3];
-        /*Serial.println();
-        for (int i = 0; i<8; i++) {
-          Serial.print(rxBuf[i], HEX); Serial.print(" ");
+      
+  do {    
+    if(!digitalRead(2)) {
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x508) {
+          BattDiag.Power =  (unsigned int) (rxBuf[2] & 0x3F) * 256 + (unsigned int) rxBuf[3];
+          return true;
         }
-        Serial.println(BattDiag.Power_or_Amps,HEX);*/
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
@@ -758,18 +847,18 @@ boolean ReadHV() {
   setCAN_Filter(0x448);
   CAN_Timeout.Reset();
   
-  float HV;
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x448) {
-        HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
-        HV = HV / 10.0;
-        BattDiag.HV = HV;
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+  float HV;   
+  do {   
+    if(!digitalRead(2)) {  
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x448) {
+          HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
+          HV = HV / 10.0;
+          BattDiag.HV = HV;
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
@@ -782,17 +871,18 @@ boolean ReadLV() {
   CAN_Timeout.Reset();
   
   float LV;
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x3D5) {
-        LV = ((float)rxBuf[3]);
-        LV = LV / 10.0;
-        BattDiag.LV = LV;
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+      
+  do {    
+    if(!digitalRead(2)) {
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x3D5) {
+          LV = ((float)rxBuf[3]);
+          LV = LV / 10.0;
+          BattDiag.LV = LV;
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
@@ -803,16 +893,16 @@ boolean ReadLV() {
 boolean ReadODO() {
   setCAN_Filter(0x412);
   CAN_Timeout.Reset();
-  
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x412) {
-        BattDiag.ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+      
+  do {    
+    if(!digitalRead(2)) {
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x412) {
+          BattDiag.ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
@@ -823,17 +913,17 @@ boolean ReadODO() {
 boolean ReadTime() {
   setCAN_Filter(0x512);
   CAN_Timeout.Reset();
-  
-  if(!digitalRead(2)) {    
-    do {    
-    CAN0.readMsgBuf(&rxID, &len, rxBuf); 
-      if (rxID == 0x512) {
-        BattDiag.hour = (unsigned int) rxBuf[0];
-        BattDiag.minutes = (unsigned int) rxBuf[1];
-        return true;
-      }
-    } while (!CAN_Timeout.Expired(false));
-  }
+      
+  do {    
+    if(!digitalRead(2)) {
+      CAN0.readMsgBuf(&rxID, &len, rxBuf); 
+        if (rxID == 0x512) {
+          BattDiag.hour = (unsigned int) rxBuf[0];
+          BattDiag.minutes = (unsigned int) rxBuf[1];
+          return true;
+        }
+    }
+  } while (!CAN_Timeout.Expired(false));
   return false;
 }
 
@@ -855,7 +945,7 @@ void loop()
    do {
       switch (testStep) {
         case 0:
-           Serial.print(F("Reading data."));
+           Serial.print(F("Reading data"));
            fOK = ReadSOC();
            break;
         case 1:
@@ -916,13 +1006,22 @@ void loop()
            fOK = getBatteryDate(false);
            break;
         case 7:
-           fOK = getBatteryTemperature(false);
+           fOK = getBatteryRevision(false);
            break;
         case 8:
+           fOK = getBatteryTemperature(false);
+           break;
+        case 9:
            fOK = getHVcontactorState(false); 
            break;
+        case 10:
+           fOK = getHVstatus(false); 
+           break;
+        case 11:
+           fOK = getIsolationValue(false); 
+           break;
       }
-      if (testStep < 9) {
+      if (testStep < 12) {
         if (fOK) {
           Serial.print(MSG_DOT);
         } else {
@@ -930,21 +1029,25 @@ void loop()
         }
       }
       testStep++;
-   } while (fOK && testStep < 9);
+   } while (fOK && testStep < 12);
     
    if (fOK) {
       Serial.println(MSG_OK);
       digitalWrite(CS, HIGH);
       Serial.println(SPACER);
       Serial.print(F("Time [hh:mm]: ")); 
-      if (BattDiag.hour < 9) Serial.print(F("0"));
+      if (BattDiag.hour <= 9) Serial.print(F("0"));
       Serial.print(BattDiag.hour); Serial.print(F(":"));
-      if (BattDiag.minutes < 9) Serial.print(F("0"));
+      if (BattDiag.minutes <= 9) Serial.print(F("0"));
       Serial.print(BattDiag.minutes);
       Serial.print(F(",   ODO : ")); Serial.print(BattDiag.ODO); Serial.println(F(" km"));
       Serial.println(SPACER);
       Serial.print(F("Battery-Production [Y/M/D]: ")); Serial.print(2000 + BattDiag.Year); Serial.print(F("/"));
       Serial.print(BattDiag.Month); Serial.print(F("/")); Serial.println(BattDiag.Day);
+      Serial.print(F("Rev.[Y/WK/PL] HW:")); Serial.print(2000 + BattDiag.hw.rev[0]); Serial.print(F("/"));
+      Serial.print(BattDiag.hw.rev[1]); Serial.print(F("/")); Serial.print(BattDiag.hw.rev[2]);
+      Serial.print(F(", SW:")); Serial.print(2000 + BattDiag.sw.rev[0]); Serial.print(F("/"));
+      Serial.print(BattDiag.sw.rev[1]); Serial.print(F("/")); Serial.println(BattDiag.sw.rev[2]);
       Serial.print(F("Initial Capacity : ")); Serial.print(BattDiag.CapInit / 360.0,1); Serial.print(F(" Ah"));
       Serial.print(F(", Loss: ")); Serial.print((float) BattDiag.CapLoss / 1000, 3); Serial.println(F(" %"));
       Serial.println(SPACER);
@@ -983,6 +1086,12 @@ void loop()
       }
       Serial.print(F("cycles left   : ")); Serial.println(BattDiag.HVcontactCyclesLeft);
       Serial.print(F("of max. cycles: ")); Serial.println(BattDiag.HVcontactCyclesMax);
+      Serial.print(F("DC isolation  : ")); Serial.print(BattDiag.Isolation); Serial.print(F(" kOhm, "));
+      if (BattDiag.DCfault == 0) {
+        Serial.println(F("NO FAULT"));
+      } else {
+        Serial.println(F("DC FAULT !!!"));
+      }
       Serial.println(SPACER);
       Serial.println(F("Temperatures Battery-Unit /degC: "));
       for (int n = 0; n < 9; n = n + 3) {

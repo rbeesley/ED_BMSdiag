@@ -32,13 +32,17 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.38    | New readings and stability improvements
+         | ... read HV-Battery voltage even with contactors open
+         | ... get HV-DC-Isolation in kOhm (reliable with contactors closed)
+         | ... get info about hardware- / software-revision of battery
 v0.35a   | Bugfix to continue reading messages if one was skipped
          | ... show 0.00kW power instead of -300.00kW
 v0.35    | Added new readouts
          | ... realSOC, current, power, time from BC
          | ... EXPERIMENTAL: initial capacity & loss
          | Changed data formatting and code cleanup
-v0.31    | fixed overflow in ODO calc.
+v0.31    | Fixed overflow in ODO calc.
          | ... no special ASCII-characters for int. support
 v0.30    | Added more readout data and reformatted the output
          | ... ODO, 12V battery, HV-unit production date

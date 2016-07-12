@@ -32,6 +32,10 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.
+         | ... usage of min. data type
+         | ... new structure typedef and templates
+         | ... small bugfixes
 v0.38    | New readings and stability improvements
          | ... read HV-Battery voltage even with contactors open
          | ... get HV-DC-Isolation in kOhm (reliable with contactors closed)

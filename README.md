@@ -32,6 +32,7 @@ This simple version will display the diagnostics via a serial USB connection. Yo
 ## Version history
 version  | comment
 -------- | --------
+v0.39b   | fixed type cast bug HVcontactor-timer
 v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.
          | ... usage of min. data type
          | ... new structure typedef and templates

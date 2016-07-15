@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.39
+// ED BMSdiag, v0.39b
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -23,7 +23,7 @@
 //! \brief   compatible hardware.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.39
+//! \version 0.39b
 //--------------------------------------------------------------------------------
 
 //#define DO_DEBUG_UPDATE        //!< Uncomment to show DEBUG output
@@ -42,7 +42,7 @@
 #include <Average.h>
 
 //Global definitions
-#define VERSION F("0.39")
+#define VERSION F("0.39b")
 #define DATALENGTH 440
 #define CELLCOUNT 93
 #define SPACER F("-----------------------------------------")
@@ -183,7 +183,7 @@ void setup()
   Serial.println(SPACER); 
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
   Serial.print(F("--- v")); Serial.print(VERSION);
-  Serial.println(F("                             ---"));
+  Serial.println(F("                            ---"));
   Serial.println(SPACER);
   
   //Serial.print(F("SRAM: ")); Serial.println(freeRam());
@@ -606,8 +606,8 @@ boolean getBatteryCapacity(boolean debug_verbose) {
     BMS.Ccap_As.max = CellCapacity.maximum(&BMS.CAP_max_at);
     BMS.Ccap_As.mean = CellCapacity.mean();
 
-    BMS.HVoff_time = (unsigned long) data[5] * 65535 + data[6] * 256 + data[7];
-    BMS.HV_lowcurrent = (unsigned long) data[9] * 65535 + data[10] * 256 + data[11];
+    BMS.HVoff_time = (unsigned long) data[5] * 65535 + (unsigned int) data[6] * 256 + data[7];
+    BMS.HV_lowcurrent = (unsigned long) data[9] * 65535 + (unsigned int) data[10] * 256 + data[11];
     BMS.OCVtimer = (unsigned int) data[12] * 256 + data[13];
     ReadDiagWord(&BMS.Cap_As.min,data,21,1);
     ReadDiagWord(&BMS.Cap_As.mean,data,23,1);

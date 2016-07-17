@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.4.0-b3
+// ED BMSdiag, v0.4.0
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -23,7 +23,7 @@
 //! \brief   compatible hardware.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.4.0-b3
+//! \version 0.4.0
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -36,11 +36,12 @@
 #include "canDiag.h"
 
 //Global definitions
-#define VERSION F("0.4.0-b3")
 #define SPACER F("-----------------------------------------")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")
 #define MSG_DOT F(".")
+
+char* const PROGMEM version = "0.4.0";
 
 #define CS     10                //!< chip select pin of MCP2515 CAN-Controller
 #define CS_SD  8                 //!< CS for SD card, if you plan to use a logger...
@@ -105,10 +106,14 @@ void clearSerialBuffer() {
 //! \brief   Output header data
 //--------------------------------------------------------------------------------
 void printWelcomeScreen() {
+  byte vLength = strlen(version);
   Serial.println(SPACER);
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
-  Serial.print(F("--- v")); Serial.print(VERSION);
-  Serial.println(F("                         ---"));
+  Serial.print(F("--- v")); Serial.print(version);
+  for (byte i = 0; i < (41 - 5 - vLength - 3); i++) {
+    Serial.print(" ");
+  }
+  Serial.println(F("---"));
   Serial.println(SPACER);
 
   Serial.println(F("Connect to OBD port - Waiting for CAN-Bus "));

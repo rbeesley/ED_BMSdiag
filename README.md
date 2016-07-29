@@ -1,40 +1,7 @@
 # ED BMSdiag
 Retrieve battery diagnostic data from your smart electric drive EV.
 
-```  
------------------------------------------
-Time [hh:mm]: 22:24,   ODO : 19440 km
------------------------------------------
-Battery-Production [Y/M/D]: 2013/9/30
-Rev.[Y/WK/PL] HW:2013/29/0, SW:2013/29/1
------------------------------------------
-SOC : 80.5 %, realSOC: 79.0 %
-HV  : 366.5 V, 0.00 A, 0.00 kW
-LV  : 12.3 V
------------------------------------------
-CV mean : 3939 mV, dV = 46 mV
-CV min  : 3915 mV
-CV max  : 3961 mV
-OCVtimer: 1338 s
------------------------------------------
-Last measurement      : 0 day(s)
-Measurement estimation: 0.824
-Actual estimation     : 0.808
-CAP mean: 19098 As/10, 53.0 Ah
-CAP min : 17873 As/10, 49.6 Ah
-CAP max : 18928 As/10, 52.6 Ah
------------------------------------------
-HV contactor state OFF, for: 18333 s
-cycles left   : 295861
-of max. cycles: 300000
-DC isolation  : 4216 kOhm, NO FAULT
------------------------------------------
-Temperatures Battery-Unit /degC:
-module 1: 26.7, 28.8, 27.2
-module 2: 27.5, 29.3, 27.2
-module 3: 27.0, 28.6, 26.4
-   mean : 27.6, min : 26.4, max : 29.4
-coolant : 25.4```
+
 
 ### You need
 An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connector) of your car. Get the hardware and use an appropriate cable for the physical connection. See the schematics for making your own cable.

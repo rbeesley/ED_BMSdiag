@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \version 0.3.0
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -35,6 +35,8 @@
 #include <Timeout.h>
 #include <AvgNew.h>
 #include "_BMS_dfs.h"
+#include "_NLG6_dfs.h"
+#include "_CS_dfs.h"
 
 class canDiag { 
  
@@ -107,6 +109,20 @@ public:
     unsigned int getCellCapacity(byte n);
 
 //--------------------------------------------------------------------------------
+//! \brief   Get methods for NLG6 charger data
+//--------------------------------------------------------------------------------
+    boolean NLG6ChargerInstalled(boolean debug_verbose);
+    boolean getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose);
+    boolean getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose);
+    boolean getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose);
+    boolean getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose);
+
+//--------------------------------------------------------------------------------
+//! \brief   Get methods for cooling- and other subsystems
+//--------------------------------------------------------------------------------
+    boolean getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verbose);
+
+//--------------------------------------------------------------------------------
 //! \brief   Read BMS values from CAN-Bus traffic
 //--------------------------------------------------------------------------------
     boolean ReadSOC(BatteryDiag_t *myBMS);
@@ -116,7 +132,6 @@ public:
     boolean ReadLV(BatteryDiag_t *myBMS);
     boolean ReadODO(BatteryDiag_t *myBMS);
     boolean ReadTime(BatteryDiag_t *myBMS);
-
 };
 
 #endif // of #ifndef CANDIAG_H

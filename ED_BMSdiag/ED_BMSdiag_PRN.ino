@@ -18,22 +18,30 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.4.2
+//! \version 0.5.0
 //--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+//! \brief   Output a space-line for separation of datasets
+//--------------------------------------------------------------------------------
+void PrintSPACER() {
+  for (byte i = 0; i < 41; i++) Serial.print(F("-"));
+  Serial.println();
+}
 
 //--------------------------------------------------------------------------------
 //! \brief   Output header data as welcome screen - wait for CAN-Bus to be ready
 //--------------------------------------------------------------------------------
 void printWelcomeScreen() {
   byte vLength = strlen(version);
-  Serial.println(SPACER);
+  PrintSPACER();
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
   Serial.print(F("--- v")); Serial.print(version);
   for (byte i = 0; i < (41 - 5 - vLength - 3); i++) {
     Serial.print(" ");
   }
   Serial.println(F("---"));
-  Serial.println(SPACER);
+  PrintSPACER();
 
   Serial.println(F("Connect to OBD port - Waiting for CAN-Bus "));
   do {
@@ -41,7 +49,7 @@ void printWelcomeScreen() {
     delay(1000);
   } while (digitalRead(2));
   Serial.println(F("CONNECTED"));
-  Serial.println(SPACER);
+  PrintSPACER();
 }
 
 //--------------------------------------------------------------------------------
@@ -173,76 +181,174 @@ void printIndividualCellData() {
     if (n < 9) Serial.print(F("0"));
     Serial.print(n+1); Serial.print(F(";")); Serial.print(DiagCAN.getCellVoltage(n) - BMS.ADCvoltsOffset); Serial.print(F(";")); Serial.println(DiagCAN.getCellCapacity(n));
   }
-  Serial.println(SPACER);
+  PrintSPACER();
   Serial.println(F("Individual Cell Statistics:"));
-  Serial.println(SPACER);
+  PrintSPACER();
   Serial.print(F("CV mean : ")); Serial.print(BMS.Cvolts.mean - BMS.ADCvoltsOffset,0); Serial.print(F(" mV"));
   Serial.print(F(", dV= ")); Serial.print(BMS.Cvolts.max - BMS.Cvolts.min); Serial.print(F(" mV"));
   Serial.print(F(", s= ")); Serial.print(BMS.Cvolts_stdev); Serial.println(F(" mV"));
   Serial.print(F("CV min  : ")); Serial.print(BMS.Cvolts.min - BMS.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BMS.CV_min_at + 1);
   Serial.print(F("CV max  : ")); Serial.print(BMS.Cvolts.max - BMS.ADCvoltsOffset); Serial.print(F(" mV, # ")); Serial.println(BMS.CV_max_at + 1);
-  Serial.println(SPACER);
+  PrintSPACER();
   Serial.print(F("CAP mean: ")); Serial.print(BMS.Ccap_As.mean, 0); Serial.print(F(" As/10, ")); Serial.print(BMS.Ccap_As.mean / 360.0,1); Serial.println(F(" Ah"));
   Serial.print(F("CAP min : ")); Serial.print(BMS.Ccap_As.min); Serial.print(F(" As/10, ")); Serial.print(BMS.Ccap_As.min / 360.0,1); Serial.print(F(" Ah, # ")); Serial.println(BMS.CAP_min_at + 1);
   Serial.print(F("CAP max : ")); Serial.print(BMS.Ccap_As.max); Serial.print(F(" As/10, ")); Serial.print(BMS.Ccap_As.max / 360.0,1); Serial.print(F(" Ah, # ")); Serial.println(BMS.CAP_max_at + 1);
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Output NLG6 charger temperatures
+//--------------------------------------------------------------------------------
+void printNLG6temperatures() {
+  Serial.println(F("Temperatures Charger-Unit /degC: "));
+  Serial.print(F("Reported       : ")); Serial.println(NLG6.ReportedTemp - TEMP_OFFSET, DEC);
+  Serial.print(F("Cooling plate  : ")); Serial.println(NLG6.CoolingPlateTemp - TEMP_OFFSET, DEC);
+  Serial.print(F("Inlet socket   : ")); Serial.println(NLG6.SocketTemp - TEMP_OFFSET, DEC);
+  Serial.println(F("Internal values: "));
+          
+  for (byte n = 0; n < 8; n++) {
+      Serial.print(NLG6.Temps[n] - TEMP_OFFSET, DEC);
+      if (n < 7) Serial.print(F(", "));
+  }
+  Serial.println();
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Output NLG6 charger voltages and currents AC and DC
+//--------------------------------------------------------------------------------
+void printNLG6_Status() {
+  Serial.println(F("Status NLG6 Charger-Unit: "));
+  Serial.print(F("User selected : ")); Serial.print(NLG6.Amps_setpoint); Serial.println(F(" A"));
+  Serial.print(F("Cable maximum : ")); Serial.print(NLG6.AmpsCableCode / 10); Serial.println(F(" A"));
+  Serial.print(F("Chargingpoint : ")); Serial.print(NLG6.AmpsChargingpoint / 10); Serial.println(F(" A"));
+  Serial.print(F("AC L1: ")); Serial.print(NLG6.MainsVoltage[0] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[0] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("AC L2: ")); Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("AC L3: ")); Serial.print(NLG6.MainsVoltage[2] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[2] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("DC HV: ")); Serial.print(NLG6.DC_HV / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.DC_Current / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("DC LV: ")); Serial.print(NLG6.LV / 10.0, 1); Serial.println(F(" V"));
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Output Cooling Subsystem temperatures
+//--------------------------------------------------------------------------------
+void printCLS_Status() {
+  Serial.println(F("Status Cooling- and Subsystems: "));
+  Serial.print(F("Temperature   : ")); Serial.print(CLS.CoolingTemp / 8.0,1); Serial.println(F(" degC"));
+  Serial.print(F("Cooling Pump  : "));
+  Serial.print(CLS.CoolingPumpRPM / 255.0 * 100.0, 1); Serial.print(F(" %, "));
+  Serial.print(CLS.CoolingPumpTemp - 50); Serial.println(F(" degC"));
+  Serial.print(F("              : "));
+  Serial.print(CLS.CoolingPumpLV / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(CLS.CoolingPumpAmps / 5.0, 1); Serial.println(F(" A"));
+  Serial.println(F("OTR:")); 
+  Serial.print(F("Cooling Pump  : ")); Serial.print(CLS.CoolingPumpOTR); Serial.println(F(" h"));
+  Serial.print(F("Battery heater: ")); Serial.print(CLS.BatteryHeaterOTR); Serial.print(F(" h, "));
+  if (CLS.BatteryHeaterON == 0) {
+    Serial.println(F("OFF"));
+  } else {
+    Serial.println(F("ON"));
+  }
+  Serial.print(F("Vaccum Pump   : ")); Serial.print(CLS.VaccumPumpOTR / 36000.0, 3); Serial.println(F(" h"));
+  Serial.print(F("Pressure 1, 2 : ")); Serial.print(CLS.VaccumPumpPress1); Serial.print(F(" mbar, "));
+  Serial.print(CLS.VaccumPumpPress2); Serial.println(F(" mbar"));
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Output status data as splash screen
 //--------------------------------------------------------------------------------
 void printSplashScreen() {
-  Serial.println(); Serial.println(SPACER);
+  Serial.println(); PrintSPACER();
   printHeaderData();
-  Serial.println(SPACER);
+  PrintSPACER();
   printStandardDataset();
-  Serial.println(SPACER);
+  PrintSPACER();
   Serial.println(F("ENTER command... (? for help)"));
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Output all BMS data
+//! \brief   Output BMS dataset
 //--------------------------------------------------------------------------------
 void printBMSdata() {
   Serial.println(MSG_OK);
   digitalWrite(CS, HIGH);
-  Serial.println(SPACER);
+  PrintSPACER();
   printHeaderData();
-  Serial.println(SPACER);
+  PrintSPACER();
   printBatteryProductionData();
-  Serial.println(SPACER);
+  PrintSPACER();
   printStandardDataset();
-  Serial.println(SPACER);
+  PrintSPACER();
   printBMS_CellVoltages();
-  Serial.println(SPACER);
+  PrintSPACER();
   printBMS_CapacityEstimate();
-  Serial.println(SPACER);
+  PrintSPACER();
   printHVcontactorState();
-  Serial.println(SPACER);
+  PrintSPACER();
   printBMStemperatures();
-  Serial.println(SPACER);
+  PrintSPACER();
   if (VERBOSE) {
     printIndividualCellData();
-    Serial.println(SPACER);
+    PrintSPACER();
   }
   if (EXPDATA) {
     printExperimentalData();
-    Serial.println(SPACER);
+    PrintSPACER();
   }
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Get and output all BMS data
+//! \brief   Output NLG6 dataset
+//--------------------------------------------------------------------------------
+void printNLG6data() {
+  Serial.println(MSG_OK);
+  digitalWrite(CS, HIGH);
+  PrintSPACER();
+  printNLG6_Status();
+  PrintSPACER();
+  printNLG6temperatures();
+  PrintSPACER();
+}
+
+
+//--------------------------------------------------------------------------------
+//! \brief   Output Cooling- and Subsystem dataset
+//--------------------------------------------------------------------------------
+void printCLSdata() {
+  Serial.println(MSG_OK);
+  digitalWrite(CS, HIGH);
+  PrintSPACER();
+  printCLS_Status();
+  PrintSPACER();
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Get all BMS data and output them
+//! \brief   Dynamic memory allocation for CellVoltages and -Capacities
+//! \brief   The allocated memory will be released after the data output
 //--------------------------------------------------------------------------------
 void printBMSall() {
+  byte selected[12];                   //hold list for selected tasks
+  
   //Read CAN-Bus IDs related to BMS (sniff traffic)
-  ReadCANtraffic_BMS();
+  for (byte i = 0; i < 8; i++) {
+    selected[i] = i;
+  }
+  Serial.print(F("Reading data"));
+  ReadCANtraffic_BMS(selected, 8);
   
   //Reserve memory
   DiagCAN.reserveMem_CellVoltage();
   DiagCAN.reserveMem_CellCapacity();
-
+  //Serial.println(getFreeRam());
+  
   //Get all diagnostics data of BMS
-  if (getBMSdata()) {
+  for (byte i = 0; i < 12; i++) {
+    selected[i] = i;
+  }
+  if (getBMSdata(selected, 12)) {
     printBMSdata();
   } else {
     Serial.println();
@@ -254,3 +360,28 @@ void printBMSall() {
   DiagCAN.freeMem_CellCapacity();
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Get all NLG6 data and output them
+//--------------------------------------------------------------------------------
+void printNLG6all() {
+  Serial.print(F("Reading data"));
+  if (getNLG6data()) {
+    printNLG6data();
+  } else {
+    Serial.println();
+    Serial.println(FAILURE);
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Get all Cooling- and Subsystem data and output them
+//--------------------------------------------------------------------------------
+void printCLSall() {
+  Serial.print(F("Reading data"));
+  if (getCLSdata()) {
+    printCLSdata();
+  } else {
+    Serial.println();
+    Serial.println(FAILURE);
+  }
+}

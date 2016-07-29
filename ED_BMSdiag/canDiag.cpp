@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \version 0.3.0
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -713,6 +713,264 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Test if a NLG6 fastcharger is installed
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::NLG6ChargerInstalled(boolean debug_verbose) {
+  unsigned int items;
+  
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerPresent);
+
+  if(items){
+    if (debug_verbose) {
+       PrintReadBuffer(items);
+    } 
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate charger temperatures (values - 40 in deg C)
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  unsigned int items;
+  
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerTemperatures);
+
+  if(items){
+    if (debug_verbose) {
+       PrintReadBuffer(items);
+    } 
+    myNLG6->CoolingPlateTemp = data[4];
+    for(byte n = 0; n < 8; n++) {
+      myNLG6->Temps[n] = data[n + 5];
+    }
+    myNLG6->ReportedTemp = data[12];
+    myNLG6->SocketTemp = data[13];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate charger setpoint (manual from vehicle BC)
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  unsigned int items;
+
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerSelCurrent);
+  
+  if(items){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myNLG6->Amps_setpoint = data[8];
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate charger voltages and currents
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  unsigned int items;
+  unsigned int value;
+
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerVoltages);
+  
+  if(items){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myNLG6->LV = data[8];
+    this->ReadDiagWord(&value,data,9,1);
+    myNLG6->DC_HV = value;
+    this->ReadDiagWord(&value,data,11,1);
+    myNLG6->MainsVoltage[0] = value;
+    this->ReadDiagWord(&value,data,13,1);
+    myNLG6->MainsVoltage[1] = value;
+    this->ReadDiagWord(&value,data,15,1);
+    myNLG6->MainsVoltage[2] = value;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate charger amps (AC and DC currents)
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  unsigned int items;
+  unsigned int value;
+
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerAmps);
+  
+  if(items){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,4,1);
+    myNLG6->DC_Current = value; 
+    this->ReadDiagWord(&value,data,6,1);
+    myNLG6->MainsAmps[0] = value;  
+    this->ReadDiagWord(&value,data,8,1);
+    myNLG6->MainsAmps[1] = value; 
+    this->ReadDiagWord(&value,data,10,1);
+    myNLG6->MainsAmps[2] = value; 
+    this->ReadDiagWord(&value,data,16,1);
+    myNLG6->AmpsChargingpoint = value; 
+    this->ReadDiagWord(&value,data,18,1);
+    myNLG6->AmpsCableCode = value;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate data of cooling- and other subsystems
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verbose) {
+  unsigned int items;
+  unsigned int value;
+  unsigned long vpOTR;
+  int vpPress;
+
+  this->setCAN_ID(0x7E5, 0x7ED);
+  items = this->Request_Diagnostics(rqCoolingTemp);
+  
+  byte n;
+  boolean fOK = false;
+  if(items){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->CoolingTemp = data[4];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingPumpTemp);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->CoolingPumpTemp = data[3];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingPumpLV);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->CoolingPumpLV = data[3];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingPumpAmps);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->CoolingPumpAmps = data[4];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingPumpRPM);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->CoolingPumpRPM = data[3];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingPumpOTR);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,3,1);
+    myCLS->CoolingPumpOTR = value;
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqBatteryHeaterOTR);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,3,1);
+    myCLS->BatteryHeaterOTR = value;
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqBatteryHeaterON);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    myCLS->BatteryHeaterON = data[3];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqVacuumPumpOTR);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,4,1);
+    vpOTR =  (unsigned long) (data[3] * (16777216 / 10.0));
+    vpOTR += (unsigned long) (data[4] * (65535 / 10.0));
+    vpOTR += (unsigned int)  (data[5] * (256 / 10.0));
+    myCLS->VaccumPumpOTR = vpOTR;
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqVacuumPumpPress1);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,4,1);
+    vpPress =  (int) data[3] * 256;
+    vpPress += (int) data[4];
+    myCLS->VaccumPumpPress1 = vpPress;
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqVacuumPumpPress2);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    this->ReadDiagWord(&value,data,4,1);
+    vpPress =  (int) data[3] * 256 ;
+    vpPress += (int) data[4] ;
+    myCLS->VaccumPumpPress2 = vpPress;
+    fOK = true;
+  }
+  if(fOK){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate SOC
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
@@ -841,7 +1099,7 @@ boolean canDiag::ReadODO(BatteryDiag_t *myBMS) {
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate odometer
+//! \brief   Read and evaluate time in Multifunction display
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadTime(BatteryDiag_t *myBMS) {

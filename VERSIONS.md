@@ -1,6 +1,10 @@
 ## ED BMSdiag version history
 version  | comment
 -------- | --------
+v0.5.0   | Added a CLI and new readouts:
+         | ... NLG6 fast charger
+         | ... Cooling- and other subsystems
+         | ... Logging function
 v0.4.2   | **please reload all files !**
          | Bugfix for Average-Template memory bug > rewritten  to AvgNew-Class
          | ... This version uses dynamic memory allocation, so monitor free memory (between heap and stack) if you make modifications!

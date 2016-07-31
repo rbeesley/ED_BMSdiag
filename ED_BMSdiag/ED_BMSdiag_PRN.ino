@@ -237,21 +237,21 @@ void printNLG6_Status() {
 void printCLS_Status() {
   Serial.println(F("Status Cooling- and Subsystems: "));
   Serial.print(F("Temperature   : ")); Serial.print(CLS.CoolingTemp / 8.0,1); Serial.println(F(" degC"));
-  Serial.print(F("Cooling Pump  : "));
+  Serial.print(F("Cooling pump  : "));
   Serial.print(CLS.CoolingPumpRPM / 255.0 * 100.0, 1); Serial.print(F(" %, "));
   Serial.print(CLS.CoolingPumpTemp - 50); Serial.println(F(" degC"));
   Serial.print(F("              : "));
   Serial.print(CLS.CoolingPumpLV / 10.0, 1); Serial.print(F(" V, "));
   Serial.print(CLS.CoolingPumpAmps / 5.0, 1); Serial.println(F(" A"));
   Serial.println(F("OTR:")); 
-  Serial.print(F("Cooling Pump  : ")); Serial.print(CLS.CoolingPumpOTR); Serial.println(F(" h"));
+  Serial.print(F("Cooling pump  : ")); Serial.print(CLS.CoolingPumpOTR); Serial.println(F(" h"));
   Serial.print(F("Battery heater: ")); Serial.print(CLS.BatteryHeaterOTR); Serial.print(F(" h, "));
   if (CLS.BatteryHeaterON == 0) {
     Serial.println(F("OFF"));
   } else {
     Serial.println(F("ON"));
   }
-  Serial.print(F("Vaccum Pump   : ")); Serial.print(CLS.VaccumPumpOTR / 36000.0, 3); Serial.println(F(" h"));
+  Serial.print(F("Vaccum pump   : ")); Serial.print(CLS.VaccumPumpOTR / 36000.0, 3); Serial.println(F(" h"));
   Serial.print(F("Pressure 1, 2 : ")); Serial.print(CLS.VaccumPumpPress1); Serial.print(F(" mbar, "));
   Serial.print(CLS.VaccumPumpPress2); Serial.println(F(" mbar"));
 }

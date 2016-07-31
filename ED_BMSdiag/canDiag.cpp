@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.3.1
+//! \version 0.3.2
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -345,6 +345,7 @@ void canDiag::ReadDiagWord(unsigned int data_out[], byte data_in[], unsigned int
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryTemperature(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattTemperatures);
@@ -383,6 +384,7 @@ boolean canDiag::getBatteryTemperature(BatteryDiag_t *myBMS, boolean debug_verbo
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -407,6 +409,7 @@ boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryRevision(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -447,6 +450,7 @@ boolean canDiag::getBatteryRevision(BatteryDiag_t *myBMS, boolean debug_verbose)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getHVstatus(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
   
@@ -473,6 +477,7 @@ boolean canDiag::getHVstatus(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getIsolationValue(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
   
@@ -497,7 +502,8 @@ boolean canDiag::getIsolationValue(BatteryDiag_t *myBMS, boolean debug_verbose) 
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
-boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose) { 
+boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -537,6 +543,7 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryExperimentalData(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
 
@@ -589,6 +596,7 @@ boolean canDiag::getBatteryExperimentalData(BatteryDiag_t *myBMS, boolean debug_
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -616,6 +624,7 @@ boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) 
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
 
@@ -640,6 +649,7 @@ boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -674,6 +684,7 @@ boolean canDiag::getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   boolean fValid = false;
   
@@ -718,6 +729,7 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::NLG6ChargerInstalled(boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   
   this->setCAN_ID(0x61A, 0x483);
@@ -739,6 +751,7 @@ boolean canDiag::NLG6ChargerInstalled(boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   
   this->setCAN_ID(0x61A, 0x483);
@@ -766,6 +779,7 @@ boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verb
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
 
   this->setCAN_ID(0x61A, 0x483);
@@ -788,6 +802,7 @@ boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbo
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
 
@@ -819,6 +834,7 @@ boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
 
@@ -853,20 +869,20 @@ boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
   unsigned int items;
   unsigned int value;
   unsigned long vpOTR;
   int vpPress;
 
-  this->setCAN_ID(0x7E5, 0x7ED);
-  items = this->Request_Diagnostics(rqCoolingTemp);
-  
-  byte n;
   boolean fOK = false;
+  this->setCAN_ID(0x7E5, 0x7ED);
+  
+  items = this->Request_Diagnostics(rqCoolingTemp);
   if(items){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,3,1);
     myCLS->CoolingTemp = value;
     fOK = true;
@@ -875,7 +891,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     myCLS->CoolingPumpTemp = data[3];
     fOK = true;
   }
@@ -883,7 +899,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     myCLS->CoolingPumpLV = data[3];
     fOK = true;
   }
@@ -891,7 +907,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     myCLS->CoolingPumpAmps = data[4];
     fOK = true;
   }
@@ -899,7 +915,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     myCLS->CoolingPumpRPM = data[3];
     fOK = true;
   }
@@ -907,7 +923,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,3,1);
     myCLS->CoolingPumpOTR = value;
     fOK = true;
@@ -916,7 +932,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,3,1);
     myCLS->BatteryHeaterOTR = value;
     fOK = true;
@@ -933,7 +949,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,4,1);
     vpOTR =  (unsigned long) (data[3] * (16777216 / 10.0));
     vpOTR += (unsigned long) (data[4] * (65535 / 10.0));
@@ -945,7 +961,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,4,1);
     vpPress =  (int) data[3] * 256;
     vpPress += (int) data[4];
@@ -956,7 +972,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   if(items && fOK){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
-    } 
+    }
     this->ReadDiagWord(&value,data,4,1);
     vpPress =  (int) data[3] * 256 ;
     vpPress += (int) data[4] ;

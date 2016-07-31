@@ -18,18 +18,20 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.3.0
+//! \version 0.3.2
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
 
-//#define DO_DEBUG_UPATE 1   //!< Uncomment to show DEBUG output
+//#define DO_DEBUG_UPATE           //!< Uncomment to show DEBUG output
 
 #ifndef DO_DEBUG_UPDATE
 #define DEBUG_UPDATE(...)
 #else
 #define DEBUG_UPDATE(...) Serial.print(__VA_ARGS__)
 #endif
+
+#define VERBOSE_ENABLE 0           //!< Local verbose mode enable to allow output of CAN messages
 
 #include <mcp_can.h>
 #include <Timeout.h>

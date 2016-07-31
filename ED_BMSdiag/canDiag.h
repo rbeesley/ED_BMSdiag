@@ -66,6 +66,7 @@ private:
     boolean Read_FC_Response(int items);
     void PrintReadBuffer(unsigned int lines);
     void ClearReadBuffer();
+    boolean ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID);
 
     void ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], unsigned int highOffset, unsigned int length);
     void ReadCellCapacity(byte data_in[], unsigned int highOffset, unsigned int length);

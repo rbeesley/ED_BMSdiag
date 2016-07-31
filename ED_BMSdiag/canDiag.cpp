@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.3.0
+//! \version 0.3.1
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -867,7 +867,8 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     } 
-    myCLS->CoolingTemp = data[4];
+    this->ReadDiagWord(&value,data,3,1);
+    myCLS->CoolingTemp = value;
     fOK = true;
   }
   items = this->Request_Diagnostics(rqCoolingPumpTemp);
@@ -969,25 +970,74 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate CAN messages
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
+  //Set CAN-Bus filter for specified rxID or clear filter
+  if (_rxID > 0) {
+    this->setCAN_Filter(_rxID);
+  } else {
+    this->clearCAN_Filter();
+  }
+  
+  //Reset timeout timer
+  myCAN_Timeout->Reset();
+  
+  do {    
+    if(!digitalRead(2)) { 
+      
+      //Read CAN traffic and evaluate ID
+      myCAN0->readMsgBuf(&rxID, &len, rxBuf);   
+      
+      if (rxID == 0x518) {
+        myBMS->SOC = (float) rxBuf[7] / 2;
+        return true;
+      }
+      if (rxID == 0x2D5) {
+        myBMS->realSOC =  (unsigned int) (rxBuf[4] & 0x03) * 256 + (unsigned int) rxBuf[5];
+        return true;
+      }
+      if (rxID == 0x508) {
+        myBMS->Power =  (unsigned int) (rxBuf[2] & 0x3F) * 256 + (unsigned int) rxBuf[3];
+        return true;
+      }
+      if (rxID == 0x448) {
+        float HV;
+        HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
+        HV = HV / 10.0;
+        myBMS->HV = HV;
+        return true;
+      }
+      if (rxID == 0x3D5) {
+        float LV;
+        LV = ((float)rxBuf[3]);
+        LV = LV / 10.0;
+        myBMS->LV = LV;
+        return true;
+      }
+      if (rxID == 0x412) {
+        myBMS->ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
+        return true;
+      }
+      if (rxID == 0x512) {
+        myBMS->hour = rxBuf[0];
+        myBMS->minutes = rxBuf[1];
+        return true;
+      }
+    }
+  } while (!myCAN_Timeout->Expired(false));
+  
+  return false;
+}
 
 //--------------------------------------------------------------------------------
 //! \brief   Read and evaluate SOC
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadSOC(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x518);
-  myCAN_Timeout->Reset();
-     
-  do {    
-    if(!digitalRead(2)) { 
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x518) {
-          myBMS->SOC = (float) rxBuf[7] / 2;
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x518);
 }
 
 //--------------------------------------------------------------------------------
@@ -995,20 +1045,7 @@ boolean canDiag::ReadSOC(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadSOCinternal(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x2D5);
-  myCAN_Timeout->Reset(); 
-      
-  do {    
-    if(!digitalRead(2)) {
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x2D5) {
-          myBMS->realSOC =  (unsigned int) (rxBuf[4] & 0x03) * 256 + (unsigned int) rxBuf[5];
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  
-  return false;
+  return this->ReadCAN(myBMS, 0x2D5);
 }
 
 //--------------------------------------------------------------------------------
@@ -1016,19 +1053,7 @@ boolean canDiag::ReadSOCinternal(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadPower(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x508);
-  myCAN_Timeout->Reset();
-      
-  do {    
-    if(!digitalRead(2)) {
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x508) {
-          myBMS->Power =  (unsigned int) (rxBuf[2] & 0x3F) * 256 + (unsigned int) rxBuf[3];
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x508);
 }
 
 //--------------------------------------------------------------------------------
@@ -1036,22 +1061,7 @@ boolean canDiag::ReadPower(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadHV(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x448);
-  myCAN_Timeout->Reset();
-  
-  float HV;   
-  do {   
-    if(!digitalRead(2)) {  
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x448) {
-          HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
-          HV = HV / 10.0;
-          myBMS->HV = HV;
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x448);
 }
 
 //--------------------------------------------------------------------------------
@@ -1059,23 +1069,7 @@ boolean canDiag::ReadHV(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadLV(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x3D5);
-  myCAN_Timeout->Reset();
-  
-  float LV;
-      
-  do {    
-    if(!digitalRead(2)) {
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x3D5) {
-          LV = ((float)rxBuf[3]);
-          LV = LV / 10.0;
-          myBMS->LV = LV;
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x3D5);
 }
 
 //--------------------------------------------------------------------------------
@@ -1083,19 +1077,7 @@ boolean canDiag::ReadLV(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadODO(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x412);
-  myCAN_Timeout->Reset();
-      
-  do {    
-    if(!digitalRead(2)) {
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x412) {
-          myBMS->ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x412);
 }
 
 //--------------------------------------------------------------------------------
@@ -1103,18 +1085,5 @@ boolean canDiag::ReadODO(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadTime(BatteryDiag_t *myBMS) {
-  this->setCAN_Filter(0x512);
-  myCAN_Timeout->Reset();
-      
-  do {    
-    if(!digitalRead(2)) {
-      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
-        if (rxID == 0x512) {
-          myBMS->hour = rxBuf[0];
-          myBMS->minutes = rxBuf[1];
-          return true;
-        }
-    }
-  } while (!myCAN_Timeout->Expired(false));
-  return false;
+  return this->ReadCAN(myBMS, 0x512);
 }

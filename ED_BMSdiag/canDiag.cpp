@@ -928,6 +928,23 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
     myCLS->CoolingPumpOTR = value;
     fOK = true;
   }
+  items = this->Request_Diagnostics(rqCoolingFanRPM);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    }
+    myCLS->CoolingFanRPM = data[3];
+    fOK = true;
+  }
+  items = this->Request_Diagnostics(rqCoolingFanOTR);
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    }
+    this->ReadDiagWord(&value,data,3,1);
+    myCLS->CoolingFanOTR = value;
+    fOK = true;
+  }
   items = this->Request_Diagnostics(rqBatteryHeaterOTR);
   if(items && fOK){
     if (debug_verbose) {

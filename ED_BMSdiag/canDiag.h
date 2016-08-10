@@ -31,7 +31,7 @@
 #define DEBUG_UPDATE(...) Serial.print(__VA_ARGS__)
 #endif
 
-#define VERBOSE_ENABLE 0           //!< Local verbose mode enable to allow output of CAN messages
+#define VERBOSE_ENABLE 1           //!< Local verbose mode enable to allow output of CAN messages
 
 #include <mcp_can.h>
 #include <Timeout.h>

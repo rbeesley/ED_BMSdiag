@@ -16,7 +16,7 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 <img  src="https://github.com/MyLab-odyssey/ED_BMSdiag/raw/master/pictures/Arduino_folder_structure.png" /><p/>
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.
 
-> **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10 and 10.11 and WIN-Systems)**
+> **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10, 10.11 and WIN-Systems)**
 
 Please see the [wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki) for further information.
 
@@ -35,6 +35,9 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ### Version history
 version  | comment
 -------- | --------
+v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating
+         | ... added HV-Ri to logging values
+         | ... new readout for cooling fan (RPM / OTR)         
 v0.5.0   | Added a CLI and new readouts:
          | ... NLG6 fast charger
          | ... Cooling- and other subsystems

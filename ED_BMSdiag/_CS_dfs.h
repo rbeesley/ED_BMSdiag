@@ -32,6 +32,8 @@ typedef struct {
   unsigned int CoolingPumpAmps;   //!< current measured at cooling pump / 5
   byte CoolingPumpRPM;            //!< RPM in % of cooling pump (value / 255 * 100%)
   unsigned int CoolingPumpOTR;    //!< operating time record of cooling pump in hours
+  byte CoolingFanRPM;             //!< RPM in % of cooling fan (value / 255 * 100%)
+  unsigned int CoolingFanOTR;     //!< operating time record of cooling fan in hours
   unsigned int BatteryHeaterOTR;  //!< operating time record of PTC heater of battery
   byte BatteryHeaterON;           //!< Status of the PTC heater of the battery
   unsigned long VaccumPumpOTR;    //!< operating time record of vaccum pump
@@ -46,6 +48,8 @@ const PROGMEM byte rqCoolingPumpLV[4]             = {0x03, 0x22, 0x23, 0x08};
 const PROGMEM byte rqCoolingPumpAmps[4]           = {0x03, 0x22, 0x23, 0x09};
 const PROGMEM byte rqCoolingPumpRPM[4]            = {0x03, 0x22, 0xD0, 0x32}; 
 const PROGMEM byte rqCoolingPumpOTR[4]            = {0x03, 0x22, 0x63, 0x09}; //operating time record
+const PROGMEM byte rqCoolingFanRPM[4]             = {0x03, 0x22, 0xD0, 0x41};
+const PROGMEM byte rqCoolingFanOTR[4]             = {0x03, 0x22, 0x63, 0x0A};
 const PROGMEM byte rqBatteryHeaterOTR[4]          = {0x03, 0x22, 0x63, 0x21};
 const PROGMEM byte rqBatteryHeaterON[4]           = {0x03, 0x22, 0xD3, 0x02};
 const PROGMEM byte rqVacuumPumpOTR[4]             = {0x03, 0x22, 0x63, 0x03};

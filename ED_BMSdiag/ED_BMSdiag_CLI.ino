@@ -18,7 +18,7 @@
 //! \brief   Functions for the Command Line Interface (CLI) menu system
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ void logdata(){
   byte selected[] = {0,1,2,3,4};
   ReadCANtraffic_BMS(selected, sizeof(selected));
 
-  byte selected2[] ={8,11};
+  byte selected2[] ={5,8,11};
   getBMSdata(selected2, sizeof(selected2));
 
   getNLG6data();
@@ -299,7 +299,7 @@ void logdata(){
     //Print Header
     myDevice.logCount++;
     Serial.println();
-    Serial.println(F("SOC;rSOC;A;kW;V;Vc,min;Vc,max;Tb/C;L1/V;L1/A;L2/V;L2/A;L3/V;L3/A;HV/V;HV/A;Tr/C;Tc/C;Ti/C;Tm/C;P/%;Tp/C"));
+    Serial.println(F("SOC;rSOC;A;kW;V;Vc,min;Vc,max;Ri;Tb/C;L1/V;L1/A;L2/V;L2/A;L3/V;L3/A;HV/V;HV/A;Tr/C;Tpl/C;Ti/C;Tc/C;P/%;Tp/C"));
   }
   //Print logged values
   Serial.print(BMS.SOC,1); Serial.print(F(";"));
@@ -313,6 +313,7 @@ void logdata(){
   Serial.print(BMS.HV,1); Serial.print(F(";"));
   Serial.print(BMS.ADCCvolts.min); Serial.print(F(";"));
   Serial.print(BMS.ADCCvolts.max); Serial.print(F(";"));
+  Serial.print(BMS.Isolation); Serial.print(F(";"));
   Serial.print((float) BMS.Temps[9] / 64, 1); Serial.print(F(";"));
   Serial.print(NLG6.MainsVoltage[0] / 10.0, 1); Serial.print(F(";")); Serial.print(NLG6.MainsAmps[0] / 10.0, 1); Serial.print(F(";"));
   Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(";")); Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.print(F(";"));

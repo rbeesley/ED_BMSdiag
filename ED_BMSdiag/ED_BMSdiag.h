@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data

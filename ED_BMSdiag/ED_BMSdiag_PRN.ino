@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -237,6 +237,8 @@ void printNLG6_Status() {
 void printCLS_Status() {
   Serial.println(F("Status Cooling- and Subsystems: "));
   Serial.print(F("Temperature   : ")); Serial.print(CLS.CoolingTemp / 8.0,1); Serial.println(F(" degC"));
+  Serial.print(F("Cooling fan   : "));
+  Serial.print(CLS.CoolingFanRPM / 255.0 * 100.0, 1); Serial.println(F(" %"));
   Serial.print(F("Cooling pump  : "));
   Serial.print(CLS.CoolingPumpRPM / 255.0 * 100.0, 1); Serial.print(F(" %, "));
   Serial.print(CLS.CoolingPumpTemp - 50); Serial.println(F(" degC"));
@@ -244,6 +246,7 @@ void printCLS_Status() {
   Serial.print(CLS.CoolingPumpLV / 10.0, 1); Serial.print(F(" V, "));
   Serial.print(CLS.CoolingPumpAmps / 5.0, 1); Serial.println(F(" A"));
   Serial.println(F("OTR:")); 
+  Serial.print(F("Cooling fan   : ")); Serial.print(CLS.CoolingFanOTR); Serial.println(F(" h"));
   Serial.print(F("Cooling pump  : ")); Serial.print(CLS.CoolingPumpOTR); Serial.println(F(" h"));
   Serial.print(F("Battery heater: ")); Serial.print(CLS.BatteryHeaterOTR); Serial.print(F(" h, "));
   if (CLS.BatteryHeaterON == 0) {

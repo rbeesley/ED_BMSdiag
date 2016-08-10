@@ -1,6 +1,9 @@
 ## ED BMSdiag version history
 version  | comment
 -------- | --------
+v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating
+         | ... added HV-Ri to logging values
+         | ... new readout for cooling fan (RPM / OTR)   
 v0.5.0   | Added a CLI and new readouts:
          | ... NLG6 fast charger
          | ... Cooling- and other subsystems

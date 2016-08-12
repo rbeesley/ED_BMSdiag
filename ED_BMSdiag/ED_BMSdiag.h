@@ -32,7 +32,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "0.5.0";
+char* const PROGMEM version = "0.5.1";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")

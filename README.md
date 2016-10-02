@@ -1,6 +1,6 @@
 # ED BMSdiag
 
-![version](https://img.shields.io/badge/version-v0.5.2-blue.svg)
+![version](https://img.shields.io/badge/version-v0.5.1-blue.svg)
 ![release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
@@ -27,7 +27,7 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 ### Usage [>on your own risk<]
 Connect the CAN shield to the OBDII-connector and power up the car.
 
-This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [wiki for further details of the CLI](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Command-Line-Interface).
+This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [Wiki for further details of the CLI](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Command-Line-Interface).
 
 
 >**You need to open the serial monitor of the Arduino-IDE.  Verify that it is set to CR = Carriage Return and the baud rate is 115200.**

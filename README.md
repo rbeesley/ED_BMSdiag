@@ -1,7 +1,13 @@
 # ED BMSdiag
+
+![version](https://img.shields.io/badge/version-v0.5.2-blue.svg)
+![release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)
+![license](https://img.shields.io/badge/license-MIT-blue.svg)
+
 Retrieve battery diagnostic data from your smart electric drive EV.
+Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki).
 
-
+---
 
 ### You need
 An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connector) of your car. Get the hardware and use an appropriate cable for the physical connection. See the schematics for making your own cable.
@@ -17,8 +23,6 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.
 
 > **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10, 10.11 and WIN-Systems)**
-
-Please see the [wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki) for further information.
 
 ### Usage [>on your own risk<]
 Connect the CAN shield to the OBDII-connector and power up the car.

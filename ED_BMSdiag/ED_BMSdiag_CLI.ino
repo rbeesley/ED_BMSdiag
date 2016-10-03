@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.5.1
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.5.2
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ void setupMenu() {
 //! \brief   Callback to get all datasets depending on the active menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void get_all (int arg_cnt, char **args) {
+void get_all (uint8_t arg_cnt, char **args) {
   switch (myDevice.menu) {
     case subBMS:
       printBMSall();
@@ -69,7 +69,7 @@ void get_all (int arg_cnt, char **args) {
 //! \brief   Callback to get temperature values depending on the active menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void get_temperatures (int arg_cnt, char **args) {
+void get_temperatures (uint8_t arg_cnt, char **args) {
   switch (myDevice.menu) {
     case subBMS:
       if (DiagCAN.getBatteryTemperature(&BMS, false)){
@@ -92,7 +92,7 @@ void get_temperatures (int arg_cnt, char **args) {
 //! \brief   Callback to get voltages depending on the active menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void get_voltages (int arg_cnt, char **args) {
+void get_voltages (uint8_t arg_cnt, char **args) {
   switch (myDevice.menu) {
     case subBMS:
       if (DiagCAN.getBatteryADCref(&BMS, false)){
@@ -113,7 +113,7 @@ void get_voltages (int arg_cnt, char **args) {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 #ifdef HELP
-void help(int arg_cnt, char **args)
+void help(uint8_t arg_cnt, char **args)
 {
   switch (myDevice.menu) {
     case MAIN:
@@ -153,7 +153,7 @@ void help(int arg_cnt, char **args)
 //! \brief   Callback to show a splash screen for startup or by command
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void show_splash(int arg_cnt, char **args) {
+void show_splash(uint8_t arg_cnt, char **args) {
    //Read CAN-Bus IDs related to BMS (sniff traffic)
    byte selected[] = {0,1,2,3,4,5,6,7};
    ReadCANtraffic_BMS(selected, sizeof(selected));
@@ -164,7 +164,7 @@ void show_splash(int arg_cnt, char **args) {
 //! \brief   Callback to get all datasets depending on the active menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void show_info(int arg_cnt, char **args)
+void show_info(uint8_t arg_cnt, char **args)
 {
   //Serial.print(F("Usable Memory: ")); Serial.println(getFreeRam());
   //Serial.print(F("Menu: ")); Serial.println(myDevice.menu);
@@ -185,7 +185,7 @@ void show_info(int arg_cnt, char **args)
 //! \brief   Callback to start logging and / or set parameters
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void set_logging(int arg_cnt, char **args) {
+void set_logging(uint8_t arg_cnt, char **args) {
   if (arg_cnt > 2) {
     myDevice.timer = (unsigned int) cmdStr2Num(args[2], 10);
   } 
@@ -209,7 +209,7 @@ void set_logging(int arg_cnt, char **args) {
 //! \brief   Callback to activate main menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void main_menu (int arg_cnt, char **args) {
+void main_menu (uint8_t arg_cnt, char **args) {
   myDevice.menu = MAIN;
   set_cmd_display("");            //reset command prompt to "CMD >>"
 }
@@ -218,7 +218,7 @@ void main_menu (int arg_cnt, char **args) {
 //! \brief   Callback to switch to the BMS sub-menu and / or evaluate commands
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void bms_sub (int arg_cnt, char **args) {
+void bms_sub (uint8_t arg_cnt, char **args) {
   myDevice.menu = subBMS;
   set_cmd_display("BMS >>");
   if (arg_cnt == 2) {
@@ -241,7 +241,7 @@ void bms_sub (int arg_cnt, char **args) {
 //! \brief   Callback to switch to the NLG6 sub-menu and / or evaluate commands
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void nlg6_sub (int arg_cnt, char **args) {
+void nlg6_sub (uint8_t arg_cnt, char **args) {
   myDevice.menu = subNLG6;
   set_cmd_display("NLG6 >>");
   if (arg_cnt == 2) {
@@ -261,7 +261,7 @@ void nlg6_sub (int arg_cnt, char **args) {
 //! \brief   Callback to switch to the Cooling sub-menu and / or evaluate commands
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
-void cs_sub (int arg_cnt, char **args) {
+void cs_sub (uint8_t arg_cnt, char **args) {
   myDevice.menu = subCS;
   set_cmd_display("CS >>");
   if (arg_cnt == 2) {
@@ -276,7 +276,11 @@ void cs_sub (int arg_cnt, char **args) {
 //! \return  report status / if present (boolean)
 //--------------------------------------------------------------------------------
 boolean nlg6_installed() {
-  myDevice.NLG6present =  DiagCAN.NLG6ChargerInstalled(false);
+  myDevice.NLG6present =  DiagCAN.NLG6ChargerInstalled(&NLG6, false);
+  if (myDevice.NLG6present) {
+    Serial.println(F("NLG6 detected"));
+    PrintSPACER();
+  }
   return myDevice.NLG6present;
 }
 
@@ -304,9 +308,9 @@ void logdata(){
   //Print logged values
   Serial.print(BMS.SOC,1); Serial.print(F(";"));
   Serial.print((float) BMS.realSOC / 10.0, 1); Serial.print(F(";"));
-  Serial.print((float) BMS.Amps/32.0, 2); Serial.print(F(";"));
+  Serial.print((float) BMS.Amps2, 2); Serial.print(F(";"));
   if (BMS.Power != 0) {
-    Serial.print(((float) (BMS.Power / 8192.0) -1) * 300, 2); Serial.print(F(";"));
+    Serial.print((float) BMS.Power, 2); Serial.print(F(";"));
   } else {
     Serial.print(F("0.00")); Serial.print(F(";"));
   }

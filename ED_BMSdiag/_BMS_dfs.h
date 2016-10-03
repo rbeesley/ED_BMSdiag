@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.4.0
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -36,37 +36,37 @@ typedef struct {
 //Data structure for statistics (min, mean, max values)
 template<typename T>
 struct Stats{
-  unsigned int min;              //!< minimum
+  uint16_t min;                  //!< minimum
   T mean;                        //!< average
-  unsigned int max;              //!< maximum
+  uint16_t max;                  //!< maximum
 };
 
 //BMS data structure
 typedef struct {     
-  Stats<unsigned int> ADCCvolts; //!< average cell voltage in mV, no offset
+  Stats<uint16_t> ADCCvolts;     //!< average cell voltage in mV, no offset
                                  //!< minimum and maximum cell voltages in mV, add offset +1500
-  int ADCvoltsOffset;            //!< calculated offset between RAW cell voltages and ADCref, about 90mV
+  int16_t ADCvoltsOffset;        //!< calculated offset between RAW cell voltages and ADCref, about 90mV
   
-  Stats<unsigned int> Cap_As;    //!< cell capacity statistics from BMS measurement cycle
+  Stats<uint16_t> Cap_As;        //!< cell capacity statistics from BMS measurement cycle
   float Cap_meas_quality;        //!< some sort of estimation factor??? after measurement cycle
   float Cap_combined_quality;    //!< some sort of estimation factor??? constantly updated
-  unsigned int LastMeas_days;    //!< days elapsed since last successful measurement
+  uint16_t LastMeas_days;        //!< days elapsed since last successful measurement
   
   Stats<float> Cvolts;           //!< calculated statistics from individual cell voltage query              
-  int CV_min_at;                 //!< cell number with voltage mininum in pack
-  int CV_max_at;                 //!< cell number with voltage maximum in pack
+  int16_t CV_min_at;             //!< cell number with voltage mininum in pack
+  int16_t CV_max_at;             //!< cell number with voltage maximum in pack
   float Cvolts_stdev;            //!< calculated standard deviation (populated)
   
   Stats<float> Ccap_As;          //!< cell capacity statistics calculated from individual cell data
-  int CAP_min_at;                //!< cell number with capacity mininum in pack
-  int CAP_max_at;                //!< cell number with capacity maximum in pack
+  int16_t CAP_min_at;            //!< cell number with capacity mininum in pack
+  int16_t CAP_max_at;            //!< cell number with capacity maximum in pack
   
-  int CapInit;                   //!< battery initial capacity (As/10), at a certain temperature maybe 45 degC
-  int CapLoss;                   //!< battery capacity loss (x/1000) in %, reflects aging (distance related?)
+  int16_t CapInit;               //!< battery initial capacity (As/10), at a certain temperature maybe 45 degC
+  int16_t CapLoss;               //!< battery capacity loss (x/1000) in %, reflects aging (distance related?)
   
   unsigned long HVoff_time;      //!< HighVoltage contactor off time in seconds
   unsigned long HV_lowcurrent;   //!< counter time of no current, reset e.g. with PLC heater or driving
-  unsigned int OCVtimer;         //!< counter time in seconds to reach OCV state
+  uint16_t OCVtimer;             //!< counter time in seconds to reach OCV state
   
   byte Day;                      //!< day of battery production
   byte Month;                    //!< month of battery production
@@ -79,20 +79,21 @@ typedef struct {
   byte minutes;                  //!< time in car: minutes
   
   float SOC;                     //!< State of Charge, as reported by vehicle dash
-  unsigned int realSOC;          //!< is this the internal SOC value in % (x/10)
+  uint16_t realSOC;              //!< is this the internal SOC value in % (x/10)
     
-  int Amps;                      //!< battery current in ampere (x/32)  
-  int Power;                     //!< power in kW, drivetrain and charge ((x/8192)-1)*300
+  int16_t Amps;                  //!< battery current in ampere (x/32) reported by by BMS
+  float Amps2;                   //!< battery current in ampere read by live data on CAN or from BMS
+  float Power;                   //!< power as product of voltage and amps in kW
   
   float HV;                      //!< total voltage of HV system in V
   float LV;                      //!< 12V onboard voltage / LV system
   
   unsigned long ODO;             //!< Odometer count
   
-  int Temps[13];                 //!< three temperatures per battery unit (1 to 3)
+  int16_t Temps[13];             //!< three temperatures per battery unit (1 to 3)
                                  //!< + max, min, mean and coolant-in temperatures
-  unsigned int Isolation;        //!< Isolation in DC path, resistance in kOhm
-  unsigned int DCfault;          //!< Flag to show DC-isolation fault
+  uint16_t Isolation;            //!< Isolation in DC path, resistance in kOhm
+  uint16_t DCfault;              //!< Flag to show DC-isolation fault
   
   byte HVcontactState;           //!< contactor state: 0 := OFF, 2 := ON
   long HVcontactCyclesLeft;      //!< counter related to ON/OFF cyles of the car

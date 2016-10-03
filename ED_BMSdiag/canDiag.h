@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.h
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.3.2
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.4.0
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -31,7 +31,7 @@
 #define DEBUG_UPDATE(...) Serial.print(__VA_ARGS__)
 #endif
 
-#define VERBOSE_ENABLE 1           //!< Local verbose mode enable to allow output of CAN messages
+#define VERBOSE_ENABLE 0         //!< Local verbose mode enable to allow output of CAN messages
 
 #include <mcp_can.h>
 #include <Timeout.h>
@@ -63,17 +63,17 @@ private:
     unsigned long rqID;
     unsigned long respID;
         
-    unsigned int Request_Diagnostics(const byte* rqQuery);
-    unsigned int Get_RequestResponse();
-    boolean Read_FC_Response(int items);
-    void PrintReadBuffer(unsigned int lines);
+    uint16_t Request_Diagnostics(const byte* rqQuery);
+    uint16_t Get_RequestResponse();
+    boolean Read_FC_Response(int16_t items);
+    void PrintReadBuffer(uint16_t lines);
     void ClearReadBuffer();
     boolean ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID);
 
-    void ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], unsigned int highOffset, unsigned int length);
-    void ReadCellCapacity(byte data_in[], unsigned int highOffset, unsigned int length);
-    void ReadCellVoltage(byte data_in[], unsigned int highOffset, unsigned int length);
-    void ReadDiagWord(unsigned int data_out[], byte data_in[], unsigned int highOffset, unsigned int length);
+    void ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], uint16_t highOffset, uint16_t length);
+    void ReadCellCapacity(byte data_in[], uint16_t highOffset, uint16_t length);
+    void ReadCellVoltage(byte data_in[], uint16_t highOffset, uint16_t length);
+    void ReadDiagWord(uint16_t data_out[], byte data_in[], uint16_t highOffset, uint16_t length);
   
 public:  
     canDiag();
@@ -108,13 +108,13 @@ public:
     boolean getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose);
     boolean getBatteryExperimentalData(BatteryDiag_t *myBMS, boolean debug_verbose);
 
-    unsigned int getCellVoltage(byte n);
-    unsigned int getCellCapacity(byte n);
+    uint16_t getCellVoltage(byte n);
+    uint16_t getCellCapacity(byte n);
 
 //--------------------------------------------------------------------------------
 //! \brief   Get methods for NLG6 charger data
 //--------------------------------------------------------------------------------
-    boolean NLG6ChargerInstalled(boolean debug_verbose);
+    boolean NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose);
@@ -131,6 +131,7 @@ public:
     boolean ReadSOC(BatteryDiag_t *myBMS);
     boolean ReadSOCinternal(BatteryDiag_t *myBMS);
     boolean ReadPower(BatteryDiag_t *myBMS);
+    boolean ReadAmps(BatteryDiag_t *myBMS);
     boolean ReadHV(BatteryDiag_t *myBMS);
     boolean ReadLV(BatteryDiag_t *myBMS);
     boolean ReadODO(BatteryDiag_t *myBMS);

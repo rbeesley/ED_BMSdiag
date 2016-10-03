@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.3.2
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.4.0
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -63,14 +63,14 @@ int canDiag::_getFreeRam () {
 //--------------------------------------------------------------------------------
 //! \brief   Get method for CellVoltages
 //--------------------------------------------------------------------------------
-unsigned int canDiag::getCellVoltage(byte n) {
+uint16_t canDiag::getCellVoltage(byte n) {
   return CellVoltage.get(n);
 }
 
 //--------------------------------------------------------------------------------
 //! \brief   Get method for CellCapacities
 //--------------------------------------------------------------------------------
-unsigned int canDiag::getCellCapacity(byte n) {
+uint16_t canDiag::getCellCapacity(byte n) {
   return CellCapacity.get(n);
 }
 
@@ -139,9 +139,9 @@ void canDiag::setCAN_ID(unsigned long _rqID, unsigned long _respID) {
 //! \brief   Send diagnostic request to ECU.
 //! \param   byte* rqQuery
 //! \see     rqBattADCref ... rqBattVolts
-//! \return  received lines count (unsigned int) of function #Get_RequestResponse
+//! \return  received lines count (uint16_t) of function #Get_RequestResponse
 //--------------------------------------------------------------------------------
-unsigned int canDiag::Request_Diagnostics(const byte* rqQuery){  
+uint16_t canDiag::Request_Diagnostics(const byte* rqQuery){  
   byte rqMsg[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   memcpy_P(rqMsg, rqQuery, 4 * sizeof(byte)); // Fill byte 01 to 04 of rqMsg with rqQuery content (from PROGMEM)
   
@@ -158,12 +158,12 @@ unsigned int canDiag::Request_Diagnostics(const byte* rqQuery){
 
 //--------------------------------------------------------------------------------
 //! \brief   Wait and read initial diagnostic response
-//! \return  lines count (unsigned int) of received lines á 7 bytes
+//! \return  lines count (uint16_t) of received lines á 7 bytes
 //--------------------------------------------------------------------------------
-unsigned int canDiag::Get_RequestResponse(){ 
+uint16_t canDiag::Get_RequestResponse(){ 
     
     byte i;
-    unsigned int items = 0;   
+    uint16_t items = 0;   
     boolean fDataOK = false;
     
     do{
@@ -220,12 +220,12 @@ unsigned int canDiag::Get_RequestResponse(){
 //! \param   items still to read (int)
 //! \return  fDiagOK (boolean)
 //--------------------------------------------------------------------------------
-boolean canDiag::Read_FC_Response(int items){   
+boolean canDiag::Read_FC_Response(int16_t items){   
     myCAN_Timeout->Reset();
     
     byte i;
-    int n = 7;
-    int FC_count = 0;
+    int16_t n = 7;
+    int16_t FC_count = 0;
     byte FC_length = rqFlowControl[1];
     boolean fDiagOK = false;
     
@@ -268,11 +268,11 @@ boolean canDiag::Read_FC_Response(int items){
 
 //--------------------------------------------------------------------------------
 //! \brief   Output read buffer
-//! \param   lines count (unsigned int)
+//! \param   lines count (uint16_t)
 //--------------------------------------------------------------------------------
-void canDiag::PrintReadBuffer(unsigned int lines) {
+void canDiag::PrintReadBuffer(uint16_t lines) {
   Serial.println(lines);
-  for(unsigned int i = 0; i < lines; i++) {
+  for(uint16_t i = 0; i < lines; i++) {
     Serial.print(F("Data: "));
     for(byte n = 0; n < 7; n++)               // Print each byte of the data.
     {
@@ -302,8 +302,8 @@ void canDiag::ClearReadBuffer(){
 //--------------------------------------------------------------------------------
 //! \brief   Store two byte data in temperature array
 //--------------------------------------------------------------------------------
-void canDiag::ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], unsigned int highOffset, unsigned int length){
-  for(unsigned int n = 0; n < (length * 2); n = n + 2){
+void canDiag::ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], uint16_t highOffset, uint16_t length){
+  for(uint16_t n = 0; n < (length * 2); n = n + 2){
     myBMS->Temps[n/2] = ((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
   }
 }
@@ -311,8 +311,8 @@ void canDiag::ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], unsi
 //--------------------------------------------------------------------------------
 //! \brief   Store two byte data in CellCapacity obj
 //--------------------------------------------------------------------------------
-void canDiag::ReadCellCapacity(byte data_in[], unsigned int highOffset, unsigned int length){
-  for(unsigned int n = 0; n < (length * 2); n = n + 2){
+void canDiag::ReadCellCapacity(byte data_in[], uint16_t highOffset, uint16_t length){
+  for(uint16_t n = 0; n < (length * 2); n = n + 2){
     CellCapacity.push((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
   }
 }
@@ -320,21 +320,21 @@ void canDiag::ReadCellCapacity(byte data_in[], unsigned int highOffset, unsigned
 //--------------------------------------------------------------------------------
 //! \brief   Store two byte data in CellVoltage obj
 //--------------------------------------------------------------------------------
-void canDiag::ReadCellVoltage(byte data_in[], unsigned int highOffset, unsigned int length){
-  for(unsigned int n = 0; n < (length * 2); n = n + 2){
+void canDiag::ReadCellVoltage(byte data_in[], uint16_t highOffset, uint16_t length){
+  for(uint16_t n = 0; n < (length * 2); n = n + 2){
     CellVoltage.push((data_in[n + highOffset] * 256 + data_in[n + highOffset + 1]));
   }
 }
 
 //--------------------------------------------------------------------------------
 //! \brief   Store two byte data
-//! \param   address to output data array (unsigned int)
-//! \param   address to input data array (unsigned int)
-//! \param   start of first high byte in data array (unsigned int)
-//! \param   length of data submitted (unsigned int)
+//! \param   address to output data array (uint16_t)
+//! \param   address to input data array (uint16_t)
+//! \param   start of first high byte in data array (uint16_t)
+//! \param   length of data submitted (uint16_t)
 //--------------------------------------------------------------------------------
-void canDiag::ReadDiagWord(unsigned int data_out[], byte data_in[], unsigned int highOffset, unsigned int length){
-  for(unsigned int n = 0; n < (length * 2); n = n + 2){
+void canDiag::ReadDiagWord(uint16_t data_out[], byte data_in[], uint16_t highOffset, uint16_t length){
+  for(uint16_t n = 0; n < (length * 2); n = n + 2){
     data_out[n/2] = data_in[n + highOffset] * 256 + data_in[n + highOffset + 1];
   }
 }
@@ -346,7 +346,7 @@ void canDiag::ReadDiagWord(unsigned int data_out[], byte data_in[], unsigned int
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryTemperature(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattTemperatures);
   
@@ -385,7 +385,7 @@ boolean canDiag::getBatteryTemperature(BatteryDiag_t *myBMS, boolean debug_verbo
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattDate);
@@ -410,7 +410,7 @@ boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryRevision(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattHWrev);
@@ -451,8 +451,8 @@ boolean canDiag::getBatteryRevision(BatteryDiag_t *myBMS, boolean debug_verbose)
 //--------------------------------------------------------------------------------
 boolean canDiag::getHVstatus(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
   
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattHVstatus);
@@ -478,8 +478,8 @@ boolean canDiag::getHVstatus(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getIsolationValue(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
   
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattIsolation);
@@ -504,7 +504,7 @@ boolean canDiag::getIsolationValue(BatteryDiag_t *myBMS, boolean debug_verbose) 
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattCapacity);
@@ -519,14 +519,14 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
     myBMS->Ccap_As.max = CellCapacity.maximum(&myBMS->CAP_max_at);
     myBMS->Ccap_As.mean = CellCapacity.mean();
 
-    myBMS->HVoff_time = (unsigned long) data[5] * 65535 + (unsigned int) data[6] * 256 + data[7];
-    myBMS->HV_lowcurrent = (unsigned long) data[9] * 65535 + (unsigned int) data[10] * 256 + data[11];
-    myBMS->OCVtimer = (unsigned int) data[12] * 256 + data[13];
+    myBMS->HVoff_time = (unsigned long) data[5] * 65535 + (uint16_t) data[6] * 256 + data[7];
+    myBMS->HV_lowcurrent = (unsigned long) data[9] * 65535 + (uint16_t) data[10] * 256 + data[11];
+    myBMS->OCVtimer = (uint16_t) data[12] * 256 + data[13];
     this->ReadDiagWord(&myBMS->Cap_As.min,data,21,1);
     this->ReadDiagWord(&myBMS->Cap_As.mean,data,23,1);
     this->ReadDiagWord(&myBMS->Cap_As.max,data,17,1);
     this->ReadDiagWord(&myBMS->LastMeas_days,data,427,1);
-    unsigned int value;
+    uint16_t value;
     this->ReadDiagWord(&value,data,429,1);
     myBMS->Cap_meas_quality = value / 65535.0;
     this->ReadDiagWord(&value,data,425,1);
@@ -544,8 +544,8 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryExperimentalData(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   
@@ -597,7 +597,7 @@ boolean canDiag::getBatteryExperimentalData(BatteryDiag_t *myBMS, boolean debug_
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattVolts);
@@ -625,8 +625,8 @@ boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) 
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattAmps);
@@ -637,6 +637,7 @@ boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
     }   
     this->ReadDiagWord(&value,data,3,1);
     myBMS->Amps = (signed) value;
+    myBMS->Amps2 = myBMS->Amps / 32.0;
     return true;
   } else {
     return false;
@@ -650,7 +651,7 @@ boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattADCref);
@@ -669,7 +670,7 @@ boolean canDiag::getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose) {
     if (RAW_VOLTAGES) {
       myBMS->ADCvoltsOffset = 0;
     } else {
-      myBMS->ADCvoltsOffset = (int) myBMS->Cvolts.mean - myBMS->ADCCvolts.mean;
+      myBMS->ADCvoltsOffset = (int16_t) myBMS->Cvolts.mean - myBMS->ADCCvolts.mean;
     }
     
     return true;
@@ -685,7 +686,7 @@ boolean canDiag::getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
   boolean fValid = false;
   
   this->setCAN_ID(0x7E7, 0x7EF);
@@ -695,7 +696,7 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     }   
-    myBMS->HVcontactCyclesLeft = (unsigned long) data[4] * 65536 + (unsigned int) data[5] * 256 + data[6]; 
+    myBMS->HVcontactCyclesLeft = (unsigned long) data[4] * 65536 + (uint16_t) data[5] * 256 + data[6]; 
     fValid = true;
   } else {
     fValid = false;
@@ -705,7 +706,7 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     }   
-    myBMS->HVcontactCyclesMax = (unsigned long) data[4] * 65536 + (unsigned int) data[5] * 256 + data[6]; 
+    myBMS->HVcontactCyclesMax = (unsigned long) data[4] * 65536 + (uint16_t) data[5] * 256 + data[6]; 
     fValid = true;
   } else {
     fValid = false;
@@ -715,7 +716,7 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     }   
-    myBMS->HVcontactState = (unsigned int) data[3]; 
+    myBMS->HVcontactState = (uint16_t) data[3]; 
     fValid = true;
   } else {
     fValid = false;
@@ -728,18 +729,26 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
-boolean canDiag::NLG6ChargerInstalled(boolean debug_verbose) {
+boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
   
   this->setCAN_ID(0x61A, 0x483);
-  items = this->Request_Diagnostics(rqChargerPresent);
+  items = this->Request_Diagnostics(rqChargerPN_HW);
 
   if(items){
     if (debug_verbose) {
        PrintReadBuffer(items);
-    } 
-    return true;
+    }
+    myNLG6->PN_HW = "";
+    for (byte n = 4; n < 14; n++) {
+      myNLG6->PN_HW += String((char)data[n]);
+    }
+    if (myNLG6->PN_HW.equals(NLG6_PN_HW)){
+      return true;
+    } else {
+      return false;
+    }
   } else {
     return false;
   }
@@ -752,7 +761,7 @@ boolean canDiag::NLG6ChargerInstalled(boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
   
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerTemperatures);
@@ -780,7 +789,7 @@ boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verb
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
+  uint16_t items;
 
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerSelCurrent);
@@ -803,8 +812,8 @@ boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbo
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
 
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerVoltages);
@@ -835,8 +844,8 @@ boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose
 //--------------------------------------------------------------------------------
 boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
 
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerAmps);
@@ -870,10 +879,10 @@ boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
 //--------------------------------------------------------------------------------
 boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
-  unsigned int items;
-  unsigned int value;
+  uint16_t items;
+  uint16_t value;
   unsigned long vpOTR;
-  int vpPress;
+  int16_t vpPress;
 
   boolean fOK = false;
   this->setCAN_ID(0x7E5, 0x7ED);
@@ -970,7 +979,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
     this->ReadDiagWord(&value,data,4,1);
     vpOTR =  (unsigned long) (data[3] * (16777216 / 10.0));
     vpOTR += (unsigned long) (data[4] * (65535 / 10.0));
-    vpOTR += (unsigned int)  (data[5] * (256 / 10.0));
+    vpOTR += (uint16_t)  (data[5] * (256 / 10.0));
     myCLS->VaccumPumpOTR = vpOTR;
     fOK = true;
   }
@@ -980,8 +989,8 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
       this->PrintReadBuffer(items);
     }
     this->ReadDiagWord(&value,data,4,1);
-    vpPress =  (int) data[3] * 256;
-    vpPress += (int) data[4];
+    vpPress =  (int16_t) data[3] * 256;
+    vpPress += (int16_t) data[4];
     myCLS->VaccumPumpPress1 = vpPress;
     fOK = true;
   }
@@ -991,8 +1000,8 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
       this->PrintReadBuffer(items);
     }
     this->ReadDiagWord(&value,data,4,1);
-    vpPress =  (int) data[3] * 256 ;
-    vpPress += (int) data[4] ;
+    vpPress =  (int16_t) data[3] * 256 ;
+    vpPress += (int16_t) data[4] ;
     myCLS->VaccumPumpPress2 = vpPress;
     fOK = true;
   }
@@ -1029,11 +1038,13 @@ boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
         return true;
       }
       if (rxID == 0x2D5) {
-        myBMS->realSOC =  (unsigned int) (rxBuf[4] & 0x03) * 256 + (unsigned int) rxBuf[5];
+        myBMS->realSOC =  (uint16_t) (rxBuf[4] & 0x03) * 256 + (uint16_t) rxBuf[5];
         return true;
       }
       if (rxID == 0x508) {
-        myBMS->Power =  (unsigned int) (rxBuf[2] & 0x3F) * 256 + (unsigned int) rxBuf[3];
+        int16_t value = 0;
+        value = (uint16_t) (rxBuf[2] & 0x3F) * 256 + (uint16_t) rxBuf[3];
+        myBMS->Amps2 = (value - 0x2000) / 10.0;
         return true;
       }
       if (rxID == 0x448) {
@@ -1051,7 +1062,7 @@ boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
         return true;
       }
       if (rxID == 0x412) {
-        myBMS->ODO = (unsigned long) rxBuf[2] * 65535 + (unsigned int) rxBuf[3] * 256 + (unsigned int) rxBuf[4];
+        myBMS->ODO = (unsigned long) rxBuf[2] * 65535 + (uint16_t) rxBuf[3] * 256 + (uint16_t) rxBuf[4];
         return true;
       }
       if (rxID == 0x512) {
@@ -1086,7 +1097,12 @@ boolean canDiag::ReadSOCinternal(BatteryDiag_t *myBMS) {
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadPower(BatteryDiag_t *myBMS) {
-  return this->ReadCAN(myBMS, 0x508);
+  if (ReadHV(myBMS) && ReadAmps(myBMS)) {
+    myBMS->Power = myBMS->HV * myBMS->Amps2 / 1000.0;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -1095,6 +1111,14 @@ boolean canDiag::ReadPower(BatteryDiag_t *myBMS) {
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadHV(BatteryDiag_t *myBMS) {
   return this->ReadCAN(myBMS, 0x448);
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate system High Voltage
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadAmps(BatteryDiag_t *myBMS) {
+  return this->ReadCAN(myBMS, 0x508);
 }
 
 //--------------------------------------------------------------------------------

@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.5.1
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.5.2
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -32,13 +32,13 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "0.5.1";
+char* const PROGMEM version = "0.5.2";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")
 #define MSG_DOT F(".")
 
-#define CS     10                //!< chip select pin of MCP2515 CAN-Controller
+#define CS     9                //!< chip select pin of MCP2515 CAN-Controller
 #define CS_SD  8                 //!< CS for SD card, if you plan to use a logger...
 MCP_CAN CAN0(CS);                //!< Set CS pin
 
@@ -58,9 +58,9 @@ typedef enum {MAIN, subBMS, subNLG6, subCS} submenu_t;
 typedef struct {
   submenu_t menu = MAIN;
   boolean NLG6present = false;
-  unsigned int timer = 30;
+  uint16_t timer = 30;
   bool logging = false;
-  unsigned int logCount = 0;
+  uint16_t logCount = 0;
 } deviceStatus_t;
 
 deviceStatus_t myDevice;

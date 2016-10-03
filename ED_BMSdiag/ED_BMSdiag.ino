@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.5.1
+// ED BMSdiag, v0.5.2
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -21,9 +21,9 @@
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.5.1
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.5.2
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 
@@ -125,14 +125,15 @@ void ReadCANtraffic_BMS(byte *selected, byte len) {
       case 1:
          fOK = DiagCAN.ReadSOCinternal(&BMS);
          break;
-      case 2:
-         fOK = DiagCAN.getBatteryAmps(&BMS, false);
+      /*case 2:
+         //fOK = DiagCAN.getBatteryAmps(&BMS, false);
+         fOK = DiagCAN.ReadAmps(&BMS);
          break;
       case 3:
-         fOK = DiagCAN.ReadPower(&BMS);
-         break;
-      case 4:
          fOK = DiagCAN.ReadHV(&BMS);
+         break;*/
+      case 4: 
+         fOK = DiagCAN.ReadPower(&BMS);
          break;
       case 5:
          fOK = DiagCAN.ReadLV(&BMS);

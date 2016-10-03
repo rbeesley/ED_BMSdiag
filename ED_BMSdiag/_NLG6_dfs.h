@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    NLG6_dfs.h
 //! \brief   Definitions and structures for the NLG6-Charger module.
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.4.0
 //--------------------------------------------------------------------------------
 #ifndef NLG6_DFS_H
 #define NLG6_DFS_H
@@ -28,24 +28,27 @@
 
 //NLG6 data structure
 typedef struct {       
-  unsigned int MainsAmps[3];      //!< AC current of L1, L2, L3
-  unsigned int MainsVoltage[3];   //!< AC voltage of L1, L2, L3
+  uint16_t MainsAmps[3];          //!< AC current of L1, L2, L3
+  uint16_t MainsVoltage[3];       //!< AC voltage of L1, L2, L3
   byte Amps_setpoint;             //!< AC charging current set by user in BC (Board Computer)
-  unsigned int AmpsCableCode;     //!< Maximum current cable (resistor coded)
-  unsigned int AmpsChargingpoint; //!< Maxiumum current of chargingpoint
-  unsigned int DC_Current;        //!< DC current measured by charger
-  unsigned int DC_HV;             //!< DC HV measured by charger
+  uint16_t AmpsCableCode;         //!< Maximum current cable (resistor coded)
+  uint16_t AmpsChargingpoint;     //!< Maxiumum current of chargingpoint
+  uint16_t DC_Current;            //!< DC current measured by charger
+  uint16_t DC_HV;                 //!< DC HV measured by charger
   byte LV;                        //!< 12V onboard voltage of Charger DC/DC
   byte Temps[7];                  //!< internal temperatures in charger unit and heat exchanger
   byte ReportedTemp;              //!< mean temperature, reported by charger
   byte SocketTemp;                //!< temperature of mains socket charger
   byte CoolingPlateTemp;          //!< temperature of cooling plate 
+  String PN_HW;                   //!< Part number of base hardware (wo revisioning)
 } ChargerDiag_t; 
 
-const PROGMEM byte rqChargerPresent[4]            = {0x03, 0x22, 0x01, 0x01};
+const PROGMEM byte rqChargerPN_HW[4]              = {0x03, 0x22, 0xF1, 0x11};
 const PROGMEM byte rqChargerVoltages[4]           = {0x03, 0x22, 0x02, 0x26};
 const PROGMEM byte rqChargerAmps[4]               = {0x03, 0x22, 0x02, 0x25};
 const PROGMEM byte rqChargerSelCurrent[4]         = {0x03, 0x22, 0x02, 0x2A};
 const PROGMEM byte rqChargerTemperatures[4]       = {0x03, 0x22, 0x02, 0x23}; 
+
+const String NLG6_PN_HW = "4519822221";  //!< Part number for NLG6 fast charging hardware
 
 #endif // of #ifndef NLG6_DFS_H

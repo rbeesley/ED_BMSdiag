@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2016-July
-//! \author  My-Lab-odyssey
-//! \version 0.5.1
+//! \date    2016-October
+//! \author  MyLab-odyssey
+//! \version 0.5.2
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -96,9 +96,9 @@ void printStandardDataset() {
   Serial.print(F("SOC : ")); Serial.print(BMS.SOC,1); Serial.print(F(" %"));
   Serial.print(F(", realSOC: ")); Serial.print((float) BMS.realSOC / 10.0, 1); Serial.println(F(" %"));
   Serial.print(F("HV  : ")); Serial.print(BMS.HV,1); Serial.print(F(" V, "));
-  Serial.print((float) BMS.Amps/32.0, 2); Serial.print(F(" A, "));
+  Serial.print((float) BMS.Amps2, 2); Serial.print(F(" A, "));
   if (BMS.Power != 0) {
-    Serial.print(((float) (BMS.Power / 8192.0) -1) * 300, 2); Serial.println(F(" kW"));
+    Serial.print((float) BMS.Power, 2); Serial.println(F(" kW"));
   } else {
     Serial.println(F("0.00 kW"));
   }
@@ -177,7 +177,7 @@ void printBMStemperatures() {
 //--------------------------------------------------------------------------------
 void printIndividualCellData() {
   Serial.println(F("# ;mV  ;As/10"));
-  for(int n = 0; n < CELLCOUNT; n++){
+  for(int16_t n = 0; n < CELLCOUNT; n++){
     if (n < 9) Serial.print(F("0"));
     Serial.print(n+1); Serial.print(F(";")); Serial.print(DiagCAN.getCellVoltage(n) - BMS.ADCvoltsOffset); Serial.print(F(";")); Serial.println(DiagCAN.getCellCapacity(n));
   }
@@ -255,7 +255,7 @@ void printCLS_Status() {
     Serial.println(F("ON"));
   }
   Serial.print(F("Vaccum pump   : ")); Serial.print(CLS.VaccumPumpOTR / 36000.0, 3); Serial.println(F(" h"));
-  Serial.print(F("Pressure 1, 2 : ")); Serial.print(CLS.VaccumPumpPress1); Serial.print(F(" mbar, "));
+  Serial.print(F("Pressure 1, 2 : ")); Serial.print((int) CLS.VaccumPumpPress1); Serial.print(F(" mbar, "));
   Serial.print(CLS.VaccumPumpPress2); Serial.println(F(" mbar"));
 }
 

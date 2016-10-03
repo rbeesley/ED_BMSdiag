@@ -1,7 +1,7 @@
 ## ED BMSdiag version history
 version  | comment
 -------- | --------
-v0.5.2   | NLG6 fast charger is now detected by hardware partnumber
+v0.5.2   | NLG6 fast charger is now detected by hardware part number
          | ... power calculation now corrected
 v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating
          | ... added HV-Ri to logging values

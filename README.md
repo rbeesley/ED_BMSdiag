@@ -1,22 +1,22 @@
 # ED BMSdiag
 
-![version](https://img.shields.io/badge/version-v0.5.1-blue.svg)
-![release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+[![version](https://img.shields.io/badge/version-v0.5.2-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV.
 Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki).
 
 ---
 
-### You need
+## You need
 An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connector) of your car. Get the hardware and use an appropriate cable for the physical connection. See the schematics for making your own cable.
 
 <p align="center">
 <img  src="https://raw.githubusercontent.com/MyLab-odyssey/ED_BMSdiag/master/pictures/Arduino%26CANbusShield.jpg" width="640"/>
 <p/>
 
-### Get started
+## Get started
 * Download the repo-ZIP, then copy the files to your Arduino folder. The folder structure should look like this:
 <p align="left">
 <img  src="https://github.com/MyLab-odyssey/ED_BMSdiag/raw/master/pictures/Arduino_folder_structure.png" /><p/>
@@ -24,7 +24,7 @@ An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connect
 
 > **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10, 10.11 and WIN-Systems)**
 
-### Usage [>on your own risk<]
+## Usage [>on your own risk<]
 Connect the CAN shield to the OBDII-connector and power up the car.
 
 This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [Wiki for further details of the CLI](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Command-Line-Interface).
@@ -36,9 +36,11 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 <img  src="https://raw.githubusercontent.com/MyLab-odyssey/ED_BMSdiag/master/pictures/Arduino%20-IDE_serial_monitor.png" />
 <p/>
 
-### Version history
+## Version history
 version  | comment
 -------- | --------
+v0.5.2   | NLG6 fast charger is now detected by hardware partnumber
+         | ... power calculation now corrected
 v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating
          | ... added HV-Ri to logging values
          | ... new readout for cooling fan (RPM / OTR)         

@@ -38,7 +38,7 @@ char* const PROGMEM version = "0.5.2";
 #define MSG_FAIL F("F")
 #define MSG_DOT F(".")
 
-#define CS     9                //!< chip select pin of MCP2515 CAN-Controller
+#define CS     10                //!< chip select pin of MCP2515 CAN-Controller
 #define CS_SD  8                 //!< CS for SD card, if you plan to use a logger...
 MCP_CAN CAN0(CS);                //!< Set CS pin
 

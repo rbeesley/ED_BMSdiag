@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2016-October
+//! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.2
+//! \version 0.5.5
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -196,6 +196,25 @@ void printIndividualCellData() {
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Output NLG6 charger voltages and currents AC and DC
+//--------------------------------------------------------------------------------
+void printNLG6_Status() {
+  Serial.println(F("Status NLG6 Charger-Unit: "));
+  Serial.print(F("User selected : ")); Serial.print(NLG6.Amps_setpoint); Serial.println(F(" A"));
+  Serial.print(F("Cable maximum : ")); Serial.print(NLG6.AmpsCableCode / 10); Serial.println(F(" A"));
+  Serial.print(F("Chargingpoint : ")); Serial.print(NLG6.AmpsChargingpoint / 10); Serial.println(F(" A"));
+  Serial.print(F("AC L1: ")); Serial.print(NLG6.MainsVoltage[0] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[0] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("AC L2: ")); Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("AC L3: ")); Serial.print(NLG6.MainsVoltage[2] / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.MainsAmps[2] / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("DC HV: ")); Serial.print(NLG6.DC_HV / 10.0, 1); Serial.print(F(" V, "));
+  Serial.print(NLG6.DC_Current / 10.0, 1); Serial.println(F(" A"));
+  Serial.print(F("DC LV: ")); Serial.print(NLG6.LV / 10.0, 1); Serial.println(F(" V"));
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Output NLG6 charger temperatures
 //--------------------------------------------------------------------------------
 void printNLG6temperatures() {
@@ -213,22 +232,11 @@ void printNLG6temperatures() {
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Output NLG6 charger voltages and currents AC and DC
+//! \brief   Output NLG6 charger HW/SW revisions
 //--------------------------------------------------------------------------------
-void printNLG6_Status() {
-  Serial.println(F("Status NLG6 Charger-Unit: "));
-  Serial.print(F("User selected : ")); Serial.print(NLG6.Amps_setpoint); Serial.println(F(" A"));
-  Serial.print(F("Cable maximum : ")); Serial.print(NLG6.AmpsCableCode / 10); Serial.println(F(" A"));
-  Serial.print(F("Chargingpoint : ")); Serial.print(NLG6.AmpsChargingpoint / 10); Serial.println(F(" A"));
-  Serial.print(F("AC L1: ")); Serial.print(NLG6.MainsVoltage[0] / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.MainsAmps[0] / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("AC L2: ")); Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("AC L3: ")); Serial.print(NLG6.MainsVoltage[2] / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.MainsAmps[2] / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("DC HV: ")); Serial.print(NLG6.DC_HV / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.DC_Current / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("DC LV: ")); Serial.print(NLG6.LV / 10.0, 1); Serial.println(F(" V"));
+void printNLG6revision() {
+  Serial.print(F("HW PN : ")); Serial.println(NLG6.PN_HW);
+  Serial.print(F("SW rev: ")); Serial.println(NLG6.SWrev);
 }
 
 //--------------------------------------------------------------------------------
@@ -312,6 +320,8 @@ void printNLG6data() {
   printNLG6_Status();
   PrintSPACER();
   printNLG6temperatures();
+  PrintSPACER();
+  printNLG6revision();
   PrintSPACER();
 }
 

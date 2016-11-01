@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.h
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-October
+//! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.4.0
+//! \version 0.5.0
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -39,6 +39,7 @@
 #include "_BMS_dfs.h"
 #include "_NLG6_dfs.h"
 #include "_CS_dfs.h"
+#include "_DRV_dfs.h"
 
 class canDiag { 
  
@@ -50,7 +51,7 @@ private:
     Average CellVoltage;
     Average CellCapacity;
 
-    int _getFreeRam ();
+    int _getFreeRam();
 
     //CAN-Bus declarations
     unsigned long rxID;
@@ -59,6 +60,8 @@ private:
     byte rxBuf[8];
     byte rqFlowControl[8] = {0x30, 0x08, 0x14, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     byte rqFC_length = 8;   //!< Interval to send flow control messages (rqFC) 
+    byte rqWakeUp[7] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    //byte rqWakeUp[1] = {0x00};
 
     unsigned long rqID;
     unsigned long respID;
@@ -67,8 +70,6 @@ private:
     uint16_t Get_RequestResponse();
     boolean Read_FC_Response(int16_t items);
     void PrintReadBuffer(uint16_t lines);
-    void ClearReadBuffer();
-    boolean ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID);
 
     void ReadBatteryTemperatures(BatteryDiag_t *myBMS, byte data_in[], uint16_t highOffset, uint16_t length);
     void ReadCellCapacity(byte data_in[], uint16_t highOffset, uint16_t length);
@@ -83,15 +84,22 @@ public:
     void reserveMem_CellCapacity();
     void freeMem_CellVoltage();
     void freeMem_CellCapacity();
+
+    boolean WakeUp();
+
+    boolean ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID);
+    boolean ReadCAN(DriveStats_t *myDRV, unsigned long _rxID);
     
 //--------------------------------------------------------------------------------
 //! \brief   General functions MCP2515 controller
 //--------------------------------------------------------------------------------
     void begin(MCP_CAN *myCAN0, CTimeout *myCAN_TimeoutObj);  
     void clearCAN_Filter();
+    boolean ClearReadBuffer();
     void setCAN_Filter(unsigned long filter);
     void setCAN_ID(unsigned long _respID);
     void setCAN_ID(unsigned long _rqID, unsigned long _respID);
+    void setCAN_Filter_DRV();
 
 //--------------------------------------------------------------------------------
 //! \brief   Get methods for BMS data
@@ -115,6 +123,7 @@ public:
 //! \brief   Get methods for NLG6 charger data
 //--------------------------------------------------------------------------------
     boolean NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbose);
+    boolean getNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose);
@@ -136,6 +145,20 @@ public:
     boolean ReadLV(BatteryDiag_t *myBMS);
     boolean ReadODO(BatteryDiag_t *myBMS);
     boolean ReadTime(BatteryDiag_t *myBMS);
+    
+//--------------------------------------------------------------------------------
+//! \brief   Evaluate values
+//--------------------------------------------------------------------------------
+    boolean CalcPower(BatteryDiag_t *myBMS);
+
+//--------------------------------------------------------------------------------
+//! \brief   Read DRV values from CAN-Bus traffic
+//--------------------------------------------------------------------------------
+    boolean ReadECO(DriveStats_t *myDRV);
+    boolean ReadVelocity(DriveStats_t *myDRV);
+    boolean ReadRange(DriveStats_t *myDRV);
+    boolean ReadEnergyConsumption(DriveStats_t *myDRV);
+    boolean ReadUserCounter(DriveStats_t *myDRV);
 };
 
 #endif // of #ifndef CANDIAG_H

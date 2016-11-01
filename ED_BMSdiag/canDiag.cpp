@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-October
+//! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.4.0
+//! \version 0.5.0
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -52,9 +52,9 @@ void canDiag::freeMem_CellCapacity() {
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Memory available between Heap and Stack
+//! \brief   Memory available between Heap and Stack, works only on UNO!
 //--------------------------------------------------------------------------------
-int canDiag::_getFreeRam () {
+int canDiag::_getFreeRam() {
   extern int __heap_start, *__brkval;
   int v;
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
@@ -95,7 +95,7 @@ void canDiag::begin(MCP_CAN *_myCAN, CTimeout *_myCAN_Timeout) {
 void canDiag::clearCAN_Filter(){
   myCAN0->init_Mask(0, 0, 0x00000000);
   myCAN0->init_Mask(1, 0, 0x00000000);
-  delay(100);
+  //delay(100);
   myCAN0->setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 }
 
@@ -113,10 +113,23 @@ void canDiag::setCAN_Filter(unsigned long filter){
   myCAN0->init_Filt(3, 0, filter);
   myCAN0->init_Filt(4, 0, filter);
   myCAN0->init_Filt(5, 0, filter);
-  delay(100);
+  //delay(100);
   myCAN0->setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 }
 
+
+void canDiag::setCAN_Filter_DRV(){
+  myCAN0->init_Mask(0, 0, 0x07FF0000);
+  myCAN0->init_Mask(1, 0, 0x07FF0000);
+  myCAN0->init_Filt(0, 0, (0x200 << 16));
+  myCAN0->init_Filt(1, 0, (0x318 << 16));
+  myCAN0->init_Filt(2, 0, (0x3CE << 16));
+  myCAN0->init_Filt(3, 0, (0x3F2 << 16));
+  myCAN0->init_Filt(4, 0, (0x3D7 << 16));
+  myCAN0->init_Filt(5, 0, (0x504 << 16));
+  //delay(100);
+  myCAN0->setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
+}
 
 //--------------------------------------------------------------------------------
 //! \brief   Set request CAN ID and response CAN ID for get functions
@@ -133,6 +146,16 @@ void canDiag::setCAN_ID(unsigned long _rqID, unsigned long _respID) {
     this->setCAN_Filter(_respID);
   }
   this->respID = _respID; 
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Try to wakeup EV CAN bus ***experimental and not working right now!***
+//--------------------------------------------------------------------------------
+boolean canDiag::WakeUp(){    
+  //--- Send WakeUp Pattern ---
+  DEBUG_UPDATE(F("Send WakeUp Request\n\r"));
+  myCAN0->sendMsgBuf(0x423, 0, 7, rqWakeUp);    // send data: Request diagnostics data, 423!, 452?, 236?
+  return true;
 }
 
 //--------------------------------------------------------------------------------
@@ -290,13 +313,15 @@ void canDiag::PrintReadBuffer(uint16_t lines) {
 //--------------------------------------------------------------------------------
 //! \brief   Cleanup after switching filters
 //--------------------------------------------------------------------------------
-void canDiag::ClearReadBuffer(){
+boolean canDiag::ClearReadBuffer(){
   if(!digitalRead(2)) {                        // still messages? pin 2 is LOW, clear the two rxBuffers by reading
     for (byte i = 1; i <= 2; i++) {
       myCAN0->readMsgBuf(&rxID, &len, rxBuf);
     }
     DEBUG_UPDATE(F("Buffer cleared!\n\r"));
+    return true;
   }
+  return false;
 }
 
 //--------------------------------------------------------------------------------
@@ -638,6 +663,7 @@ boolean canDiag::getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose) {
     this->ReadDiagWord(&value,data,3,1);
     myBMS->Amps = (signed) value;
     myBMS->Amps2 = myBMS->Amps / 32.0;
+    CalcPower(myBMS);
     return true;
   } else {
     return false;
@@ -725,7 +751,7 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Test if a NLG6 fastcharger is installed
+//! \brief   Test if a NLG6 fastcharger is installed by reading HW-Rev.
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
@@ -749,6 +775,41 @@ boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbo
     } else {
       return false;
     }
+  } else {
+    return false;
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Get NLG6 SW revision
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
+  uint16_t items;
+  
+  this->setCAN_ID(0x61A, 0x483);
+  items = this->Request_Diagnostics(rqChargerSWrev);
+
+  if(items){
+    if (debug_verbose) {
+       PrintReadBuffer(items);
+    }
+    myNLG6->SWrev = "";
+    byte n = 4; 
+    byte revCount = 0;
+    do {
+      if (n > 4 && (data[n] == 0x34 && data[n+1] == 0x35 && data[n+2] == 0x31)) {
+        myNLG6->SWrev += ", ";
+        revCount++;
+        if (revCount%3 == 0) {
+          myNLG6->SWrev += "\n";
+        }
+      }
+      myNLG6->SWrev += String((char)data[n]);
+    } while ((data[++n] != 0x0F) && (n < items * 7));
+    return true;
   } else {
     return false;
   }
@@ -1013,7 +1074,7 @@ boolean canDiag::getCoolingAndSubsystems(CoolingSub_t *myCLS, boolean debug_verb
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate CAN messages
+//! \brief   Read and evaluate CAN messages related to battery system
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
@@ -1027,6 +1088,17 @@ boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
   //Reset timeout timer
   myCAN_Timeout->Reset();
   
+  boolean _fOK = false;
+
+  //event counter
+  byte SOC = 0;
+  byte rSOC = 0;
+  byte Pc = 0;
+  byte HVc = 0;
+  byte LVc = 0;
+  byte ODO = 0;
+  byte Tc = 0;  
+  
   do {    
     if(!digitalRead(2)) { 
       
@@ -1035,41 +1107,53 @@ boolean canDiag::ReadCAN(BatteryDiag_t *myBMS, unsigned long _rxID) {
       
       if (rxID == 0x518) {
         myBMS->SOC = (float) rxBuf[7] / 2;
-        return true;
+        SOC = 1;
+        _fOK = true;
       }
       if (rxID == 0x2D5) {
         myBMS->realSOC =  (uint16_t) (rxBuf[4] & 0x03) * 256 + (uint16_t) rxBuf[5];
-        return true;
+        rSOC = 1;
+        _fOK = true;
       }
       if (rxID == 0x508) {
         int16_t value = 0;
         value = (uint16_t) (rxBuf[2] & 0x3F) * 256 + (uint16_t) rxBuf[3];
         myBMS->Amps2 = (value - 0x2000) / 10.0;
-        return true;
+        CalcPower(myBMS);
+        Pc = 1;
+        _fOK = true;
       }
       if (rxID == 0x448) {
         float HV;
         HV = ((float)rxBuf[6]*256 + (float)rxBuf[7]);
         HV = HV / 10.0;
         myBMS->HV = HV;
-        return true;
+        HVc = 1;
+        _fOK = true;
       }
       if (rxID == 0x3D5) {
         float LV;
         LV = ((float)rxBuf[3]);
         LV = LV / 10.0;
         myBMS->LV = LV;
-        return true;
+        LVc = 1;
+        _fOK = true;
       }
       if (rxID == 0x412) {
         myBMS->ODO = (unsigned long) rxBuf[2] * 65535 + (uint16_t) rxBuf[3] * 256 + (uint16_t) rxBuf[4];
-        return true;
+        ODO = 1;
+        _fOK = true;
       }
       if (rxID == 0x512) {
         myBMS->hour = rxBuf[0];
         myBMS->minutes = rxBuf[1];
-        return true;
+        Tc = 1;
+        _fOK = true;
       }
+    }
+    byte done = SOC + rSOC + Pc + HVc + LVc + ODO + Tc;
+    if ((_fOK && _rxID > 0) || done == 7) {
+      return _fOK;
     }
   } while (!myCAN_Timeout->Expired(false));
   
@@ -1093,12 +1177,21 @@ boolean canDiag::ReadSOCinternal(BatteryDiag_t *myBMS) {
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Calculate power reading
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::CalcPower(BatteryDiag_t *myBMS) {
+  myBMS->Power = myBMS->HV * myBMS->Amps2 / 1000.0;
+  return true;
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate power reading
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadPower(BatteryDiag_t *myBMS) {
   if (ReadHV(myBMS) && ReadAmps(myBMS)) {
-    myBMS->Power = myBMS->HV * myBMS->Amps2 / 1000.0;
+    CalcPower(myBMS);
     return true;
   } else {
     return false;
@@ -1138,9 +1231,135 @@ boolean canDiag::ReadODO(BatteryDiag_t *myBMS) {
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate time in Multifunction display
+//! \brief   Read and evaluate time in multifunction display
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::ReadTime(BatteryDiag_t *myBMS) {
   return this->ReadCAN(myBMS, 0x512);
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate CAN messages related to drivetrain
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadCAN(DriveStats_t *myDRV, unsigned long _rxID) {
+  //Set CAN-Bus filter for specified rxID or clear filter
+  if (_rxID > 0) {
+    this->setCAN_Filter(_rxID);
+  } else {
+    //this->clearCAN_Filter();
+    this->setCAN_Filter_DRV();
+  }
+  
+  //Reset timeout timer
+  myCAN_Timeout->Reset();
+
+  boolean _fOK = false;
+
+  //event counter
+  byte Vc = 0;
+  byte Rc = 0;
+  byte Ec = 0;
+  byte Oc = 0;
+  byte ECO = 0;
+  byte HVs = 0;
+  
+  do {    
+    if(!digitalRead(2)) { 
+      
+      //Read CAN traffic and evaluate ID
+      myCAN0->readMsgBuf(&rxID, &len, rxBuf); 
+      //Serial.print(" CANrx: ");
+
+      if (rxID == 0x200) {
+        myDRV->velocity = (rxBuf[2]*256 + rxBuf[3]) / 18;
+        Vc = 1;
+        _fOK = true;
+      }
+
+      if (rxID == 0x318) {
+        myDRV->usablePower = rxBuf[5];
+        myDRV->range = rxBuf[7];
+        Rc = 1;
+        _fOK = true;
+      }
+
+      if (rxID == 0x3CE) {
+        myDRV->energyStart = rxBuf[0]*256 + rxBuf[1];
+        myDRV->energyReset = rxBuf[2]*256 + rxBuf[3];
+        Ec = 1;
+        _fOK = true;
+      }
+
+      if (rxID == 0x3D7) {
+        myDRV->HVactive = rxBuf[0];
+        HVs = 1;
+        _fOK = true;
+      }
+      
+      if (rxID == 0x3F2) {
+        myDRV->ECO_accel = rxBuf[0] >> 1;
+        myDRV->ECO_const = rxBuf[1] >> 1;
+        myDRV->ECO_coast = rxBuf[2] >> 1;
+        myDRV->ECO_total = rxBuf[3] >> 1;
+        ECO = 1;
+        _fOK = true;
+      }
+
+      if (rxID == 0x504) {
+        uint16_t value = rxBuf[1]*256 + rxBuf[2];
+        if (value != 254) myDRV->odoStart = value; 
+        value = rxBuf[4]*256 + rxBuf[5];
+        if (value != 254) myDRV->odoReset = value;
+        Oc = 1;
+        _fOK = true;
+      }
+    }
+    byte done = Vc + Rc + Ec + Oc + ECO + HVs;
+    if ((_fOK && _rxID > 0) || done == 6) {
+      return _fOK;
+    }
+  } while (!myCAN_Timeout->Expired(false));
+  return false;
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate vehicle velocity (as reported in the dashboard)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadVelocity(DriveStats_t *myDRV) {
+  return this->ReadCAN(myDRV, 0x200);
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate vehicle range (as calculated in the dashboard)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadRange(DriveStats_t *myDRV) {
+  return this->ReadCAN(myDRV, 0x318);
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate vehicle energy consumption per 100km
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadEnergyConsumption(DriveStats_t *myDRV) {
+  return this->ReadCAN(myDRV, 0x3CE);
+}
+
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate ECO values from multifunction display
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadECO(DriveStats_t *myDRV) {
+  return this->ReadCAN(myDRV, 0x3F2);
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Read and evaluate ECO values from multifunction display
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::ReadUserCounter(DriveStats_t *myDRV) {
+  return this->ReadCAN(myDRV, 0x504);
 }

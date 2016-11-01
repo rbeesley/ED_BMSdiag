@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.5.2
+// ED BMSdiag, v0.5.3
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -21,9 +21,9 @@
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2016-October
+//! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.2
+//! \version 0.5.5
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 

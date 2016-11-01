@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2016-October
+//! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.2
+//! \version 0.5.5
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -100,6 +100,10 @@ void get_voltages (uint8_t arg_cnt, char **args) {
       }
       break;
     case subNLG6:
+      if (getNLG6data()){
+        Serial.println();
+        printNLG6_Status();
+      }
       break;
     case subCS:
       break;
@@ -139,6 +143,7 @@ void help(uint8_t arg_cnt, char **args)
     case subNLG6:
       Serial.println(F("* NLG6 Menu:"));
       Serial.println(F("  all   Get complete dataset"));
+      Serial.println(F("  v     Get voltages, amps & status"));
       Serial.println(F("  t     Get temperatures"));
       break;
     case subCS:
@@ -251,6 +256,9 @@ void nlg6_sub (uint8_t arg_cnt, char **args) {
     if (strcmp(args[1], "t") == 0) {
       get_temperatures(arg_cnt, args);
     }
+    if (strcmp(args[1], "v") == 0) {
+      get_voltages(arg_cnt, args);
+    }
   } else {
 
   }
@@ -273,11 +281,13 @@ void cs_sub (uint8_t arg_cnt, char **args) {
 
 //--------------------------------------------------------------------------------
 //! \brief   Funcion to check if a NLG6 fast charger is installed 
+//! \brief   If the NLG6 charger is detected, get SW revisions
 //! \return  report status / if present (boolean)
 //--------------------------------------------------------------------------------
 boolean nlg6_installed() {
   myDevice.NLG6present =  DiagCAN.NLG6ChargerInstalled(&NLG6, false);
   if (myDevice.NLG6present) {
+    DiagCAN.getNLG6ChargerSWrev(&NLG6, false); //get SW revisons
     Serial.println(F("NLG6 detected"));
     PrintSPACER();
   }
@@ -294,9 +304,7 @@ void logdata(){
 
   byte selected2[] ={5,8,11};
   getBMSdata(selected2, sizeof(selected2));
-
   getNLG6data();
-
   getCLSdata();
 
   if (myDevice.logCount == 0) {

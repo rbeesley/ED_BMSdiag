@@ -42,9 +42,9 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 version  | comment
 -------- | --------
-v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue #7)
-         | ... power calculation now updated in BMS submenu (#5 fixed)
-         | ... canDiag-Library updated to real time data of drivetrain (#6, not used by now in this project)
+v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue [#7](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/7))
+         | ... power calculation now updated in BMS submenu ([#5](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/5) fixed)
+         | ... canDiag-Library updated to real time data of drivetrain ([#6](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/6), not used by now in this project)
 v0.5.2   | NLG6 fast charger is now detected by hardware part number
          | ... power calculation now corrected
 v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.5.3
+// ED BMSdiag, v0.5.6
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2016 by MyLab-odyssey
@@ -23,7 +23,7 @@
 //! \brief   compatible hardware.
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.5
+//! \version 0.5.6
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 

@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the NLG6-Charger module.
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 #ifndef NLG6_DFS_H
 #define NLG6_DFS_H
@@ -40,8 +40,7 @@ typedef struct {
   byte ReportedTemp;              //!< mean temperature, reported by charger
   byte SocketTemp;                //!< temperature of mains socket charger
   byte CoolingPlateTemp;          //!< temperature of cooling plate 
-  String PN_HW;                   //!< Part number of base hardware (wo revisioning)
-  String SWrev;                   //!< Part number of base software and updates
+  char PN_HW[12];                 //!< Part number of base hardware (wo revisioning)
 } ChargerDiag_t; 
 
 const PROGMEM byte rqChargerPN_HW[4]              = {0x03, 0x22, 0xF1, 0x11};
@@ -51,6 +50,6 @@ const PROGMEM byte rqChargerAmps[4]               = {0x03, 0x22, 0x02, 0x25};
 const PROGMEM byte rqChargerSelCurrent[4]         = {0x03, 0x22, 0x02, 0x2A};
 const PROGMEM byte rqChargerTemperatures[4]       = {0x03, 0x22, 0x02, 0x23}; 
 
-const String NLG6_PN_HW = "4519822221";  //!< Part number for NLG6 fast charging hardware
+const char NLG6_PN_HW[] = "4519822221";  //!< Part number for NLG6 fast charging hardware
 
 #endif // of #ifndef NLG6_DFS_H

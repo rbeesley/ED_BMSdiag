@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -758,19 +758,22 @@ boolean canDiag::getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose
 boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
   uint16_t items;
-  
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerPN_HW);
 
-  if(items){
+  if (items){
     if (debug_verbose) {
        PrintReadBuffer(items);
     }
-    myNLG6->PN_HW = "";
-    for (byte n = 4; n < 14; n++) {
-      myNLG6->PN_HW += String((char)data[n]);
+    byte n;
+    byte comp = 0;
+    for (n = 4; n < 14; n++) {
+        myNLG6->PN_HW[n - 4] = data[n];
+        if (data[n] == NLG6_PN_HW[n - 4]) {
+          comp++;
+        }
     }
-    if (myNLG6->PN_HW.equals(NLG6_PN_HW)){
+    if (comp == 10){
       return true;
     } else {
       return false;
@@ -785,7 +788,7 @@ boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbo
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
-boolean canDiag::getNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose) {
+boolean canDiag::printNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
   uint16_t items;
   
@@ -796,19 +799,19 @@ boolean canDiag::getNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbos
     if (debug_verbose) {
        PrintReadBuffer(items);
     }
-    myNLG6->SWrev = "";
     byte n = 4; 
     byte revCount = 0;
     do {
       if (n > 4 && (data[n] == 0x34 && data[n+1] == 0x35 && data[n+2] == 0x31)) {
-        myNLG6->SWrev += ", ";
+        Serial.print(F(", "));
         revCount++;
         if (revCount%3 == 0) {
-          myNLG6->SWrev += "\n";
+          Serial.println();
         }
       }
-      myNLG6->SWrev += String((char)data[n]);
+      Serial.print((char)data[n]);
     } while ((data[++n] != 0x0F) && (n < items * 7));
+    Serial.println();
     return true;
   } else {
     return false;

@@ -1,7 +1,7 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.5.5-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
-[![version](https://img.shields.io/badge/issues-memory leak-red.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
+[![version](https://img.shields.io/badge/version-v0.5.6-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
 [![release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
@@ -43,6 +43,7 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 version  | comment
 -------- | --------
+v0.5.6   | Fixed memory leak issue [#8](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/8)
 v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue [#7](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/7))
          | ... power calculation now updated in BMS submenu ([#5](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/5) fixed)
          | ... canDiag-Library updated to real time data of drivetrain ([#6](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/6), not used by now in this project)

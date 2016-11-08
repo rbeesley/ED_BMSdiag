@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.0
+//! \version 0.5.1
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -123,7 +123,7 @@ public:
 //! \brief   Get methods for NLG6 charger data
 //--------------------------------------------------------------------------------
     boolean NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbose);
-    boolean getNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose);
+    boolean printNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbose);
     boolean getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose);

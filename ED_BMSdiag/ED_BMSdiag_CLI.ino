@@ -18,7 +18,7 @@
 //! \brief   Functions for the Command Line Interface (CLI) menu system
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.5
+//! \version 0.5.6
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -287,7 +287,6 @@ void cs_sub (uint8_t arg_cnt, char **args) {
 boolean nlg6_installed() {
   myDevice.NLG6present =  DiagCAN.NLG6ChargerInstalled(&NLG6, false);
   if (myDevice.NLG6present) {
-    DiagCAN.getNLG6ChargerSWrev(&NLG6, false); //get SW revisons
     Serial.println(F("NLG6 detected"));
     PrintSPACER();
   }

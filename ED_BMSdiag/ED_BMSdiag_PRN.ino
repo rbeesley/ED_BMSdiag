@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2016-November
 //! \author  MyLab-odyssey
-//! \version 0.5.5
+//! \version 0.5.6
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -236,7 +236,10 @@ void printNLG6temperatures() {
 //--------------------------------------------------------------------------------
 void printNLG6revision() {
   Serial.print(F("HW PN : ")); Serial.println(NLG6.PN_HW);
-  Serial.print(F("SW rev: ")); Serial.println(NLG6.SWrev);
+  Serial.print(F("SW rev: "));
+    if (myDevice.NLG6present) {
+    DiagCAN.printNLG6ChargerSWrev(&NLG6, false); //get SW revisons and send to serial
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -355,7 +358,6 @@ void printBMSall() {
   //Reserve memory
   DiagCAN.reserveMem_CellVoltage();
   DiagCAN.reserveMem_CellCapacity();
-  //Serial.println(getFreeRam());
   
   //Get all diagnostics data of BMS
   for (byte i = 0; i < 12; i++) {

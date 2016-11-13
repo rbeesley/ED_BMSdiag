@@ -1,5 +1,5 @@
-// CAN Receive Example
-//
+// CAN Receive Example by Cory Fowler
+// modified with CS constant, 2016 MyLab-odyssey
 
 #include <mcp_can.h>
 #include <SPI.h>
@@ -8,15 +8,15 @@ long unsigned int rxId;
 unsigned char len = 0;
 unsigned char rxBuf[8];
 
-MCP_CAN CAN0(9);                               // Set CS to pin 10
-
+#define CS 10                //!< chip select pin of MCP2515 CAN-Controller 
+MCP_CAN CAN0(CS);                               
 
 void setup()
 {
   Serial.begin(115200);
   
-  pinMode(9, OUTPUT);
-  pinMode(8, OUTPUT);
+  pinMode(CS, OUTPUT);
+  pinMode(8, OUTPUT);       //!< disable chip select of SD card reader (commonly pin 8)
   digitalWrite(8, HIGH);
   
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters disabled.
@@ -34,7 +34,7 @@ void loop()
 {
     if(!digitalRead(2))                         // If pin 2 is low, read receive buffer
     {
-      CAN0.readMsgBuf(&rxId, &len, rxBuf);              // Read data: len = data length, buf = data byte(s)
+      CAN0.readMsgBuf(&rxId, &len, rxBuf);      // Read data: len = data length, buf = data byte(s)
 
       Serial.print("ID: ");                     // Print the message ID.
       Serial.print(rxId, HEX);

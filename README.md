@@ -11,7 +11,7 @@ Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/
 ---
 
 ## You need
-An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connector) of your car. Find information about usable [CAN-Shields here](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/CAN-Bus-Basics). If you have trouble getting a CAN connection please see the [Troubleshooting and Tips]((https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Troubleshooting-and-Tips) section.
+An Arduino with CAN bus shield to connect to the diagnostics port (OBDII-connector) of your car. Find information about usable [CAN-Shields here](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/CAN-Bus-Basics). If you have trouble getting a CAN connection please see the [Troubleshooting and Tips](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Troubleshooting-and-Tips) section.
 
 Get the hardware and use an appropriate cable for the physical connection. See the schematics for making your own cable.
 

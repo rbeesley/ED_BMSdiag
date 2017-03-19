@@ -23,7 +23,7 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 * Download the [repo-ZIP](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip), then copy the files to your Arduino folder. The folder structure should look like this:
 <p align="left">
 <img  src="https://github.com/MyLab-odyssey/ED_BMSdiag/raw/master/pictures/Arduino_folder_structure.png" /><p/>
-* Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.
+* Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.  
 * Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).
 
 > **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10, 10.11 and WIN-Systems)**

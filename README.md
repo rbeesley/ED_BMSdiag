@@ -63,4 +63,5 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 |v0.3.9b  | **now using semantic versioning** (old files unchanged)|
 |v0.39b   | fixed type cast bug HVcontactor-timer|
 |v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.|
+
 (For more entries see VERSIONS.md)

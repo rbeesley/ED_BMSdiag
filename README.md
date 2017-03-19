@@ -41,26 +41,26 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 <p/>
 
 ## Version history
-version  | comment
--------- | --------
-v0.5.6   | Fixed memory leak issue [#8](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/8)
-v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue [#7](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/7))
-         | ... power calculation now updated in BMS submenu ([#5](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/5) fixed)
-         | ... canDiag-Library updated to real time data of drivetrain ([#6](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/6), not used by now in this project)
-v0.5.2   | NLG6 fast charger is now detected by hardware part number
-         | ... power calculation now corrected
-v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating
-         | ... added HV-Ri to logging values
-         | ... new readout for cooling fan (RPM / OTR)         
-v0.5.0   | Added a CLI and new readouts:
-         | ... NLG6 fast charger
-         | ... Cooling- and other subsystems
-         | ... Logging function
-v0.4.2   | **please reload all files !**
-         | Bugfix for Average-Template memory bug > rewritten  to AvgNew-Class
-         | ... This version uses dynamic memory allocation, so monitor free memory (between heap and stack) if you make modifications!
-v0.4.0   | New canDiag class structure and BMS_dfs.h for BMS specific code
-v0.3.9b  | **now using semantic versioning** (old files unchanged)
-v0.39b   | fixed type cast bug HVcontactor-timer
-v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.
+|version  | comment|
+|-------- | --------|
+|v0.5.6   | Fixed memory leak issue [#8](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/8)|
+|v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue [#7](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/7))|
+|         | ... power calculation now updated in BMS submenu ([#5](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/5) fixed)|
+|         | ... canDiag-Library updated to real time data of drivetrain ([#6](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/6), not used by now in this project)|
+|v0.5.2   | NLG6 fast charger is now detected by hardware part number|
+|         | ... power calculation now corrected|
+|v0.5.1   | Small bugfix for logging min, max HV-Voltage not updating|
+|         | ... added HV-Ri to logging values|
+|         | ... new readout for cooling fan (RPM / OTR)|
+|v0.5.0   | Added a CLI and new readouts:|
+|         | ... NLG6 fast charger|
+|         | ... Cooling- and other subsystems|
+|         | ... Logging function|
+|v0.4.2   | **please reload all files !**|
+|         | Bugfix for Average-Template memory bug > rewritten  to AvgNew-Class|
+|         | ... This version uses dynamic memory allocation, so monitor free memory (between heap and stack) if you make modifications!|
+|v0.4.0   | New canDiag class structure and BMS_dfs.h for BMS specific code|
+|v0.3.9b  | **now using semantic versioning** (old files unchanged)|
+|v0.39b   | fixed type cast bug HVcontactor-timer|
+|v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.|
 (For more entries see VERSIONS.md)

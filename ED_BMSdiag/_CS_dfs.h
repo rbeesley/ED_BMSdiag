@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    CS_dfs.h
 //! \brief   Definitions and structures for the Cooling- & Subsystems module.
-//! \date    2016-October
+//! \date    2017-January
 //! \author  MyLab-odyssey
-//! \version 0.4.0
+//! \version 0.4.1
 //--------------------------------------------------------------------------------
 #ifndef CS_DFS_H
 #define CS_DFS_H
@@ -26,19 +26,19 @@
 //CS data structure
 typedef struct {       
 
-  uint16_t  CoolingTemp;      //!< main cooling temperatur measurement / 8
-  byte CoolingPumpTemp;           //!< temperature at cooling pump, offset 50
-  byte CoolingPumpLV;             //!< 12V onboard voltage of cooling pump / 10
-  uint16_t CoolingPumpAmps;   //!< current measured at cooling pump / 5
-  byte CoolingPumpRPM;            //!< RPM in % of cooling pump (value / 255 * 100%)
-  uint16_t CoolingPumpOTR;    //!< operating time record of cooling pump in hours
-  byte CoolingFanRPM;             //!< RPM in % of cooling fan (value / 255 * 100%)
-  uint16_t CoolingFanOTR;     //!< operating time record of cooling fan in hours
-  uint16_t BatteryHeaterOTR;  //!< operating time record of PTC heater of battery
-  byte BatteryHeaterON;           //!< Status of the PTC heater of the battery
-  unsigned long VaccumPumpOTR;    //!< operating time record of vaccum pump
-  int16_t VaccumPumpPress1;           //!< pressure of vaccum pump measuerement #1 in mbar?
-  int16_t VaccumPumpPress2;           //!< pressure of vaccum pump measuerement #2 in mbar?
+  int16_t  CoolingTemp;         //!< main cooling temperatur measurement / 8
+  byte CoolingPumpTemp;         //!< temperature at cooling pump, offset 50
+  byte CoolingPumpLV;           //!< 12V onboard voltage of cooling pump / 10
+  uint16_t CoolingPumpAmps;     //!< current measured at cooling pump / 5
+  byte CoolingPumpRPM;          //!< RPM in % of cooling pump (value / 255 * 100%)
+  uint16_t CoolingPumpOTR;      //!< operating time record of cooling pump in hours
+  byte CoolingFanRPM;           //!< RPM in % of cooling fan (value / 255 * 100%)
+  uint16_t CoolingFanOTR;       //!< operating time record of cooling fan in hours
+  uint16_t BatteryHeaterOTR;    //!< operating time record of PTC heater of battery
+  byte BatteryHeaterON;         //!< Status of the PTC heater of the battery
+  unsigned long VaccumPumpOTR;  //!< operating time record of vaccum pump
+  int16_t VaccumPumpPress1;     //!< pressure of vaccum pump measuerement #1 in mbar?
+  int16_t VaccumPumpPress2;     //!< pressure of vaccum pump measuerement #2 in mbar?
 
 } CoolingSub_t; 
 

@@ -45,6 +45,10 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v06.0    | Some new features and minor bug fixes:|
+|         | ... make runtime memory more efficient by skipping unused data (>200 bytes saved during cell readout)|
+|         | ... show **F**actory **A**cceptance **T**esting date of the completed battery |
+|         | ... tested / corrected display of negative cooling-temperatures (done in wintertime)|
 |v0.5.6   | Fixed memory leak issue [#8](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/8)|
 |v0.5.5   | NLG6 fast charger SW revisions and HW PN now reported (see issue [#7](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/7))|
 |         | ... power calculation now updated in BMS submenu ([#5](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/5) fixed)|

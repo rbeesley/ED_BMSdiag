@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.6
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -32,7 +32,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "0.5.6";
+char* const PROGMEM version = "0.6.0";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,15 +16,15 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2016-October
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.4.0
+//! \version 0.4.2
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
 
 //Definitions for BMS
-#define DATALENGTH 440
+#define DATALENGTH 238
 #define CELLCOUNT 93
 #define RAW_VOLTAGES 0           //!< Use RAW values or calc ADC offset voltage
 
@@ -68,9 +68,13 @@ typedef struct {
   unsigned long HV_lowcurrent;   //!< counter time of no current, reset e.g. with PLC heater or driving
   uint16_t OCVtimer;             //!< counter time in seconds to reach OCV state
   
-  byte Day;                      //!< day of battery production
-  byte Month;                    //!< month of battery production
-  byte Year;                     //!< year of battery production
+  byte Day;                      //!< day of battery final testing
+  byte Month;                    //!< month of battery final testing
+  byte Year;                     //!< year of battery final testing
+
+  byte ProdDay;                  //!< day of battery production
+  byte ProdMonth;                //!< month of battery production
+  byte ProdYear;                 //!< year of battery production
 
   Revision_t sw;                 //!< soft-revision
   Revision_t hw;                 //!< hardware-revision
@@ -107,11 +111,12 @@ const PROGMEM byte rqBattTemperatures[4]          = {0x03, 0x22, 0x02, 0x01};
 const PROGMEM byte rqBattModuleTemperatures[4]    = {0x03, 0x22, 0x02, 0x02};
 const PROGMEM byte rqBattHVstatus[4]              = {0x03, 0x22, 0x02, 0x04};
 const PROGMEM byte rqBattADCref[4]                = {0x03, 0x22, 0x02, 0x07};
-const PROGMEM byte rqBattVolts[4]                 = {0x03, 0x22, 0x02, 0x08};
+const PROGMEM byte rqBattVolts[6]                 = {0x03, 0x22, 0x02, 0x08, 28, 57};
 const PROGMEM byte rqBattIsolation[4]             = {0x03, 0x22, 0x02, 0x09};
 const PROGMEM byte rqBattAmps[4]                  = {0x03, 0x22, 0x02, 0x03};
 const PROGMEM byte rqBattDate[4]                  = {0x03, 0x22, 0x03, 0x04};
-const PROGMEM byte rqBattCapacity[4]              = {0x03, 0x22, 0x03, 0x10};
+const PROGMEM byte rqBattProdDate[4]              = {0x03, 0x22, 0xF1, 0x8C};
+const PROGMEM byte rqBattCapacity[6]              = {0x03, 0x22, 0x03, 0x10, 31, 59};
 const PROGMEM byte rqBattHVContactorCyclesLeft[4] = {0x03, 0x22, 0x03, 0x0B};
 const PROGMEM byte rqBattHVContactorMax[4]        = {0x03, 0x22, 0x03, 0x0C};
 const PROGMEM byte rqBattHVContactorState[4]      = {0x03, 0x22, 0xD0, 0x00};

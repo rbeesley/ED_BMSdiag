@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.6
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------

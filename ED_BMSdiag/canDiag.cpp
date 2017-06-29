@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.1
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -165,9 +165,22 @@ boolean canDiag::WakeUp(){
 //! \return  received lines count (uint16_t) of function #Get_RequestResponse
 //--------------------------------------------------------------------------------
 uint16_t canDiag::Request_Diagnostics(const byte* rqQuery){  
+
   byte rqMsg[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-  memcpy_P(rqMsg, rqQuery, 4 * sizeof(byte)); // Fill byte 01 to 04 of rqMsg with rqQuery content (from PROGMEM)
   
+  // Detect skip data mode; size of request standard 4 parameter; skip enable (start param 5, stop param 6)
+  if (SkipEnable) {
+    //Copy request from prog memory with skip start and end
+    memcpy_P(rqMsg, rqQuery, 6 * sizeof(byte)); // Fill byte 01 to 04 of rqMsg with rqQuery content (from PROGMEM)
+    SkipStart = rqMsg[4];
+    SkipEnd = rqMsg[5];
+    rqMsg[4] = 0xFF; rqMsg[5] = 0xFF; // mark elements 5, 6 as unused data for correct query 
+    //Serial.print("> "); Serial.print(SkipStart); Serial.print(" > "); Serial.println(SkipEnd);
+  } else {
+    //Copy request from prog memory and fill up for UDS request size of 8 parameters
+    memcpy_P(rqMsg, rqQuery, 4 * sizeof(byte)); // Fill byte 01 to 04 of rqMsg with rqQuery content (from PROGMEM)
+  }
+
   myCAN_Timeout->Reset();                     // Reset Timeout-Timer
   
   //digitalWrite(CS_SD, HIGH);                // Disable SD card, or other SPI devices if nessesary
@@ -228,6 +241,8 @@ uint16_t canDiag::Get_RequestResponse(){
       }
     } while (!myCAN_Timeout->Expired(false) && !fDataOK);
 
+    this->SkipEnable = false;
+
     if (fDataOK) {
       return (items + 7) / 7;
       DEBUG_UPDATE(F("success!\n\r"));
@@ -248,6 +263,7 @@ boolean canDiag::Read_FC_Response(int16_t items){
     
     byte i;
     int16_t n = 7;
+    int16_t rspLine = 0;
     int16_t FC_count = 0;
     byte FC_length = rqFlowControl[1];
     boolean fDiagOK = false;
@@ -272,7 +288,13 @@ boolean canDiag::Read_FC_Response(int16_t items){
               myCAN0->sendMsgBuf(this->rqID, 0, 8, rqFlowControl);
               DEBUG_UPDATE(F("FCrq\n\r"));
             }
-            n = n + 7;
+            //--- Skip read data by using a write pointer (n) and a line counter (rspLine)
+            if (this->SkipEnable && (rspLine + 1) >= this->SkipStart && (rspLine + 1) <= this->SkipEnd) {
+              rspLine = rspLine + 1; 
+            } else {
+              rspLine = rspLine + 1;
+              n = n + 7;              
+            }
           }      
         } while(!digitalRead(2) && !myCAN_Timeout->Expired(false) && items > 0);
       }
@@ -294,17 +316,21 @@ boolean canDiag::Read_FC_Response(int16_t items){
 //! \param   lines count (uint16_t)
 //--------------------------------------------------------------------------------
 void canDiag::PrintReadBuffer(uint16_t lines) {
+  uint16_t pos;
   Serial.println(lines);
   for(uint16_t i = 0; i < lines; i++) {
     Serial.print(F("Data: "));
     for(byte n = 0; n < 7; n++)               // Print each byte of the data.
     {
-      if(data[n + 7 * i] < 0x10)             // If data byte is less than 0x10, add a leading zero.
-      {
-        Serial.print(F("0"));
+      pos = n + 7 * i;
+      if (pos <= DATALENGTH) {
+        if(data[pos] < 0x10)             // If data byte is less than 0x10, add a leading zero.
+        {
+          Serial.print(F("0"));
+        }
+        Serial.print(data[pos], HEX);
+        Serial.print(" ");
       }
-      Serial.print(data[n + 7 * i], HEX);
-      Serial.print(" ");
     }
     Serial.println();
   }
@@ -404,7 +430,8 @@ boolean canDiag::getBatteryTemperature(BatteryDiag_t *myBMS, boolean debug_verbo
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Read and evaluate battery production date
+//! \brief   Read and evaluate battery production date 
+//! \brief   and date of factory acceptacnce test
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
@@ -412,9 +439,11 @@ boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
   uint16_t items;
 
+  //Get date of Factory Acceptance Testing (FAT)
   this->setCAN_ID(0x7E7, 0x7EF);
   items = this->Request_Diagnostics(rqBattDate);
-  
+
+  boolean fOK = false;
   if(items){
     if (debug_verbose) {
       this->PrintReadBuffer(items);
@@ -422,6 +451,23 @@ boolean canDiag::getBatteryDate(BatteryDiag_t *myBMS, boolean debug_verbose) {
     myBMS->Year = data[4];
     myBMS->Month = data[5];
     myBMS->Day = data[6];
+    fOK = true;
+  }
+
+  //Get date of initial Battery Production Date as part of the SN
+  items = this->Request_Diagnostics(rqBattProdDate);
+
+  if(items && fOK){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    }
+    myBMS->ProdYear = (data[4] - 48) * 10 + (data[5] - 48);
+    myBMS->ProdMonth = (data[6] - 48) * 10 + (data[7] - 48);
+    myBMS->ProdDay = (data[8] - 48) * 10 + (data[9] - 48);
+    fOK = true;
+  }
+  
+  if(fOK){
     return true;
   } else {
     return false;
@@ -532,6 +578,7 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
   uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
+  this->SkipEnable = true;
   items = this->Request_Diagnostics(rqBattCapacity);
   
   if(items){
@@ -550,11 +597,11 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
     this->ReadDiagWord(&myBMS->Cap_As.min,data,21,1);
     this->ReadDiagWord(&myBMS->Cap_As.mean,data,23,1);
     this->ReadDiagWord(&myBMS->Cap_As.max,data,17,1);
-    this->ReadDiagWord(&myBMS->LastMeas_days,data,427,1);
+    this->ReadDiagWord(&myBMS->LastMeas_days,data,224,1); //427->231
     uint16_t value;
-    this->ReadDiagWord(&value,data,429,1);
+    this->ReadDiagWord(&value,data,226,1); //429->233
     myBMS->Cap_meas_quality = value / 65535.0;
-    this->ReadDiagWord(&value,data,425,1);
+    this->ReadDiagWord(&value,data,222,1); //425->229
     myBMS->Cap_combined_quality = value / 65535.0;
     return true;
   } else {
@@ -625,6 +672,7 @@ boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) 
   uint16_t items;
 
   this->setCAN_ID(0x7E7, 0x7EF);
+  this->SkipEnable = true;
   items = this->Request_Diagnostics(rqBattVolts);
   
   if(items){
@@ -784,7 +832,7 @@ boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbo
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Get NLG6 SW revision
+//! \brief   Get NLG6 SW revision (print directly to screen to save memory)
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------

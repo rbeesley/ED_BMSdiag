@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.h
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.1
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -31,7 +31,7 @@
 #define DEBUG_UPDATE(...) Serial.print(__VA_ARGS__)
 #endif
 
-#define VERBOSE_ENABLE 0         //!< Local verbose mode enable to allow output of CAN messages
+#define VERBOSE_ENABLE 1         //!< Local verbose mode enable to allow output of CAN messages
 
 #include <mcp_can.h>
 #include <Timeout.h>
@@ -65,6 +65,9 @@ private:
 
     unsigned long rqID;
     unsigned long respID;
+    uint16_t SkipStart;
+    uint16_t SkipEnd;
+    boolean SkipEnable = false;
         
     uint16_t Request_Diagnostics(const byte* rqQuery);
     uint16_t Get_RequestResponse();

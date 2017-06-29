@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2016 by MyLab-odyssey
+// (c) 2015-2017 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.6
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -68,7 +68,9 @@ void printHeaderData() {
 //! \brief   Output battery production data
 //--------------------------------------------------------------------------------
 void printBatteryProductionData() {
-  Serial.print(F("Battery-Production [Y/M/D]: ")); Serial.print(2000 + BMS.Year); Serial.print(F("/"));
+  Serial.print(F("Battery-Production [Y/M/D]: ")); Serial.print(2000 + BMS.ProdYear); Serial.print(F("/"));
+  Serial.print(BMS.ProdMonth); Serial.print(F("/")); Serial.println(BMS.ProdDay);
+  Serial.print(F("Battery-FAT date   [Y/M/D]: ")); Serial.print(2000 + BMS.Year); Serial.print(F("/"));
   Serial.print(BMS.Month); Serial.print(F("/")); Serial.println(BMS.Day);
   Serial.print(F("Rev.[Y/WK/PL] HW:")); Serial.print(2000 + BMS.hw.rev[0]); Serial.print(F("/"));
   Serial.print(BMS.hw.rev[1]); Serial.print(F("/")); Serial.print(BMS.hw.rev[2]);

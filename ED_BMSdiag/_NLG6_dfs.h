@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    NLG6_dfs.h
 //! \brief   Definitions and structures for the NLG6-Charger module.
-//! \date    2016-November
+//! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.5.1
+//! \version 0.6.0
 //--------------------------------------------------------------------------------
 #ifndef NLG6_DFS_H
 #define NLG6_DFS_H
@@ -28,6 +28,7 @@
 
 //NLG6 data structure
 typedef struct {       
+  boolean NLG6present = false;    //!< Flag to show NLG6 detected in system
   uint16_t MainsAmps[3];          //!< AC current of L1, L2, L3
   uint16_t MainsVoltage[3];       //!< AC voltage of L1, L2, L3
   byte Amps_setpoint;             //!< AC charging current set by user in BC (Board Computer)

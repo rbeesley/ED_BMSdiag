@@ -36,8 +36,10 @@ void setupMenu() {
   cmdAdd("t", get_temperatures);
   cmdAdd("v", get_voltages);
   cmdAdd("bms", bms_sub);
-  if (myDevice.NLG6present) {
+  if (NLG6.NLG6present) {
     cmdAdd("nlg6", nlg6_sub);
+  } else {
+    cmdAdd("obl", obl_sub);
   }
   cmdAdd("cs", cs_sub);
   cmdAdd("all", get_all);
@@ -55,6 +57,7 @@ void get_all (uint8_t arg_cnt, char **args) {
       printBMSall();
       break;
     case subNLG6:
+    case subOBL:
       printNLG6all();
       break;
     case subCS:
@@ -77,6 +80,7 @@ void get_temperatures (uint8_t arg_cnt, char **args) {
       }
       break;
     case subNLG6:
+    case subOBL:
       if (DiagCAN.getChargerTemperature(&NLG6, false)){
         printNLG6temperatures();
       }
@@ -100,6 +104,7 @@ void get_voltages (uint8_t arg_cnt, char **args) {
       }
       break;
     case subNLG6:
+    case subOBL:
       if (getNLG6data()){
         Serial.println();
         printNLG6_Status();
@@ -124,8 +129,10 @@ void help(uint8_t arg_cnt, char **args)
       Serial.println(F("* Main Menu:"));
       Serial.println(F("  BMS   Submenu"));
       Serial.println(F("  CS    Submenu"));
-      if (myDevice.NLG6present) {
+      if (NLG6.NLG6present) {
         Serial.println(F("  NLG6  Submenu"));
+      } else {
+        Serial.println(F("  OBL   Submenu"));
       }
       Serial.println(F("  help  List commands"));
       Serial.println(F("  log   Logging"));
@@ -142,6 +149,12 @@ void help(uint8_t arg_cnt, char **args)
       break;
     case subNLG6:
       Serial.println(F("* NLG6 Menu:"));
+      Serial.println(F("  all   Get complete dataset"));
+      Serial.println(F("  v     Get voltages, amps & status"));
+      Serial.println(F("  t     Get temperatures"));
+      break;
+    case subOBL:
+      Serial.println(F("* OBL Menu:"));
       Serial.println(F("  all   Get complete dataset"));
       Serial.println(F("  v     Get voltages, amps & status"));
       Serial.println(F("  t     Get temperatures"));
@@ -173,7 +186,7 @@ void show_info(uint8_t arg_cnt, char **args)
 {
   //Serial.print(F("Usable Memory: ")); Serial.println(getFreeRam());
   //Serial.print(F("Menu: ")); Serial.println(myDevice.menu);
-  Serial.print(F("NLG6: ")); Serial.println(myDevice.NLG6present);
+  Serial.print(F("NLG6: ")); Serial.println(NLG6.NLG6present);
   Serial.print(F("Logging interval: ")); Serial.print(myDevice.timer, DEC);
   Serial.println(F(" s"));
   Serial.print(F("Logging is "));
@@ -264,6 +277,29 @@ void nlg6_sub (uint8_t arg_cnt, char **args) {
   }
 }
 
+//--------------------------------------------------------------------------------
+//! \brief   Callback to switch to the OBL (Onboard Loader / std. charger)
+//! \brief   sub-menu and / or evaluate commands
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void obl_sub (uint8_t arg_cnt, char **args) {
+  myDevice.menu = subOBL;
+  set_cmd_display("OBL >>");
+  if (arg_cnt == 2) {
+    if (strcmp(args[1], "all") == 0) {
+      get_all(arg_cnt, args);
+    }
+    if (strcmp(args[1], "t") == 0) {
+      get_temperatures(arg_cnt, args);
+    }
+    if (strcmp(args[1], "v") == 0) {
+      get_voltages(arg_cnt, args);
+    }
+  } else {
+
+  }
+}
+
 
 //--------------------------------------------------------------------------------
 //! \brief   Callback to switch to the Cooling sub-menu and / or evaluate commands
@@ -285,12 +321,15 @@ void cs_sub (uint8_t arg_cnt, char **args) {
 //! \return  report status / if present (boolean)
 //--------------------------------------------------------------------------------
 boolean nlg6_installed() {
-  myDevice.NLG6present =  DiagCAN.NLG6ChargerInstalled(&NLG6, false);
-  if (myDevice.NLG6present) {
+  NLG6.NLG6present =  DiagCAN.NLG6ChargerInstalled(&NLG6, false);
+  if (NLG6.NLG6present) {
     Serial.println(F("NLG6 detected"));
     PrintSPACER();
+  } else {
+    //Serial.println(F("OBL detected"));
+    //PrintSPACER();
   }
-  return myDevice.NLG6present;
+  return NLG6.NLG6present;
 }
 
 //--------------------------------------------------------------------------------

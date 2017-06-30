@@ -201,16 +201,24 @@ void printIndividualCellData() {
 //! \brief   Output NLG6 charger voltages and currents AC and DC
 //--------------------------------------------------------------------------------
 void printNLG6_Status() {
-  Serial.println(F("Status NLG6 Charger-Unit: "));
+  if (NLG6.NLG6present) {
+    Serial.println(F("Status NLG6 Charger-Unit: "));
+  } else {
+    Serial.println(F("Status OBL Charger-Unit: "));
+  }
   Serial.print(F("User selected : ")); Serial.print(NLG6.Amps_setpoint); Serial.println(F(" A"));
   Serial.print(F("Cable maximum : ")); Serial.print(NLG6.AmpsCableCode / 10); Serial.println(F(" A"));
-  Serial.print(F("Chargingpoint : ")); Serial.print(NLG6.AmpsChargingpoint / 10); Serial.println(F(" A"));
+  if (NLG6.NLG6present) {
+    Serial.print(F("Chargingpoint : ")); Serial.print(NLG6.AmpsChargingpoint / 10); Serial.println(F(" A"));
+  }
   Serial.print(F("AC L1: ")); Serial.print(NLG6.MainsVoltage[0] / 10.0, 1); Serial.print(F(" V, "));
   Serial.print(NLG6.MainsAmps[0] / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("AC L2: ")); Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.println(F(" A"));
-  Serial.print(F("AC L3: ")); Serial.print(NLG6.MainsVoltage[2] / 10.0, 1); Serial.print(F(" V, "));
-  Serial.print(NLG6.MainsAmps[2] / 10.0, 1); Serial.println(F(" A"));
+  if (NLG6.NLG6present) {
+    Serial.print(F("AC L2: ")); Serial.print(NLG6.MainsVoltage[1] / 10.0, 1); Serial.print(F(" V, "));
+    Serial.print(NLG6.MainsAmps[1] / 10.0, 1); Serial.println(F(" A"));
+    Serial.print(F("AC L3: ")); Serial.print(NLG6.MainsVoltage[2] / 10.0, 1); Serial.print(F(" V, "));
+    Serial.print(NLG6.MainsAmps[2] / 10.0, 1); Serial.println(F(" A"));
+  }
   Serial.print(F("DC HV: ")); Serial.print(NLG6.DC_HV / 10.0, 1); Serial.print(F(" V, "));
   Serial.print(NLG6.DC_Current / 10.0, 1); Serial.println(F(" A"));
   Serial.print(F("DC LV: ")); Serial.print(NLG6.LV / 10.0, 1); Serial.println(F(" V"));
@@ -224,22 +232,23 @@ void printNLG6temperatures() {
   Serial.print(F("Reported       : ")); Serial.println(NLG6.ReportedTemp - TEMP_OFFSET, DEC);
   Serial.print(F("Cooling plate  : ")); Serial.println(NLG6.CoolingPlateTemp - TEMP_OFFSET, DEC);
   Serial.print(F("Inlet socket   : ")); Serial.println(NLG6.SocketTemp - TEMP_OFFSET, DEC);
-  Serial.println(F("Internal values: "));
-          
-  for (byte n = 0; n < 8; n++) {
-      Serial.print(NLG6.Temps[n] - TEMP_OFFSET, DEC);
-      if (n < 7) Serial.print(F(", "));
+  if (NLG6.NLG6present) {
+    Serial.println(F("Internal values: "));       
+    for (byte n = 0; n < 8; n++) {
+        Serial.print(NLG6.Temps[n] - TEMP_OFFSET, DEC);
+        if (n < 7) Serial.print(F(", "));
+    }
+    Serial.println();
   }
-  Serial.println();
 }
 
 //--------------------------------------------------------------------------------
 //! \brief   Output NLG6 charger HW/SW revisions
 //--------------------------------------------------------------------------------
 void printNLG6revision() {
-  Serial.print(F("HW PN : ")); Serial.println(NLG6.PN_HW);
-  Serial.print(F("SW rev: "));
-    if (myDevice.NLG6present) {
+  if (NLG6.NLG6present) {
+    Serial.print(F("HW PN : ")); Serial.println(NLG6.PN_HW);
+    Serial.print(F("SW rev: "));
     DiagCAN.printNLG6ChargerSWrev(&NLG6, false); //get SW revisons and send to serial
   }
 }
@@ -326,10 +335,11 @@ void printNLG6data() {
   PrintSPACER();
   printNLG6temperatures();
   PrintSPACER();
-  printNLG6revision();
-  PrintSPACER();
+  if (NLG6.NLG6present) {
+    printNLG6revision();
+    PrintSPACER();
+  }
 }
-
 
 //--------------------------------------------------------------------------------
 //! \brief   Output Cooling- and Subsystem dataset

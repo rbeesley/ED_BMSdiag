@@ -22,9 +22,9 @@
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
-#define EXPDATA 1                //!< EXPDATA mode will output experimental / NOT VERIFIED data
+#define EXPDATA 0                //!< EXPDATA mode will output experimental / NOT VERIFIED data
 #define HELP 1                   //!< HELP menu active
-#define NLG6TEST 1               //!< Test if the NLG6 fast charger is installed
+#define NLG6TEST 1               //!< Test if the NLG6 fast charger is installed, set zero to speed up with standard OBL!!!
 
 #include <mcp_can.h>
 #include <Timeout.h>
@@ -52,12 +52,11 @@ CTimeout CLI_Timeout(500);      //!< Timeout value for CLI polling in millis
 CTimeout LOG_Timeout(30000);    //!< Timeout value for LOG activity in millis
 
 //Menu levels
-typedef enum {MAIN, subBMS, subNLG6, subCS} submenu_t;
+typedef enum {MAIN, subBMS, subNLG6, subOBL, subCS} submenu_t;
 
 //deviceStatus struct to store menu settings
 typedef struct {
   submenu_t menu = MAIN;
-  boolean NLG6present = false;
   uint16_t timer = 30;
   bool logging = false;
   uint16_t logCount = 0;

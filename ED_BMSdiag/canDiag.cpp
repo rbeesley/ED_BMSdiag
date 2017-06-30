@@ -882,12 +882,18 @@ boolean canDiag::getChargerTemperature(ChargerDiag_t *myNLG6, boolean debug_verb
     if (debug_verbose) {
        PrintReadBuffer(items);
     } 
-    myNLG6->CoolingPlateTemp = data[4];
-    for(byte n = 0; n < 8; n++) {
-      myNLG6->Temps[n] = data[n + 5];
+    if (myNLG6->NLG6present){
+      myNLG6->CoolingPlateTemp = data[4];
+      for(byte n = 0; n < 8; n++) {
+        myNLG6->Temps[n] = data[n + 5];
+      }
+      myNLG6->ReportedTemp = data[12];
+      myNLG6->SocketTemp = data[13];
+    } else {
+      myNLG6->CoolingPlateTemp = data[5]; //5
+      myNLG6->ReportedTemp = data[7]; //7
+      myNLG6->SocketTemp = data[9]; //9
     }
-    myNLG6->ReportedTemp = data[12];
-    myNLG6->SocketTemp = data[13];
     return true;
   } else {
     return false;
@@ -910,7 +916,11 @@ boolean canDiag::getChargerSelCurrent(ChargerDiag_t *myNLG6, boolean debug_verbo
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     } 
-    myNLG6->Amps_setpoint = data[8];
+    if(myNLG6->NLG6present){
+      myNLG6->Amps_setpoint = data[8]; //Get data for NLG6 fast charger
+    } else {
+      myNLG6->Amps_setpoint = data[7]; //7 //Get data for standard OBL
+    }
     return true;
   } else {
     return false;
@@ -934,15 +944,31 @@ boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     } 
-    myNLG6->LV = data[8];
-    this->ReadDiagWord(&value,data,9,1);
-    myNLG6->DC_HV = value;
-    this->ReadDiagWord(&value,data,11,1);
-    myNLG6->MainsVoltage[0] = value;
-    this->ReadDiagWord(&value,data,13,1);
-    myNLG6->MainsVoltage[1] = value;
-    this->ReadDiagWord(&value,data,15,1);
-    myNLG6->MainsVoltage[2] = value;
+    if (myNLG6->NLG6present){
+      myNLG6->LV = data[8];
+      this->ReadDiagWord(&value,data,9,1);
+      myNLG6->DC_HV = value;
+      this->ReadDiagWord(&value,data,11,1);
+      myNLG6->MainsVoltage[0] = value;
+      this->ReadDiagWord(&value,data,13,1);
+      myNLG6->MainsVoltage[1] = value;
+      this->ReadDiagWord(&value,data,15,1);
+      myNLG6->MainsVoltage[2] = value;
+    } else {
+      myNLG6->LV = data[6]; //6
+      this->ReadDiagWord(&value,data,9,1);
+      if (value != 8190) {  //OBL showing only valid data while charging
+        myNLG6->DC_HV = value;
+      } else {
+        myNLG6->DC_HV = 0;
+      }
+      this->ReadDiagWord(&value,data,11,1);
+      if (value != 8190) {  //OBL showing only valid data while charging
+        myNLG6->MainsVoltage[0] = value;
+      } else {
+        myNLG6->MainsVoltage[0] = 0;
+      }
+    }
     return true;
   } else {
     return false;
@@ -966,18 +992,34 @@ boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
     if (debug_verbose) {
       this->PrintReadBuffer(items);
     } 
-    this->ReadDiagWord(&value,data,4,1);
-    myNLG6->DC_Current = value; 
-    this->ReadDiagWord(&value,data,6,1);
-    myNLG6->MainsAmps[0] = value;  
-    this->ReadDiagWord(&value,data,8,1);
-    myNLG6->MainsAmps[1] = value; 
-    this->ReadDiagWord(&value,data,10,1);
-    myNLG6->MainsAmps[2] = value; 
-    this->ReadDiagWord(&value,data,16,1);
-    myNLG6->AmpsChargingpoint = value; 
-    this->ReadDiagWord(&value,data,18,1);
-    myNLG6->AmpsCableCode = value;
+    if (myNLG6->NLG6present){
+      this->ReadDiagWord(&value,data,4,1);
+      myNLG6->DC_Current = value; 
+      this->ReadDiagWord(&value,data,6,1);
+      myNLG6->MainsAmps[0] = value;  
+      this->ReadDiagWord(&value,data,8,1);
+      myNLG6->MainsAmps[1] = value; 
+      this->ReadDiagWord(&value,data,10,1);
+      myNLG6->MainsAmps[2] = value; 
+      this->ReadDiagWord(&value,data,16,1);
+      myNLG6->AmpsChargingpoint = value; 
+      this->ReadDiagWord(&value,data,18,1);
+      myNLG6->AmpsCableCode = value;
+    } else {
+      this->ReadDiagWord(&value,data,6,1);
+      if (value != 2047) {  //OBL showing only valid data while charging
+        myNLG6->MainsAmps[0] = value; 
+      } else {
+        myNLG6->MainsAmps[0] = 0;
+      }
+      this->ReadDiagWord(&value,data,18,1);
+      if (value != 2047) {  //OBL showing only valid data while charging
+        myNLG6->DC_Current = value; 
+      } else {
+        myNLG6->DC_Current = 0;
+      }
+      myNLG6->AmpsCableCode = data[15]; //15
+    }
     return true;
   } else {
     return false;

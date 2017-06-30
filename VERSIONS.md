@@ -1,7 +1,10 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
-|v06.0    | Some new features and minor bug fixes:|
+|v0.6.2   | Standard Charger now implemented as **OBL** command in CLI|
+|         | ... THX to "erich" & "AlterAmi" for their support|
+|         | ... PLEASE report if values a plausible !!!|
+|v0.6.0   | Some new features and minor bug fixes:|
 |         | ... make runtime memory more efficient by skipping unused data (>200 bytes saved during cell readout)|
 |         | ... show **F**actory **A**cceptance **T**esting date of the completed battery |
 |         | ... tested / corrected display of negative cooling-temperatures (done in wintertime)|

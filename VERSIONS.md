@@ -1,7 +1,7 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
-|v0.6.2   | Standard Charger now implemented as **OBL** command in CLI|
+|v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
 |         | ... THX to "erich" & "AlterAmi" for their support|
 |         | ... PLEASE report if values a plausible !!!|
 |v0.6.0   | Some new features and minor bug fixes:|

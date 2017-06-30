@@ -1,8 +1,8 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.6.0-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v0.6.2-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v0.5.6-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v0.6.0-orange.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV.
@@ -45,7 +45,7 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
-|v0.6.2   | Standard Charger now implemented as **OBL** command in CLI|
+|v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
 |         | ... THX to "erich" & "AlterAmi" for their support|
 |         | ... PLEASE report if values a plausible !!!|
 |v0.6.0   | Some new features and minor bug fixes:|

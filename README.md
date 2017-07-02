@@ -28,7 +28,7 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 
 * Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).
 
-> **Verified to work with Arduino IDE 1.6.8, 1.6.9 and 1.6.10 (on OS X 10.10, 10.11 and WIN-Systems)**
+> **Verified to work with Arduino IDE 1.8.1 (on OS X 10.12 and WIN-Systems)**
 
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
@@ -47,7 +47,7 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 |-------- | --------|
 |v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
 |         | ... THX to "erich" & "AlterAmi" for their support|
-|         | ... PLEASE report if values a plausible !!!|
+|         | ... PLEASE report if values are plausible !!!|
 |v0.6.0   | Some new features and minor bug fixes:|
 |         | ... make runtime memory more efficient by skipping unused data (>200 bytes saved during cell readout)|
 |         | ... show **F**actory **A**cceptance **T**esting date of the completed battery |

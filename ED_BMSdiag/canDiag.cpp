@@ -597,11 +597,11 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
     this->ReadDiagWord(&myBMS->Cap_As.min,data,21,1);
     this->ReadDiagWord(&myBMS->Cap_As.mean,data,23,1);
     this->ReadDiagWord(&myBMS->Cap_As.max,data,17,1);
-    this->ReadDiagWord(&myBMS->LastMeas_days,data,224,1); //427->231
+    this->ReadDiagWord(&myBMS->LastMeas_days,data,224,1); 
     uint16_t value;
-    this->ReadDiagWord(&value,data,226,1); //429->233
+    this->ReadDiagWord(&value,data,226,1); 
     myBMS->Cap_meas_quality = value / 65535.0;
-    this->ReadDiagWord(&value,data,222,1); //425->229
+    this->ReadDiagWord(&value,data,222,1); 
     myBMS->Cap_combined_quality = value / 65535.0;
     return true;
   } else {

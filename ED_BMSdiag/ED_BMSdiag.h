@@ -18,13 +18,14 @@
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
 //! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.6.0
+//! \version 0.6.2
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
 #define EXPDATA 0                //!< EXPDATA mode will output experimental / NOT VERIFIED data
 #define HELP 1                   //!< HELP menu active
-#define NLG6TEST 1               //!< Test if the NLG6 fast charger is installed, set zero to speed up with standard OBL!!!
+#define NLG6TEST 1               //!< Test if the NLG6 fast charger is installed, 
+                                 //!< set zero to speed up startup with standard OBL!!!
 
 #include <mcp_can.h>
 #include <Timeout.h>
@@ -32,7 +33,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "0.6.0";
+char* const PROGMEM version = "0.6.2";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")

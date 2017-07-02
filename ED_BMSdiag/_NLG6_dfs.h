@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the NLG6-Charger module.
 //! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.6.0
+//! \version 0.6.2
 //--------------------------------------------------------------------------------
 #ifndef NLG6_DFS_H
 #define NLG6_DFS_H

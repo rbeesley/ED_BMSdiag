@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2017-June
 //! \author  MyLab-odyssey
-//! \version 0.6.0
+//! \version 0.6.2
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 

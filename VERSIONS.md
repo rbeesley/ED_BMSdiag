@@ -2,7 +2,7 @@
 |version  | comment|
 |-------- | --------|
 |v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
-|         | ... use from `CMD >>` prompt with the command `OBL all` to get all readouts from the LEAR **O**n**B**oard**L**oader, or use `OBL v` for voltages and `OBL t` for temperatures on their own. See `?` for help in all menu levels ;-)|
+|         | ... use from `CMD >>` prompt with the command `obl all` to get all readouts from the LEAR **O**n**B**oard**L**oader, or use `obl v` for voltages and `obl t` for temperatures on their own. See `?` for help in all menu levels ;-)|
 |         | ... THX to "erich" & "AlterAmi" for their support|
 |         | ... PLEASE report if values are plausible !!!|
 |v0.6.0   | Some new features and minor bug fixes:|

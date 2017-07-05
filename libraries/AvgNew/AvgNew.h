@@ -32,7 +32,7 @@
 //! \brief   Modified version of Average.h (no template, small footprint).
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.1.0
+//! \version 0.2.0
 //--------------------------------------------------------------------------------
 
 #ifndef AVERAGE_NEW_H
@@ -76,14 +76,14 @@ class Average {
         float mean();
         uint16_t mode();
         uint16_t minimum();
-        uint16_t minimum(int *);
+        uint16_t minimum(int16_t *);
         uint16_t maximum();
-        uint16_t maximum(int *);
+        uint16_t maximum(int16_t *);
         float stddev();
         uint16_t get(uint16_t);
         void leastSquares(float &m, float &b, float &r);
-        int getCount();
-        uint16_t predict(int x);
+        int16_t getCount();
+        uint16_t predict(int16_t x);
         uint16_t sum();
         void clear();
         //Average<T> &operator=(Average<T> &a);

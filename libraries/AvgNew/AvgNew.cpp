@@ -32,7 +32,7 @@
 //! \brief   Modified version of Average.h (no template, small footprint).
 //! \date    2016-July
 //! \author  My-Lab-odyssey
-//! \version 0.1.0
+//! \version 0.2.0
 //--------------------------------------------------------------------------------
 #include "AvgNew.h"
 
@@ -58,7 +58,7 @@ void Average::freeMem() {
   free(_store);
 }
 
-int Average::getCount() {
+int16_t Average::getCount() {
     return _count;
 }
 
@@ -128,7 +128,7 @@ uint16_t Average::minimum() {
     return this->minimum(NULL);
 }
 
-uint16_t Average::minimum(int *index) {
+uint16_t Average::minimum(int16_t *index) {
   uint16_t minval;
 
     if (index != NULL) {
@@ -158,7 +158,7 @@ uint16_t Average::maximum() {
     return this->maximum(NULL);
 }
 
-uint16_t Average::maximum(int *index) {
+uint16_t Average::maximum(int16_t *index) {
   uint16_t maxval;
 
     if (index != NULL) {
@@ -187,7 +187,7 @@ float Average::stddev() {
   float sum;
   float mu;
   float theta;
-  //int i;
+  //int16_t i;
 
     if (_count == 0) {
         return 0;
@@ -242,7 +242,7 @@ void Average::leastSquares(float &m, float &c, float &r) {
     r = (sumxy - sumx * sumy / _count) / sqrt((sumx2 - sqr(sumx)/_count) * (sumy2 - sqr(sumy)/_count));
 }
 
-uint16_t Average::predict(int x) {
+uint16_t Average::predict(int16_t x) {
     float m, c, r;
     this->leastSquares(m, c, r); // y = mx + c;
 
@@ -263,7 +263,7 @@ void Average::clear() {
 
 /*template <class T> Average<T> &Average<T>::operator=(Average<T> &a) {
     clear();
-    for (int i = 0; i < _size; i++) {
+    for (int16_t i = 0; i < _size; i++) {
         push(a.get(i));
     }
     return *this;

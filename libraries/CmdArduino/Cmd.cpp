@@ -33,9 +33,9 @@
 //! \file    Cmd.cpp
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2016-July
+//! \date    2017-July
 //! \author  My-Lab-odyssey
-//! \version 0.5.0
+//! \version 0.6.1
 //--------------------------------------------------------------------------------
 
 *******************************************************************/
@@ -55,6 +55,9 @@
 #include "HardwareSerial.h"
 #include "Cmd.h"
 
+#define mytoupper(c) ((c) >= 'a' && (c) <= 'z') ? (c -= 32) : (c)
+#define mytolower(c) ((c) >= 'A' && (c) <= 'Z') ? (c += 32) : (c)
+
 // command line message buffer and pointer
 static uint8_t msg[MAX_MSG_SIZE];
 static uint8_t *msg_ptr;
@@ -68,6 +71,7 @@ const char cmd_prompt[] PROGMEM = "CMD >> ";
 const char cmd_unrecog[] PROGMEM = "CMD: not recognized";
 
 char myCMD[MAX_CMD_SIZE];
+boolean fECHO = true;  //flag for local echo of input characters
 
 
 /**************************************************************************/
@@ -98,6 +102,15 @@ void set_cmd_display(const char *_myCMD)
 
 }
 
+void set_local_echo(boolean _fECHO)
+{
+    if (_fECHO) {
+       fECHO = true;
+    } else {
+       fECHO = false;
+    }
+}
+
 /**************************************************************************/
 /*!
     Parse the command line. This function tokenizes the command input, then
@@ -112,7 +125,7 @@ void cmd_parse(char *cmd)
     char buf[50];
     cmd_t *cmd_entry;
 
-    fflush(stdout);
+    //fflush(stdout);  //not reliable on all boards ?!
 
     // parse the command line statement and break it up into space-delimited
     // strings. the array of strings will be saved in the argv array.
@@ -177,7 +190,8 @@ void cmd_handler()
     
     default:
         // normal character entered. add it to the buffer
-        Serial.print(c);
+	c = mytolower(c);     
+        if (fECHO) Serial.print(c);
         *msg_ptr++ = c;
         break;
     }
@@ -236,7 +250,7 @@ void cmdInit(uint32_t speed)
     at the setup() portion of the sketch. 
 */
 /**************************************************************************/
-void cmdAdd(const char *name, void (*func)(int argc, char **argv))
+void cmdAdd(const char *name, void (*func)(uint8_t argc, char **argv))
 {
     // alloc memory for command struct
     cmd_tbl = (cmd_t *)malloc(sizeof(cmd_t));

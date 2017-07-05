@@ -33,9 +33,9 @@
 //! \file    Cmd.h
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2016-July
+//! \date    2017-July
 //! \author  My-Lab-odyssey
-//! \version 0.5.0
+//! \version 0.6.1
 //--------------------------------------------------------------------------------
 
 *******************************************************************/
@@ -57,7 +57,7 @@
 typedef struct _cmd_t
 {
     char *cmd;
-    void (*func)(int argc, char **argv);
+    void (*func)(uint8_t argc, char **argv);
     struct _cmd_t *next;
 } cmd_t;
 
@@ -65,8 +65,9 @@ void cmdInit();
 void cmdInit(uint32_t speed);
 void cmd_display();
 void set_cmd_display(const char *myCMD);
+void set_local_echo(boolean _fECHO);
 void cmdPoll();
-void cmdAdd(const char *name, void (*func)(int argc, char **argv));
+void cmdAdd(const char *name, void (*func)(uint8_t argc, char **argv));
 uint32_t cmdStr2Num(char *str, uint8_t base);
 
 

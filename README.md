@@ -1,8 +1,8 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.6.2-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v0.7.0-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v0.6.0-orange.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v0.6.0-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV.
@@ -45,6 +45,11 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v0.7.0   |**please reload all files (including library files) !!!**|
+|         | Now the cell voltage distribution is shown as box plot in the `bms all` query and some new features are implemented:|
+|         | ... in the CLI the input is no more case sensitive|
+|         | ... the local echo can be diabled with the `ECHO`-switch in the `ED_BMSdiag.h`|
+|         | ... small changes to the new OBL readouts - PLEASE report ;-)|
 |v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
 |         | ... use from `CMD >>` prompt with the command `obl all` to get all readouts from the LEAR **O**n**B**oard**L**oader, or use `obl v` for voltages and `obl t` for temperatures on their own. See `?` for help in all menu levels ;-)|
 |         | ... THX to "erich" & "AlterAmi" for their support|

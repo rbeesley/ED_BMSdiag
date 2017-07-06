@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.h
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2017-June
+//! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.6.2
+//! \version 0.7.0
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -114,6 +114,7 @@ public:
     boolean getIsolationValue(BatteryDiag_t *myBMS, boolean debug_verbose);
     boolean getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose);
     boolean getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose);
+    boolean getBatteryVoltageDist(BatteryDiag_t *myBMS);
     boolean getBatteryAmps(BatteryDiag_t *myBMS, boolean debug_verbose);
     boolean getBatteryADCref(BatteryDiag_t *myBMS, boolean debug_verbose);
     boolean getHVcontactorState(BatteryDiag_t *myBMS, boolean debug_verbose);

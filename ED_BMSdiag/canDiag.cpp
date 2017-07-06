@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2017-June
+//! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.6.2
+//! \version 0.7.0
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -692,6 +692,19 @@ boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) 
 }
 
 //--------------------------------------------------------------------------------
+//! \brief  Evaluate voltage data for distribution, calc. percentiles
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getBatteryVoltageDist(BatteryDiag_t *myBMS) {
+  byte _Count = CellVoltage.getCount();
+  CellVoltage.bubble_sort();
+  myBMS->Cvolts.p25 = CellVoltage.percentile(_Count / 4);
+  myBMS->Cvolts.median = CellVoltage.percentile(_Count / 2);
+  myBMS->Cvolts.p75 = CellVoltage.percentile(_Count * 3 / 4);
+  return true;
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate current data / ampere
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
@@ -968,6 +981,8 @@ boolean canDiag::getChargerVoltages(ChargerDiag_t *myNLG6, boolean debug_verbose
       } else {
         myNLG6->MainsVoltage[0] = 0;
       }
+      myNLG6->MainsVoltage[1] = 0;
+      myNLG6->MainsVoltage[2] = 0;
     }
     return true;
   } else {
@@ -1009,16 +1024,22 @@ boolean canDiag::getChargerAmps(ChargerDiag_t *myNLG6, boolean debug_verbose) {
       this->ReadDiagWord(&value,data,6,1);
       if (value != 2047) {  //OBL showing only valid data while charging
         myNLG6->MainsAmps[0] = value; 
+
       } else {
         myNLG6->MainsAmps[0] = 0;
       }
+      myNLG6->MainsAmps[1] = 0;
+      myNLG6->MainsAmps[2] = 0;
+      
       this->ReadDiagWord(&value,data,18,1);
       if (value != 2047) {  //OBL showing only valid data while charging
         myNLG6->DC_Current = value; 
       } else {
         myNLG6->DC_Current = 0;
       }
-      myNLG6->AmpsCableCode = data[15]; //15
+      this->ReadDiagWord(&value,data,14,1); //Usable AmpsCode from Cable seem to be also a word with OBL as with NLG6?!
+      myNLG6->AmpsCableCode = value;
+      //myNLG6->AmpsCableCode = data[15]; //15
     }
     return true;
   } else {

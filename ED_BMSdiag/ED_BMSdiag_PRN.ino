@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2017-June
+//! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.6.2
+//! \version 0.7.0
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -198,6 +198,58 @@ void printIndividualCellData() {
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Visualize voltage distribution of cell data and statistics
+//--------------------------------------------------------------------------------
+void printVoltageDistribution() {
+  uint16_t CVmin = BMS.Cvolts.min - BMS.ADCvoltsOffset;
+  uint16_t CVmax = BMS.Cvolts.max - BMS.ADCvoltsOffset;
+  uint16_t CVp25 = BMS.Cvolts.p25 - BMS.ADCvoltsOffset;
+  uint16_t CVp50 = BMS.Cvolts.median - BMS.ADCvoltsOffset;
+  uint16_t CVp75 = BMS.Cvolts.p75 - BMS.ADCvoltsOffset;
+  byte bp_p25 = map(CVp25, CVmin, CVmax, 0, 40);
+  byte bp_p50 = map(CVp50, CVmin, CVmax, 0, 40);
+  byte bp_p75 = map(CVp75, CVmin, CVmax, 0, 40);
+ 
+  Serial.print(F("Voltage Distribution (dV= ")); Serial.print(CVmax - CVmin); Serial.println(F(" mV):"));
+
+  Serial.print(F("*"));
+  for (byte n = 1; n < 40; n++) {
+    if (n < bp_p25) {
+      Serial.print(F("-"));
+    } else if (n == bp_p25) {
+      Serial.print(F("["));
+    } else if (n < bp_p50) {
+      Serial.print(F("="));
+    } else if (n == bp_p50) {
+      Serial.print(F("|"));
+    } else if (n > bp_p50 && n < bp_p75) {
+      Serial.print(F("="));
+    } else if (n == bp_p75) {
+      Serial.print(F("]"));
+    } else {
+      Serial.print(F("-"));
+    }
+  }
+  Serial.print(F("*"));
+  Serial.println();
+  Serial.print(CVmin);
+  for (byte n = 0; n <= 7; n++) Serial.print(F(" "));
+  Serial.print(F("["));
+  Serial.print(CVp25); Serial.print(F("; "));
+  Serial.print(CVp50); Serial.print(F("; "));
+  Serial.print(CVp75); Serial.print(F("]"));
+  for (byte n = 0; n <= 5; n++) Serial.print(F(" "));
+  Serial.print(F(" ")); Serial.print(CVmax);
+
+  Serial.println();
+  Serial.print(F("min"));
+  for (byte n = 0; n <= 8; n++) Serial.print(F(" "));
+  Serial.print(F("[p25; median; p75]"));
+  for (byte n = 0; n <= 7; n++) Serial.print(F(" "));
+  Serial.println(F("max"));
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Output NLG6 charger voltages and currents AC and DC
 //--------------------------------------------------------------------------------
 void printNLG6_Status() {
@@ -229,9 +281,24 @@ void printNLG6_Status() {
 //--------------------------------------------------------------------------------
 void printNLG6temperatures() {
   Serial.println(F("Temperatures Charger-Unit /degC: "));
-  Serial.print(F("Reported       : ")); Serial.println(NLG6.ReportedTemp - TEMP_OFFSET, DEC);
-  Serial.print(F("Cooling plate  : ")); Serial.println(NLG6.CoolingPlateTemp - TEMP_OFFSET, DEC);
-  Serial.print(F("Inlet socket   : ")); Serial.println(NLG6.SocketTemp - TEMP_OFFSET, DEC);
+  Serial.print(F("Reported       : ")); 
+  if (NLG6.ReportedTemp < 0xFF) {
+    Serial.println(NLG6.ReportedTemp - TEMP_OFFSET, DEC);
+  } else {
+    Serial.println("NA");
+  }
+  Serial.print(F("Cooling plate  : ")); 
+  if (NLG6.CoolingPlateTemp < 0xFF) {
+    Serial.println(NLG6.CoolingPlateTemp - TEMP_OFFSET, DEC);
+  } else {
+    Serial.println("NA");
+  }
+  Serial.print(F("Inlet socket   : ")); 
+  if (NLG6.SocketTemp < 0xFF) {
+    Serial.println(NLG6.SocketTemp - TEMP_OFFSET, DEC);
+  } else {
+    Serial.println("NA");
+  }
   if (NLG6.NLG6present) {
     Serial.println(F("Internal values: "));       
     for (byte n = 0; n < 8; n++) {
@@ -316,6 +383,12 @@ void printBMSdata() {
   PrintSPACER();
   if (VERBOSE) {
     printIndividualCellData();
+    PrintSPACER();
+  }
+  if (BOXPLOT) {
+    DiagCAN.getBatteryVoltageDist(&BMS);  //Sort cell voltages rising up and calc. quartiles
+                                          //!!! after sorting track of individual cells is lost -> redo ".getBatteryVoltages" !!!
+    printVoltageDistribution();           //Print statistic data as boxplot
     PrintSPACER();
   }
   if (EXPDATA) {

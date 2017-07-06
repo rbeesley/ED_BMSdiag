@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2017-June
+//! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.6.2
+//! \version 0.7.0
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -225,6 +225,7 @@ void set_logging(uint8_t arg_cnt, char **args) {
 
 //--------------------------------------------------------------------------------
 //! \brief   Callback to activate main menu
+//! \brief   reset command promt
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void main_menu (uint8_t arg_cnt, char **args) {

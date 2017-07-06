@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2017-June
+//! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.4.2
+//! \version 0.7.0
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -37,7 +37,10 @@ typedef struct {
 template<typename T>
 struct Stats{
   uint16_t min;                  //!< minimum
-  T mean;                        //!< average
+  uint16_t p25;                  //!< 25th percentile
+  T mean;                        //!< average, 
+  uint16_t median;               //!< 50th percentile
+  uint16_t p75;                  //!< 75th percentile
   uint16_t max;                  //!< maximum
 };
 

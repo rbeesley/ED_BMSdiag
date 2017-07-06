@@ -30,9 +30,9 @@
 //--------------------------------------------------------------------------------
 //! \file    AvgNew.h
 //! \brief   Modified version of Average.h (no template, small footprint).
-//! \date    2016-July
+//! \date    2017-July
 //! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \version 0.3.0
 //--------------------------------------------------------------------------------
 
 #ifndef AVERAGE_NEW_H
@@ -86,6 +86,8 @@ class Average {
         uint16_t predict(int16_t x);
         uint16_t sum();
         void clear();
+        void bubble_sort();
+        int16_t percentile(int pos);
         //Average<T> &operator=(Average<T> &a);
 
 };

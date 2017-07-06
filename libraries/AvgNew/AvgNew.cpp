@@ -30,9 +30,9 @@
  //--------------------------------------------------------------------------------
 //! \file    AvgNew.cpp
 //! \brief   Modified version of Average.h (no template, small footprint).
-//! \date    2016-July
+//! \date    2017-July
 //! \author  My-Lab-odyssey
-//! \version 0.2.0
+//! \version 0.3.0
 //--------------------------------------------------------------------------------
 #include "AvgNew.h"
 
@@ -261,6 +261,28 @@ void Average::clear() {
     _position = 0;
 }
 
+void Average::bubble_sort()
+{
+  for ( int i = 0; i < _size; i++ )
+    for( int j = 0; j < _size - 1; j++ )
+      if ( _store[ j ] > _store[ j + 1 ] )
+      {
+        int temp = _store[ j ];
+        _store[ j ] = _store[ j + 1 ];
+        _store[ j + 1 ] = temp;
+      }
+}
+
+int16_t Average::percentile(int16_t pos)
+{
+  int16_t result = 0;
+
+  if ( pos > 0 && pos % 2 == 0 )
+    result = ( _store[pos] + _store[pos + 1] ) / 2;
+  else
+    result = _store[pos];
+  return result;
+}
 /*template <class T> Average<T> &Average<T>::operator=(Average<T> &a) {
     clear();
     for (int16_t i = 0; i < _size; i++) {

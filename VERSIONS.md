@@ -4,7 +4,7 @@
 |v0.7.0   |**please reload all files (including library files) !!!**|
 |         | Now the cell voltage distribution is shown as box plot in the `bms all` query and some new features are implemented:|
 |         | ... in the CLI the input is no more case sensitive|
-|         | ... the local echo can be diabled with the `ECHO`-switch in the `ED_BMSdiag.h`|
+|         | ... the local echo can be disabled with the `ECHO`-switch in the `ED_BMSdiag.h`|
 |         | ... small changes to the new OBL readouts - PLEASE report ;-)|
 |v0.6.2   | Standard charger now implemented as **OBL** command in CLI|
 |         | ... use from `CMD >>` prompt with the command `obl all` to get all readouts from the LEAR **O**n**B**oard**L**oader, or use `obl v` for voltages and `obl t` for temperatures on their own. See `?` for help in all menu levels ;-)|

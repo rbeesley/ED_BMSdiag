@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.7.0
+//! \version 0.7.1
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -692,15 +692,39 @@ boolean canDiag::getBatteryVoltage(BatteryDiag_t *myBMS, boolean debug_verbose) 
 }
 
 //--------------------------------------------------------------------------------
-//! \brief  Evaluate voltage data for distribution, calc. percentiles
+//! \brief  Evaluate voltage data for distribution, calc. percentiles & outliners
 //! \return  report success (boolean)
 //--------------------------------------------------------------------------------
 boolean canDiag::getBatteryVoltageDist(BatteryDiag_t *myBMS) {
   byte _Count = CellVoltage.getCount();
+
+  //Sort voltges in ascending order
   CellVoltage.bubble_sort();
+
+  //Get Quartiles
   myBMS->Cvolts.p25 = CellVoltage.percentile(_Count / 4);
   myBMS->Cvolts.median = CellVoltage.percentile(_Count / 2);
-  myBMS->Cvolts.p75 = CellVoltage.percentile(_Count * 3 / 4);
+  myBMS->Cvolts.p75 = CellVoltage.percentile(_Count * 3/4);
+
+  //Get Outliners
+  uint16_t p3IQR = (myBMS->Cvolts.p75 - myBMS->Cvolts.p25) * IQR_FACTOR;
+  byte p25_Out = 0;
+  for (byte n = 0; n < (CellVoltage.getCount() / 4); n++) {
+    if (CellVoltage.get(n) < ( myBMS->Cvolts.p25 - p3IQR)) {
+      p25_Out++;
+      //Serial.println(ave.get(n));
+    }
+  }
+  byte p75_Out = 0;
+  for (byte n = (CellVoltage.getCount() * 3/4); n <= CellVoltage.getCount(); n++) {
+    if (CellVoltage.get(n) > ( myBMS->Cvolts.p75 + p3IQR)) {
+      p75_Out++;
+      //Serial.println(ave.get(n));
+    }
+  }
+  myBMS->Cvolts.p25_out_count = p25_Out;
+  myBMS->Cvolts.p75_out_count = p75_Out;
+  
   return true;
 }
 

@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the BMS module.
 //! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.7.0
+//! \version 0.7.1
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -27,6 +27,7 @@
 #define DATALENGTH 238
 #define CELLCOUNT 93
 #define RAW_VOLTAGES 0           //!< Use RAW values or calc ADC offset voltage
+#define IQR_FACTOR 1.5           //!< Factor to define Outliners-Range, 1.5 for suspected outliners, 3 for definitive outliners
 
 //Data structure soft-/hardware-revision
 typedef struct {
@@ -37,10 +38,12 @@ typedef struct {
 template<typename T>
 struct Stats{
   uint16_t min;                  //!< minimum
+  byte p25_out_count;            //!< count of datasets below p25, including mininal value
   uint16_t p25;                  //!< 25th percentile
   T mean;                        //!< average, 
   uint16_t median;               //!< 50th percentile
   uint16_t p75;                  //!< 75th percentile
+  byte p75_out_count;            //!< count of datasets above p75, including maximum value
   uint16_t max;                  //!< maximum
 };
 

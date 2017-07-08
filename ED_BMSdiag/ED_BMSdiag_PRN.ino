@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2017-July
 //! \author  MyLab-odyssey
-//! \version 0.7.0
+//! \version 0.7.1
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -206,16 +206,24 @@ void printVoltageDistribution() {
   uint16_t CVp25 = BMS.Cvolts.p25 - BMS.ADCvoltsOffset;
   uint16_t CVp50 = BMS.Cvolts.median - BMS.ADCvoltsOffset;
   uint16_t CVp75 = BMS.Cvolts.p75 - BMS.ADCvoltsOffset;
+  uint16_t CVp3IQR = (BMS.Cvolts.p75 - BMS.Cvolts.p25) * IQR_FACTOR;
+  
   byte bp_p25 = map(CVp25, CVmin, CVmax, 0, 40);
   byte bp_p50 = map(CVp50, CVmin, CVmax, 0, 40);
   byte bp_p75 = map(CVp75, CVmin, CVmax, 0, 40);
+  byte bp_p3IQR_low = map(CVp25 - CVp3IQR, CVmin, CVmax, 0, 40);
+  byte bp_p3IQR_high = map(CVp75 + CVp3IQR, CVmin, CVmax, 0, 40);
  
   Serial.print(F("Voltage Distribution (dV= ")); Serial.print(CVmax - CVmin); Serial.println(F(" mV):"));
 
   Serial.print(F("*"));
   for (byte n = 1; n < 40; n++) {
     if (n < bp_p25) {
-      Serial.print(F("-"));
+      if (n == bp_p3IQR_low) {
+        Serial.print(F(">"));
+      } else {
+        Serial.print(F("-"));
+      }
     } else if (n == bp_p25) {
       Serial.print(F("["));
     } else if (n < bp_p50) {
@@ -227,18 +235,26 @@ void printVoltageDistribution() {
     } else if (n == bp_p75) {
       Serial.print(F("]"));
     } else {
-      Serial.print(F("-"));
+      if (n == bp_p3IQR_high) {
+        Serial.print(F("<"));
+      } else {
+        Serial.print(F("-"));
+      }
     }
   }
-  Serial.print(F("*"));
-  Serial.println();
+  Serial.println(F("*"));
+
   Serial.print(CVmin);
-  for (byte n = 0; n <= 7; n++) Serial.print(F(" "));
+  Serial.print(F("   "));
+  if (BMS.Cvolts.p25_out_count < 10) Serial.print('0');
+  Serial.print(BMS.Cvolts.p25_out_count); Serial.print(F(" > "));
   Serial.print(F("["));
   Serial.print(CVp25); Serial.print(F("; "));
   Serial.print(CVp50); Serial.print(F("; "));
   Serial.print(CVp75); Serial.print(F("]"));
-  for (byte n = 0; n <= 5; n++) Serial.print(F(" "));
+  Serial.print(F(" < "));
+  if (BMS.Cvolts.p75_out_count < 10) Serial.print('0');
+  Serial.print(BMS.Cvolts.p75_out_count); Serial.print(F(" "));
   Serial.print(F(" ")); Serial.print(CVmax);
 
   Serial.println();

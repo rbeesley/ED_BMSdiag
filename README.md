@@ -1,6 +1,6 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.7.0-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v0.7.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
 [![release](https://img.shields.io/badge/release-v0.6.0-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
@@ -45,6 +45,7 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v0.7.1   | Now showing outliners count in the box plot|
 |v0.7.0   |**please reload all files (including library files) !!!**|
 |         | Now the cell voltage distribution is shown as box plot in the `bms all` query and some new features are implemented:|
 |         | ... in the CLI the input is no more case sensitive|

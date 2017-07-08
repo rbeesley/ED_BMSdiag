@@ -1,6 +1,7 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
+|v0.7.1   | Now showing outliners count in the box plot|
 |v0.7.0   |**please reload all files (including library files) !!!**|
 |         | Now the cell voltage distribution is shown as box plot in the `bms all` query and some new features are implemented:|
 |         | ... in the CLI the input is no more case sensitive|

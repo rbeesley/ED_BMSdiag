@@ -1,7 +1,7 @@
 # ED BMSdiag
 
 [![version](https://img.shields.io/badge/version-v0.7.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
-[![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
+[![version](https://img.shields.io/badge/issues-zero-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
 [![release](https://img.shields.io/badge/release-v0.7.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 

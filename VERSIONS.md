@@ -1,7 +1,7 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
-|v0.9.2.  | **Final Release Canidate** with bugfixes and new features. **please reload all files (including library files) !!!**|
+|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **please reload all files (including library files) !!!**|
 |         | `all` command in MAIN menue will run all test|
 |         | `rpt` command will get a Battery Status Report. This completed feature [#12](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/12).|
 |v0.7.1   | Now showing outliners count in the box plot. Feature [#13](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/13) completed. See [Wiki for description](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Data-Overview).|

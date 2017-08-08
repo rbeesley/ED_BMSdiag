@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2017-July
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.7.0
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -36,13 +36,14 @@ void setupMenu() {
   cmdAdd("t", get_temperatures);
   cmdAdd("v", get_voltages);
   cmdAdd("bms", bms_sub);
+  cmdAdd("cs", cs_sub);
   if (NLG6.NLG6present) {
     cmdAdd("nlg6", nlg6_sub);
   } else {
     cmdAdd("obl", obl_sub);
   }
-  cmdAdd("cs", cs_sub);
   cmdAdd("all", get_all);
+  cmdAdd("rpt", get_rpt);
   cmdAdd("log", set_logging);
   cmdAdd("info", show_info);
 }
@@ -64,8 +65,19 @@ void get_all (uint8_t arg_cnt, char **args) {
       printCLSall();
       break;
     case MAIN:
+      printBMSall();
+      printNLG6all();
+      printCLSall();
       break;
   }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Callback to get all datasets and print a battery status report
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void get_rpt (uint8_t arg_cnt, char **args) {
+  printRPT();
 }
 
 //--------------------------------------------------------------------------------
@@ -134,11 +146,14 @@ void help(uint8_t arg_cnt, char **args)
       } else {
         Serial.println(F("  OBL   Submenu"));
       }
+      Serial.println(F("  all   Run all tests"));
+      Serial.println(F("  rpt   Show battery report"));
+      Serial.println();
       Serial.println(F("  help  List commands"));
+      Serial.println(F("  info  Show logging state"));
       Serial.println(F("  log   Logging"));
       Serial.println(F("        [on/off] or [on/off] [time/s]"));
       Serial.println();
-      Serial.println(F("  info  Show logging state"));
       Serial.println(F("  #     Show real time data"));
       break;
     case subBMS:
@@ -223,6 +238,14 @@ void set_logging(uint8_t arg_cnt, char **args) {
   }
 }
 
+void init_cmd_prompt() {
+  if (BMS.fHAL == false) {
+    set_cmd_display("");            //reset command prompt to "CMD >>" 
+  } else {
+    set_cmd_display("HAL >>");    
+  }
+}
+
 //--------------------------------------------------------------------------------
 //! \brief   Callback to activate main menu
 //! \brief   reset command promt
@@ -230,7 +253,7 @@ void set_logging(uint8_t arg_cnt, char **args) {
 //--------------------------------------------------------------------------------
 void main_menu (uint8_t arg_cnt, char **args) {
   myDevice.menu = MAIN;
-  set_cmd_display("");            //reset command prompt to "CMD >>"
+  init_cmd_prompt();
 }
 
 //--------------------------------------------------------------------------------
@@ -301,7 +324,6 @@ void obl_sub (uint8_t arg_cnt, char **args) {
   }
 }
 
-
 //--------------------------------------------------------------------------------
 //! \brief   Callback to switch to the Cooling sub-menu and / or evaluate commands
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
@@ -314,6 +336,15 @@ void cs_sub (uint8_t arg_cnt, char **args) {
   } else {
 
   }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Funcion to check if the VIN in the battery compares to myVIN def.
+//! \return  report status / if present (boolean)
+//--------------------------------------------------------------------------------
+boolean test_BattVIN() {
+  BMS.fHAL =  DiagCAN.getBatteryVIN(&BMS, false);
+  return BMS.fHAL;
 }
 
 //--------------------------------------------------------------------------------

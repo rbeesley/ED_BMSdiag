@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2017-July
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.7.1
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -67,15 +67,22 @@ void printHeaderData() {
 //--------------------------------------------------------------------------------
 //! \brief   Output battery production data
 //--------------------------------------------------------------------------------
-void printBatteryProductionData() {
+void printBatteryProductionData(boolean fRPT) {
   Serial.print(F("Battery-Production [Y/M/D]: ")); Serial.print(2000 + BMS.ProdYear); Serial.print(F("/"));
   Serial.print(BMS.ProdMonth); Serial.print(F("/")); Serial.println(BMS.ProdDay);
-  Serial.print(F("Battery-FAT date   [Y/M/D]: ")); Serial.print(2000 + BMS.Year); Serial.print(F("/"));
-  Serial.print(BMS.Month); Serial.print(F("/")); Serial.println(BMS.Day);
-  Serial.print(F("Rev.[Y/WK/PL] HW:")); Serial.print(2000 + BMS.hw.rev[0]); Serial.print(F("/"));
-  Serial.print(BMS.hw.rev[1]); Serial.print(F("/")); Serial.print(BMS.hw.rev[2]);
-  Serial.print(F(", SW:")); Serial.print(2000 + BMS.sw.rev[0]); Serial.print(F("/"));
-  Serial.print(BMS.sw.rev[1]); Serial.print(F("/")); Serial.println(BMS.sw.rev[2]);
+  if (fRPT) {
+    Serial.print(F("Battery verified   [Y/M/D]: "));
+    Serial.print(2000 + BMS.Year); Serial.print(F("/"));
+    Serial.print(BMS.Month); Serial.print(F("/")); Serial.println(BMS.Day);
+  } else {
+    Serial.print(F("Battery-FAT date   [Y/M/D]: ")); 
+    Serial.print(2000 + BMS.Year); Serial.print(F("/")); 
+    Serial.print(BMS.Month); Serial.print(F("/")); Serial.println(BMS.Day);
+    Serial.print(F("Rev.[Y/WK/PL] HW:")); Serial.print(2000 + BMS.hw.rev[0]); Serial.print(F("/"));
+    Serial.print(BMS.hw.rev[1]); Serial.print(F("/")); Serial.print(BMS.hw.rev[2]);
+    Serial.print(F(", SW:")); Serial.print(2000 + BMS.sw.rev[0]); Serial.print(F("/"));
+    Serial.print(BMS.sw.rev[1]); Serial.print(F("/")); Serial.println(BMS.sw.rev[2]);
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -385,7 +392,7 @@ void printBMSdata() {
   PrintSPACER();
   printHeaderData();
   PrintSPACER();
-  printBatteryProductionData();
+  printBatteryProductionData(false);
   PrintSPACER();
   printStandardDataset();
   PrintSPACER();
@@ -438,6 +445,84 @@ void printCLSdata() {
   digitalWrite(CS, HIGH);
   PrintSPACER();
   printCLS_Status();
+  PrintSPACER();
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Output BMS dataset
+//--------------------------------------------------------------------------------
+void printRPTdata() {
+  Serial.println(MSG_OK);
+  digitalWrite(CS, HIGH);
+  PrintSPACER();
+  Serial.println(F("---       Battery Status Report       ---"));
+  PrintSPACER();
+  printHeaderData();
+  Serial.println();
+  printBatteryProductionData(true);
+  Serial.println();
+  Serial.print(F("realSOC          : ")); Serial.print((float) BMS.realSOC / 10.0, 1); Serial.print(F(" %, "));
+  Serial.print(F("SOC: ")); Serial.print(BMS.SOC,1); Serial.println(F(" %"));
+  Serial.print(F("Charged Capacity : ")); Serial.print(BMS.Ccap_As.min / 360.0,1); Serial.print(F(" Ah, min. Cell# ")); Serial.println(BMS.CAP_min_at + 1);
+  Serial.print(F("BMS estimate     : ")); Serial.print(BMS.Cap_As.min / 360.0,1); Serial.println(F(" Ah, value @25degC "));
+  Serial.print(F("Measurement done : ")); Serial.print(BMS.LastMeas_days); Serial.println(F(" day(s) ago"));
+  if (BMS.LastMeas_days > 21) Serial.println(F("* Watch timer for OCV state, redo test! *"));
+  Serial.print(F("Estimation factor: ")); Serial.print(BMS.Cap_meas_quality,3);
+  if (BMS.Cap_meas_quality >= 0.82) {
+    Serial.println(F(", very good"));
+  } else if (BMS.Cap_meas_quality >= 0.80) {
+    Serial.println(F(", good"));
+  } else if (BMS.Cap_meas_quality >= 0.78) {
+    Serial.println(F(", okay"));
+    Serial.println(F("* need >>dSOC, start test below 20% SOC *"));
+  } else {
+    Serial.println(F(", poor!"));
+    Serial.println(F("*** Don't trust and redo measurement! ***"));
+  }
+  Serial.println();
+  Serial.print(F("OCV timer        : ")); Serial.print(BMS.OCVtimer); Serial.print(F(" s, "));
+  Serial.print(F("@")); Serial.print((float) BMS.Temps[11] / 64, 1); Serial.println(F("degC"));
+  Serial.print(F("OCV state        : "));
+  if (BMS.HVcontactState == 0x02) {
+    Serial.println(F("HV ON, can't meas. OCV"));
+  } else if (BMS.HVcontactState == 0x00) {  
+    if (BMS.HVoff_time < BMS.OCVtimer) {
+      Serial.print(F("wait for "));
+      uint16_t dTime = BMS.OCVtimer - BMS.HVoff_time;
+      if (dTime > 60) {
+        if ((dTime / 60) < 10) Serial.print(F("0"));
+        Serial.print(dTime / 60); Serial.print(F(":")); 
+        if ((dTime % 60) < 10) Serial.print(F("0"));
+        Serial.print(dTime % 60); Serial.println(F(" [mm:ss]"));
+      } else {
+        Serial.print(dTime); Serial.println(F(" s"));
+      }
+    } else {
+      if (BMS.SOC <= 20) {
+        Serial.println(F("Ready for cap. meas. !"));
+      } else {
+        Serial.println(MSG_OK);
+      }
+    }
+  }
+  Serial.println();
+  Serial.print(F("DC isolation     : ")); Serial.print(BMS.Isolation); Serial.print(F(" kOhm, "));
+  if (BMS.DCfault == 0) {
+    Serial.println(F("NO FAULT"));
+  } else {
+    Serial.println(F("DC FAULT"));
+  }
+  Serial.println();
+  Serial.print(F("Battery Status   : "));
+  if (BMS.SOH == 0xFF) {
+    Serial.println(MSG_OK);
+  } else {
+    Serial.println(F("* DEGRADED CELLS PRESENT *"));
+  }
+  Serial.println();
+  DiagCAN.getBatteryVoltageDist(&BMS);  //Sort cell voltages rising up and calc. quartiles
+                                        //!!! after sorting track of individual cells is lost -> redo ".getBatteryVoltages" !!!
+  printVoltageDistribution();           //Print statistic data as boxplot
   PrintSPACER();
 }
 
@@ -501,3 +586,39 @@ void printCLSall() {
     Serial.println(FAILURE);
   }
 }
+
+//--------------------------------------------------------------------------------
+//! \brief   Get all BMS data and output them as status report
+//! \brief   Dynamic memory allocation for CellVoltages and -Capacities
+//! \brief   The allocated memory will be released after the data output
+//--------------------------------------------------------------------------------
+void printRPT() {
+  byte selected[12];                   //hold list for selected tasks
+  
+  //Read CAN-Bus IDs related to BMS (sniff traffic)
+  for (byte i = 0; i < 8; i++) {
+    selected[i] = i;
+  }
+  Serial.print(F("Reading data"));
+  ReadCANtraffic_BMS(selected, 8);
+  
+  //Reserve memory
+  DiagCAN.reserveMem_CellVoltage();
+  DiagCAN.reserveMem_CellCapacity();
+  
+  //Get all diagnostics data of BMS
+  for (byte i = 0; i < 12; i++) {
+    selected[i] = i;
+  }
+  if (getBMSdata(selected, 12)) {
+    printRPTdata();
+  } else {
+    Serial.println();
+    Serial.println(FAILURE);
+  }
+    
+  //Free allocated memory
+  DiagCAN.freeMem_CellVoltage();
+  DiagCAN.freeMem_CellCapacity();
+}
+

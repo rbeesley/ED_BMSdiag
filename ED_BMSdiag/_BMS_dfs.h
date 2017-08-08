@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2017-July
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.7.1
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -28,6 +28,10 @@
 #define CELLCOUNT 93
 #define RAW_VOLTAGES 0           //!< Use RAW values or calc ADC offset voltage
 #define IQR_FACTOR 1.5           //!< Factor to define Outliners-Range, 1.5 for suspected outliners, 3 for definitive outliners
+
+//Easter Egg from the HAL Laboratories in Urbana, Illinois
+#define myVIN "WME4514921K756772" //example: enter your VIN to get a reminder from a paranoid, holonomic brain
+//#define myVIN ""                //empty myVIN will disable easter egg ;-)
 
 //Data structure soft-/hardware-revision
 typedef struct {
@@ -48,7 +52,7 @@ struct Stats{
 };
 
 //BMS data structure
-typedef struct {     
+typedef struct {   
   Stats<uint16_t> ADCCvolts;     //!< average cell voltage in mV, no offset
                                  //!< minimum and maximum cell voltages in mV, add offset +1500
   int16_t ADCvoltsOffset;        //!< calculated offset between RAW cell voltages and ADCref, about 90mV
@@ -89,7 +93,8 @@ typedef struct {
   byte minutes;                  //!< time in car: minutes
   
   float SOC;                     //!< State of Charge, as reported by vehicle dash
-  uint16_t realSOC;              //!< is this the internal SOC value in % (x/10)
+  byte SOH;                      //!< Flag showing if degraded cells are found  
+  uint16_t realSOC;              //!< The internal SOC value in % (x/10)
     
   int16_t Amps;                  //!< battery current in ampere (x/32) reported by by BMS
   float Amps2;                   //!< battery current in ampere read by live data on CAN or from BMS
@@ -97,6 +102,7 @@ typedef struct {
   
   float HV;                      //!< total voltage of HV system in V
   float LV;                      //!< 12V onboard voltage / LV system
+  byte LV_DCDC_amps;             //!< current of DC/DC LV system, not 12V battery!
   
   unsigned long ODO;             //!< Odometer count
   
@@ -109,10 +115,13 @@ typedef struct {
   long HVcontactCyclesLeft;      //!< counter related to ON/OFF cyles of the car
   long HVcontactCyclesMax;       //!< static, seems to be maxiumum of contactor cycles 
   byte UnknownCounter[3];        //!< some incremental counter - for what?
+  char BattVIN[18];              //!< VIN stored in BMS
+  boolean fHAL = false;
 } BatteryDiag_t; 
 
 const PROGMEM byte rqBattHWrev[4]                 = {0x03, 0x22, 0xF1, 0x50};
 const PROGMEM byte rqBattSWrev[4]                 = {0x03, 0x22, 0xF1, 0x51};
+const PROGMEM byte rqBattVIN[4]                   = {0x03, 0x22, 0xF1, 0x90};
 const PROGMEM byte rqBattTemperatures[4]          = {0x03, 0x22, 0x02, 0x01}; 
 const PROGMEM byte rqBattModuleTemperatures[4]    = {0x03, 0x22, 0x02, 0x02};
 const PROGMEM byte rqBattHVstatus[4]              = {0x03, 0x22, 0x02, 0x04};

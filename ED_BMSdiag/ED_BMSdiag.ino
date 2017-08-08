@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v0.7.1
+// ED BMSdiag, v0.9.2
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2015-2017 by MyLab-odyssey
@@ -21,9 +21,9 @@
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2017-July
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.7.1
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 
@@ -55,6 +55,9 @@ void setup() {
 
   //Look if a NLG6 fastcharger is installed
   if (NLG6TEST) nlg6_installed();
+
+  //test valid VIN stored in Battery
+  if (sizeof(myVIN) > 1) test_BattVIN();
   
   //Read CAN-Bus IDs related to BMS (sniff traffic)
   Serial.print(F("Reading data"));
@@ -66,6 +69,7 @@ void setup() {
   
   //Setup CLI, display prompt and local echo
   setupMenu();
+  init_cmd_prompt();
   cmd_display();
   set_local_echo(ECHO);
   

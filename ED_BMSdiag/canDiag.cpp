@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2017-July
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.7.1
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 
@@ -83,9 +83,11 @@ void canDiag::begin(MCP_CAN *_myCAN, CTimeout *_myCAN_Timeout) {
   myCAN_Timeout = _myCAN_Timeout;
   
   // Initialize MCP2515 running at 16MHz with a baudrate of 500kb/s and the masks and filters enabled.
-  if(myCAN0->begin(MCP_STD, CAN_500KBPS, MCP_16MHZ) == CAN_OK) DEBUG_UPDATE(F("MCP2515 Init Okay!!\r\n"));
-  else DEBUG_UPDATE(F("MCP2515 Init Failed!!\r\n"));
-
+  if (myCAN0->begin(MCP_STD, CAN_500KBPS, MCP_16MHZ) == CAN_OK) {
+    DEBUG_UPDATE(F("MCP2515 Init Okay!!\r\n"));
+  } else {
+    DEBUG_UPDATE(F("MCP2515 Init Failed!!\r\n"));
+  }
   this->data = new byte[DATALENGTH];
 }
 
@@ -516,6 +518,37 @@ boolean canDiag::getBatteryRevision(BatteryDiag_t *myBMS, boolean debug_verbose)
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Read the VIN stored in the battery and compare it to myVIN def.
+//! \param   enable verbose / debug output (boolean)
+//! \return  report success (boolean)
+//--------------------------------------------------------------------------------
+boolean canDiag::getBatteryVIN(BatteryDiag_t *myBMS, boolean debug_verbose) {
+  debug_verbose = debug_verbose & VERBOSE_ENABLE;
+  uint16_t items;
+
+  this->setCAN_ID(0x7E7, 0x7EF);
+  items = this->Request_Diagnostics(rqBattVIN);
+  
+  byte OKcount = 0;
+  if(items){
+    if (debug_verbose) {
+      this->PrintReadBuffer(items);
+    } 
+    for(byte n = 0; n < 17; n++) {
+      myBMS->BattVIN[n] =  data[n + 4];
+      if (myBMS->BattVIN[n] == myVIN[n]) OKcount++;
+    }
+    //return true if data completely matches
+    if (OKcount == 17) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Read and evaluate battery high voltage status
 //! \param   enable verbose / debug output (boolean)
 //! \return  report success (boolean)
@@ -594,6 +627,7 @@ boolean canDiag::getBatteryCapacity(BatteryDiag_t *myBMS, boolean debug_verbose)
     myBMS->HVoff_time = (unsigned long) data[5] * 65535 + (uint16_t) data[6] * 256 + data[7];
     myBMS->HV_lowcurrent = (unsigned long) data[9] * 65535 + (uint16_t) data[10] * 256 + data[11];
     myBMS->OCVtimer = (uint16_t) data[12] * 256 + data[13];
+    myBMS->SOH = data[14];
     this->ReadDiagWord(&myBMS->Cap_As.min,data,21,1);
     this->ReadDiagWord(&myBMS->Cap_As.mean,data,23,1);
     this->ReadDiagWord(&myBMS->Cap_As.max,data,17,1);

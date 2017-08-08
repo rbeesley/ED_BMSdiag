@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    NLG6_dfs.h
 //! \brief   Definitions and structures for the NLG6-Charger module.
-//! \date    2017-June
+//! \date    2017-August
 //! \author  MyLab-odyssey
-//! \version 0.6.2
+//! \version 0.9.2
 //--------------------------------------------------------------------------------
 #ifndef NLG6_DFS_H
 #define NLG6_DFS_H
@@ -37,7 +37,7 @@ typedef struct {
   uint16_t DC_Current;            //!< DC current measured by charger
   uint16_t DC_HV;                 //!< DC HV measured by charger
   byte LV;                        //!< 12V onboard voltage of Charger DC/DC
-  byte Temps[7];                  //!< internal temperatures in charger unit and heat exchanger
+  byte Temps[8];                  //!< internal temperatures in charger unit and heat exchanger
   byte ReportedTemp;              //!< mean temperature, reported by charger
   byte SocketTemp;                //!< temperature of mains socket charger
   byte CoolingPlateTemp;          //!< temperature of cooling plate 

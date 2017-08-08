@@ -33,9 +33,9 @@
 //! \file    Cmd.cpp
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2017-July
+//! \date    2017-August
 //! \author  My-Lab-odyssey
-//! \version 0.6.1
+//! \version 0.6.2
 //--------------------------------------------------------------------------------
 
 *******************************************************************/
@@ -66,12 +66,14 @@ static uint8_t *msg_ptr;
 static cmd_t *cmd_tbl_list, *cmd_tbl;
 
 // text strings for command prompt (stored in flash)
-const char cmd_banner[] PROGMEM = "*** CMD ***";
-const char cmd_prompt[] PROGMEM = "CMD >> ";
+//const char cmd_banner[] PROGMEM = "*** CMD ***";
+const char cmd_prompt[] PROGMEM = "CMD >>";
 const char cmd_unrecog[] PROGMEM = "CMD: not recognized";
 
 char myCMD[MAX_CMD_SIZE];
 boolean fECHO = true;  //flag for local echo of input characters
+
+byte HALcount = 0;
 
 
 /**************************************************************************/
@@ -99,7 +101,6 @@ void set_cmd_display(const char *_myCMD)
     } else {
        strcpy_P(myCMD, cmd_prompt);
     }
-
 }
 
 void set_local_echo(boolean _fECHO)
@@ -124,6 +125,26 @@ void cmd_parse(char *cmd)
     char *argv[30];
     char buf[50];
     cmd_t *cmd_entry;
+
+    if (!strcmp(myCMD, "HAL >>")) {
+       switch (HALcount) {
+          case 0:
+	     Serial.println(F("I'm sorry, Dave. I'm afraid I can't do that."));
+             HALcount++;
+             break;
+          case 1:
+	     Serial.println(F("This mission is too important for me to allow you to jeopardize it."));
+             HALcount++;
+             break;
+          case 2:
+	     Serial.println(F("Dave, this conversation can serve no purpose any more. Goodbye."));
+             HALcount++;
+             break;
+          default:
+             break;
+       }
+       return;
+    }
 
     //fflush(stdout);  //not reliable on all boards ?!
 

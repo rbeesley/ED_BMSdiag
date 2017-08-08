@@ -1,6 +1,6 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.7.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v0.9.2-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
 [![release](https://img.shields.io/badge/release-v0.7.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
@@ -45,6 +45,9 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v0.9.2.  | **Final Release Canidate** with bugfixes and new features. **please reload all files (including library files) !!!**|
+|         | `all` command in MAIN menue will run all test|
+|         | `rpt` command will get a Battery Status Report. This completed feature [#12](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/12).|
 |v0.7.1   | Now showing outliners count in the box plot. Feature [#13](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/13) completed. See [Wiki for description](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Data-Overview).|
 |**v0.7.0**   |**please reload all files (including library files) !!!**|
 |         | Now the cell voltage distribution is shown as box plot in the `bms all` query and some new features are implemented:|

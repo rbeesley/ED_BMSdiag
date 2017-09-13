@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2017-August
+//! \date    2017-September
 //! \author  MyLab-odyssey
-//! \version 0.9.2
+//! \version 1.0.1
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -201,6 +201,7 @@ void show_info(uint8_t arg_cnt, char **args)
 {
   //Serial.print(F("Usable Memory: ")); Serial.println(getFreeRam());
   //Serial.print(F("Menu: ")); Serial.println(myDevice.menu);
+  Serial.print(F("Battery VIN: ")); Serial.println(BMS.BattVIN);
   Serial.print(F("NLG6: ")); Serial.println(NLG6.NLG6present);
   Serial.print(F("Logging interval: ")); Serial.print(myDevice.timer, DEC);
   Serial.println(F(" s"));

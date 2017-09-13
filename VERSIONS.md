@@ -1,8 +1,12 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
-|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **please reload all files (including library files) !!!**|
-|         | `all` command in MAIN menue will run all test|
+|v1.0.1   | **Final Release - Project finished**. Small bugfixes and improvements:|
+|         | ... Battery Status Flag shows health status of the pack [OK, FAULT].|
+|         | ... Outliners count in box plot now excludes min- / max-values.|
+|         | ... Battery Status Report optimized with hints for better charging / capacity measurement.|
+|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **Please reload all files (including library files) !!!**|
+|         | `all` command in MAIN menue will run all test.|
 |         | `rpt` command will get a Battery Status Report. This completed feature [#12](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/12).|
 |v0.7.1   | Now showing outliners count in the box plot. Feature [#13](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/13) completed. See [Wiki for description](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Data-Overview).|
 |**v0.7.0**   |**please reload all files (including library files) !!!**|
@@ -29,12 +33,12 @@
 |         | ... NLG6 fast charger|
 |         | ... Cooling- and other subsystems|
 |         | ... Logging function|
-|v0.4.2   | **please reload all files !**|
+|v0.4.2   | **Please reload all files !**|
 |         | Bugfix for Average-Template memory bug > rewritten  to AvgNew-Class|
 |         | ... This version uses dynamic memory allocation, so monitor free memory (between heap and stack) if you make modifications!|
 |v0.4.0   | New canDiag class structure and BMS_dfs.h for BMS specific code.|
-|v0.3.9b  | **now using semantic versioning** (old files unchanged)|
-|v0.39b   | fixed type cast bug HVcontactor-timer.|
+|v0.3.9b  | **Now using semantic versioning** (old files unchanged)|
+|v0.39b   | Fixed type cast bug HVcontactor-timer.|
 |v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features:|
 |         | ... usage of min. data type|
 |         | ... new structure typedef and templates|

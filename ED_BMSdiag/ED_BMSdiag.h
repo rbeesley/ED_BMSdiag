@@ -16,14 +16,14 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2017-August
+//! \date    2017-September
 //! \author  MyLab-odyssey
-//! \version 0.9.2
+//! \version 1.0.1
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
 #define BOXPLOT 1                //!< Visualize cell statistics as boxplot
-#define EXPDATA 1                //!< EXPDATA mode will output experimental / NOT VERIFIED data
+#define EXPDATA 0                //!< EXPDATA mode will output experimental / NOT VERIFIED data
 #define HELP 1                   //!< HELP menu active
 #define ECHO 1                   //!< local ECHO of CLI
 #define NLG6TEST 1               //!< Test if the NLG6 fast charger is installed, 
@@ -35,7 +35,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "0.9.2";
+char* const PROGMEM version = "1.0.1";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")

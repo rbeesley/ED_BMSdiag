@@ -1,12 +1,17 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v0.9.2-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v1.0.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v0.7.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v1.0.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
-Retrieve battery diagnostic data from your smart electric drive EV.
-Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki).
+Retrieve battery diagnostic data from your smart electric drive EV. Get a Status Report to rate the health of the battery or dig into more detailed measurements.  
+
+>**Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki).**
+
+>**The development is now finished with the final release of v1.0.1 .**  
+
+>**The software will only work on the third generation Smart electric drive vehicle build from late 2012 to mid 2015.**
 
 ---
 
@@ -20,15 +25,15 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 <p/>
 
 ## Get started
-* Download the [repo-ZIP](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip), then copy the files to your Arduino folder. The folder structure should look like this:
+* Download the [repo-ZIP](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip), then copy the files to your **Arduino folder** (location depends on OS). The folder structure should look like this:
 <p align="left">
 <img  src="https://github.com/MyLab-odyssey/ED_BMSdiag/raw/master/pictures/Arduino_folder_structure.png" /><p/>
 
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.  
 
-* Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).
+* **Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).**
 
-> **Verified to work with Arduino IDE 1.8.1 (on OS X 10.12 and WIN-Systems)**
+> **Verified to work with Arduino IDE 1.8.4 (on OS X 10.12 and WIN-Systems)**
 
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
@@ -45,8 +50,12 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
-|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **please reload all files (including library files) !!!**|
-|         | `all` command in MAIN menue will run all test|
+|v1.0.1   | **Final Release - Project finished**. Small bugfixes and improvements:|
+|         | ... Battery Status Flag shows health status of the pack [OK, FAULT].|
+|         | ... Outliners count in box plot now excludes min- / max-values.|
+|         | ... Battery Status Report optimized with hints for better charging / capacity measurement.|
+|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **Please reload all files (including library files) !!!**|
+|         | `all` command in MAIN menue will run all test.|
 |         | `rpt` command will get a Battery Status Report. This completed feature [#12](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/12).|
 |v0.7.1   | Now showing outliners count in the box plot. Feature [#13](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/13) completed. See [Wiki for description](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Data-Overview).|
 |**v0.7.0**   |**please reload all files (including library files) !!!**|
@@ -73,12 +82,12 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 |         | ... NLG6 fast charger|
 |         | ... Cooling- and other subsystems|
 |         | ... Logging function|
-|v0.4.2   | **please reload all files !**|
+|v0.4.2   | **Please reload all files !**|
 |         | Bugfix for Average-Template memory bug > rewritten  to AvgNew-Class|
 |         | ... This version uses dynamic memory allocation, so monitor free memory (between heap and stack) if you make modifications!|
 |v0.4.0   | New canDiag class structure and BMS_dfs.h for BMS specific code.|
-|v0.3.9b  | **now using semantic versioning** (old files unchanged)|
-|v0.39b   | fixed type cast bug HVcontactor-timer.|
+|v0.3.9b  | **Now using semantic versioning** (old files unchanged)|
+|v0.39b   | Fixed type cast bug HVcontactor-timer.|
 |v0.39    | Optimized memory usage to gain ~ 560 Bytes of SRAM for more features.|
 
 (For more entries see VERSIONS.md)

@@ -33,9 +33,9 @@
 //! \file    Cmd.h
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2017-July
+//! \date    2017-August
 //! \author  My-Lab-odyssey
-//! \version 0.6.1
+//! \version 0.6.2
 //--------------------------------------------------------------------------------
 
 *******************************************************************/

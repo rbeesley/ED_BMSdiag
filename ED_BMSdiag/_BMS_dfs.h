@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2017-August
+//! \date    2017-September
 //! \author  MyLab-odyssey
-//! \version 0.9.2
+//! \version 1.0.1
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -93,7 +93,7 @@ typedef struct {
   byte minutes;                  //!< time in car: minutes
   
   float SOC;                     //!< State of Charge, as reported by vehicle dash
-  byte SOH;                      //!< Flag showing if degraded cells are found  
+  byte SOH;                      //!< Flag showing if degraded cells are found, or battery failiure present 
   uint16_t realSOC;              //!< The internal SOC value in % (x/10)
     
   int16_t Amps;                  //!< battery current in ampere (x/32) reported by by BMS

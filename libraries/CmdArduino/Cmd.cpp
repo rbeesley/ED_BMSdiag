@@ -125,7 +125,6 @@ void cmd_parse(char *cmd)
     char *argv[30];
     char buf[50];
     cmd_t *cmd_entry;
-
     if (!strcmp(myCMD, "HAL >>")) {
        switch (HALcount) {
           case 0:

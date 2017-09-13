@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2017-August
+//! \date    2017-September
 //! \author  MyLab-odyssey
-//! \version 0.9.2
+//! \version 1.0.1
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -65,10 +65,19 @@ void printHeaderData() {
 }
 
 //--------------------------------------------------------------------------------
-//! \brief   Output battery production data
+//! \brief   Output battery production data and battery status SOH flag
 //--------------------------------------------------------------------------------
 void printBatteryProductionData(boolean fRPT) {
-  Serial.print(F("Battery-Production [Y/M/D]: ")); Serial.print(2000 + BMS.ProdYear); Serial.print(F("/"));
+  Serial.print(F("Battery Status   : "));
+  if (BMS.SOH == 0xFF) {
+    Serial.println(MSG_OK);
+  } else if (BMS.SOH == 0) {
+    Serial.println(F("FAULT"));
+  } else {
+    Serial.println(F("DEGRADED"));
+  }
+  Serial.println();
+  Serial.print(F("Battery Production [Y/M/D]: ")); Serial.print(2000 + BMS.ProdYear); Serial.print(F("/"));
   Serial.print(BMS.ProdMonth); Serial.print(F("/")); Serial.println(BMS.ProdDay);
   if (fRPT) {
     Serial.print(F("Battery verified   [Y/M/D]: "));
@@ -90,9 +99,9 @@ void printBatteryProductionData(boolean fRPT) {
 //--------------------------------------------------------------------------------
 void printExperimentalData() {
   Serial.println(F("*** Experimental Data - NOT VERIFIED ***"));
-  Serial.print(F("Maximum Capacity @45C: ")); Serial.print(BMS.CapInit / 360.0,1); Serial.println(F(" Ah"));
+  Serial.print(F("Maximum capacity @45C: ")); Serial.print(BMS.CapInit / 360.0,1); Serial.println(F(" Ah"));
   Serial.print(F("Aging-Loss: ")); Serial.print((float) BMS.CapLoss / 1000, 3); Serial.println(F(" %"));
-  Serial.print(F("Unknown Counter: 0x")); 
+  Serial.print(F("Unknown counter: 0x")); 
   if (BMS.UnknownCounter[0] <= 9) Serial.print(F("0")); Serial.print(BMS.UnknownCounter[0], HEX);
   if (BMS.UnknownCounter[1] <= 9) Serial.print(F("0")); Serial.print(BMS.UnknownCounter[1], HEX);
   if (BMS.UnknownCounter[2] <= 9) Serial.print(F("0")); Serial.println(BMS.UnknownCounter[2], HEX);
@@ -149,11 +158,11 @@ void printHVcontactorState() {
     Serial.print(F("state OFF"));
     Serial.print(F(", for: ")); Serial.print(BMS.HVoff_time); Serial.println(F(" s"));
   }
-  Serial.print(F("cycles left   : ")); Serial.println(BMS.HVcontactCyclesLeft);
+  Serial.print(F("Cycles left   : ")); Serial.println(BMS.HVcontactCyclesLeft);
   Serial.print(F("of max. cycles: ")); Serial.println(BMS.HVcontactCyclesMax);
   Serial.print(F("DC isolation  : ")); Serial.print(BMS.Isolation); Serial.print(F(" kOhm, "));
   if (BMS.DCfault == 0) {
-    Serial.println(F("NO FAULT"));
+    Serial.println(MSG_OK);
   } else {
     Serial.println(F("DC FAULT"));
   }
@@ -463,17 +472,19 @@ void printRPTdata() {
   Serial.println();
   Serial.print(F("realSOC          : ")); Serial.print((float) BMS.realSOC / 10.0, 1); Serial.print(F(" %, "));
   Serial.print(F("SOC: ")); Serial.print(BMS.SOC,1); Serial.println(F(" %"));
-  Serial.print(F("Charged Capacity : ")); Serial.print(BMS.Ccap_As.min / 360.0,1); Serial.print(F(" Ah, min. Cell# ")); Serial.println(BMS.CAP_min_at + 1);
+  Serial.print(F("Charged capacity : ")); Serial.print(BMS.Ccap_As.min / 360.0,1); Serial.print(F(" Ah, min. Cell# ")); Serial.println(BMS.CAP_min_at + 1);
   Serial.print(F("BMS estimate     : ")); Serial.print(BMS.Cap_As.min / 360.0,1); Serial.println(F(" Ah, value @25degC "));
   Serial.print(F("Measurement done : ")); Serial.print(BMS.LastMeas_days); Serial.println(F(" day(s) ago"));
   if (BMS.LastMeas_days > 21) Serial.println(F("* Watch timer for OCV state, redo test! *"));
   Serial.print(F("Estimation factor: ")); Serial.print(BMS.Cap_meas_quality,3);
-  if (BMS.Cap_meas_quality >= 0.82) {
+  if (BMS.Cap_meas_quality >= 0.85) {
+    Serial.println(F(", excellent"));
+  } else if (BMS.Cap_meas_quality >= 0.82) {
     Serial.println(F(", very good"));
   } else if (BMS.Cap_meas_quality >= 0.80) {
     Serial.println(F(", good"));
   } else if (BMS.Cap_meas_quality >= 0.78) {
-    Serial.println(F(", okay"));
+    Serial.println(F(", fair"));
     Serial.println(F("* need >>dSOC, start test below 20% SOC *"));
   } else {
     Serial.println(F(", poor!"));
@@ -489,7 +500,12 @@ void printRPTdata() {
     if (BMS.HVoff_time < BMS.OCVtimer) {
       Serial.print(F("wait for "));
       uint16_t dTime = BMS.OCVtimer - BMS.HVoff_time;
-      if (dTime > 60) {
+      if (dTime > 3600) {
+        if ((dTime / 3600) < 10) Serial.print(F("0"));
+        Serial.print(dTime / 3600); Serial.print(F(":")); 
+        if (((dTime % 3600) / 60) < 10) Serial.print(F("0"));
+        Serial.print((dTime % 3600) / 60); Serial.println(F(" [hh:mm]"));
+      } else if (dTime > 60) {
         if ((dTime / 60) < 10) Serial.print(F("0"));
         Serial.print(dTime / 60); Serial.print(F(":")); 
         if ((dTime % 60) < 10) Serial.print(F("0"));
@@ -508,16 +524,9 @@ void printRPTdata() {
   Serial.println();
   Serial.print(F("DC isolation     : ")); Serial.print(BMS.Isolation); Serial.print(F(" kOhm, "));
   if (BMS.DCfault == 0) {
-    Serial.println(F("NO FAULT"));
-  } else {
-    Serial.println(F("DC FAULT"));
-  }
-  Serial.println();
-  Serial.print(F("Battery Status   : "));
-  if (BMS.SOH == 0xFF) {
     Serial.println(MSG_OK);
   } else {
-    Serial.println(F("* DEGRADED CELLS PRESENT *"));
+    Serial.println(F("DC FAULT"));
   }
   Serial.println();
   DiagCAN.getBatteryVoltageDist(&BMS);  //Sort cell voltages rising up and calc. quartiles

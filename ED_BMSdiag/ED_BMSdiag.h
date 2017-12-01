@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2017-September
+//! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.1
+//! \version 1.0.2
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -35,7 +35,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = "1.0.1";
+char* const PROGMEM version = "1.0.2";
 #define FAILURE F("* Measurement failed *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")
@@ -63,6 +63,13 @@ typedef struct {
   uint16_t timer = 30;
   bool logging = false;
   uint16_t logCount = 0;
+  bool initialDump = true;
 } deviceStatus_t;
 
 deviceStatus_t myDevice;
+
+enum {EE_Signature = 0, EE_IntialDumpAll, EE_logging, EE_logInterval};
+const byte kMagicSignature = 0x55;
+
+boolean ReadGlobalConfig(deviceStatus_t *config, bool force_write = false);
+

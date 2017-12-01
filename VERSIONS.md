@@ -1,6 +1,11 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
+|v1.0.3   | Small improvement:|
+|         | ... Experimental/unverified data now configurable at use rather than at compile time|
+|v1.0.2   | Small improvements:|
+|         | ... Now supports automatic dumping of all diagnostic data upon connection|
+|         | ... Configuration is now stored to onboard EEPROM, so device comes up in the same state as it was last used (for logging settings and intial dump on/off)|
 |v1.0.1   | **Final Release - Project finished**. Small bugfixes and improvements:|
 |         | ... Battery Status Flag shows health status of the pack [OK, FAULT].|
 |         | ... Outliners count in box plot now excludes min- / max-values.|

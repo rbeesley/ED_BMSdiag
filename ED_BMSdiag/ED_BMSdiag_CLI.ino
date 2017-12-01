@@ -18,7 +18,7 @@
 //! \brief   Functions for the Command Line Interface (CLI) menu system
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.2
+//! \version 1.0.3
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -48,6 +48,7 @@ void setupMenu() {
   cmdAdd("info", show_info);
   cmdAdd("reset", reset_factory_defaults);
   cmdAdd("initial", set_initial_dump);
+  cmdAdd("experimental", set_experimental);
 }
 
 //--------------------------------------------------------------------------------
@@ -141,24 +142,26 @@ void help(uint8_t arg_cnt, char **args)
   switch (myDevice.menu) {
     case MAIN:
       Serial.println(F("* Main Menu:"));
-      Serial.println(F("  BMS     Submenu"));
-      Serial.println(F("  CS      Submenu"));
+      Serial.println(F("  BMS          Submenu"));
+      Serial.println(F("  CS           Submenu"));
       if (NLG6.NLG6present) {
-        Serial.println(F("  NLG6    Submenu"));
+        Serial.println(F("  NLG6         Submenu"));
       } else {
-        Serial.println(F("  OBL     Submenu"));
+        Serial.println(F("  OBL          Submenu"));
       }
-      Serial.println(F("  all     Run all tests"));
-      Serial.println(F("  rpt     Show battery report"));
+      Serial.println(F("  all          Run all tests"));
+      Serial.println(F("  rpt          Show battery report"));
       Serial.println();
-      Serial.println(F("  help    List commands"));
-      Serial.println(F("  info    Show logging state"));
-      Serial.println(F("  log     Logging"));
-      Serial.println(F("          [on/off] or [on/off] [time/s]"));
-      Serial.println(F("  reset   Reset to factory defaults (initial dump, logging off)"));
-      Serial.println(F("  initial Configure initial dump on or off"));
-      Serial.println(F("          [on/off]"));
-      
+      Serial.println(F("  help         List commands"));
+      Serial.println(F("  info         Show logging state"));
+      Serial.println(F("  log          Logging"));
+      Serial.println(F("               [on/off] or [on/off] [time/s]"));
+      Serial.println(F("  reset        Reset to factory defaults (initial dump, logging off)"));
+      Serial.println(F("  initial      Configure initial dump on or off"));
+      Serial.println(F("               [on/off]"));
+      Serial.println(F("  experimental Configure whether to include experimental data"));
+      Serial.println(F("               [on/off]"));
+            
       Serial.println();
       Serial.println(F("  #     Show real time data"));
       break;
@@ -201,6 +204,20 @@ void show_splash(uint8_t arg_cnt, char **args) {
 
 //--------------------------------------------------------------------------------
 //! \brief   Callback to get all datasets depending on the active menu
+//! \param   true for "ON", false for "OFF"
+//--------------------------------------------------------------------------------
+void print_on_off(bool on)
+{
+  if (on)
+  {
+    Serial.println(F("ON"));
+  } else {
+    Serial.println(F("OFF"));
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Callback to get all datasets depending on the active menu
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void show_info(uint8_t arg_cnt, char **args)
@@ -213,21 +230,12 @@ void show_info(uint8_t arg_cnt, char **args)
   Serial.print(F("Logging interval: ")); Serial.print(myDevice.timer, DEC);
   Serial.println(F(" s"));
   Serial.print(F("Logging is "));
-  if (myDevice.logging)
-  {
-    Serial.println(F("ON"));
-  }
-  else {
-    Serial.println(F("OFF"));
-  }
+  print_on_off(myDevice.logging);
   Serial.print(F("Initial dump is "));
-  if (myDevice.initialDump)
-  {
-    Serial.println(F("ON"));
-  }
-  else {
-    Serial.println(F("OFF"));
-  }}
+  print_on_off (myDevice.initialDump);
+  Serial.print(F("Experimental data is "));
+  print_on_off (myDevice.experimental);
+}
 
 //--------------------------------------------------------------------------------
 //! \brief   Callback to start logging and / or set parameters
@@ -268,6 +276,26 @@ void set_initial_dump(uint8_t arg_cnt, char **args) {
       myDevice.initialDump = false;
     }
     EEPROM.update(EE_IntialDumpAll, myDevice.initialDump);
+  } else {
+    if (arg_cnt == 1) {
+      show_info(arg_cnt, args);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Callback to configure experimental data or not
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void set_experimental(uint8_t arg_cnt, char **args) {
+  if (arg_cnt == 1) {
+    if (strcmp(args[1], "on") == 0) {
+      myDevice.experimental = true;
+    }
+    if (strcmp(args[1], "off") == 0) {
+      myDevice.experimental = false;
+    }
+    EEPROM.update(EE_Experimental, myDevice.experimental);
   } else {
     if (arg_cnt == 1) {
       show_info(arg_cnt, args);

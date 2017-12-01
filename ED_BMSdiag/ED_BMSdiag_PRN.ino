@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.2
+//! \version 1.0.3
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ void printBMSdata() {
     printVoltageDistribution();           //Print statistic data as boxplot
     PrintSPACER();
   }
-  if (EXPDATA) {
+  if (myDevice.experimental) {
     printExperimentalData();
     PrintSPACER();
   }

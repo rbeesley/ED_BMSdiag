@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2017-September
+//! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.1
+//! \version 1.0.2
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -46,6 +46,8 @@ void setupMenu() {
   cmdAdd("rpt", get_rpt);
   cmdAdd("log", set_logging);
   cmdAdd("info", show_info);
+  cmdAdd("reset", reset_factory_defaults);
+  cmdAdd("initial", set_initial_dump);
 }
 
 //--------------------------------------------------------------------------------
@@ -139,20 +141,24 @@ void help(uint8_t arg_cnt, char **args)
   switch (myDevice.menu) {
     case MAIN:
       Serial.println(F("* Main Menu:"));
-      Serial.println(F("  BMS   Submenu"));
-      Serial.println(F("  CS    Submenu"));
+      Serial.println(F("  BMS     Submenu"));
+      Serial.println(F("  CS      Submenu"));
       if (NLG6.NLG6present) {
-        Serial.println(F("  NLG6  Submenu"));
+        Serial.println(F("  NLG6    Submenu"));
       } else {
-        Serial.println(F("  OBL   Submenu"));
+        Serial.println(F("  OBL     Submenu"));
       }
-      Serial.println(F("  all   Run all tests"));
-      Serial.println(F("  rpt   Show battery report"));
+      Serial.println(F("  all     Run all tests"));
+      Serial.println(F("  rpt     Show battery report"));
       Serial.println();
-      Serial.println(F("  help  List commands"));
-      Serial.println(F("  info  Show logging state"));
-      Serial.println(F("  log   Logging"));
-      Serial.println(F("        [on/off] or [on/off] [time/s]"));
+      Serial.println(F("  help    List commands"));
+      Serial.println(F("  info    Show logging state"));
+      Serial.println(F("  log     Logging"));
+      Serial.println(F("          [on/off] or [on/off] [time/s]"));
+      Serial.println(F("  reset   Reset to factory defaults (initial dump, logging off)"));
+      Serial.println(F("  initial Configure initial dump on or off"));
+      Serial.println(F("          [on/off]"));
+      
       Serial.println();
       Serial.println(F("  #     Show real time data"));
       break;
@@ -201,6 +207,7 @@ void show_info(uint8_t arg_cnt, char **args)
 {
   //Serial.print(F("Usable Memory: ")); Serial.println(getFreeRam());
   //Serial.print(F("Menu: ")); Serial.println(myDevice.menu);
+//  Serial.print(F("    Car VIN: ")); Serial.println(BMS.CarVIN);
   Serial.print(F("Battery VIN: ")); Serial.println(BMS.BattVIN);
   Serial.print(F("NLG6: ")); Serial.println(NLG6.NLG6present);
   Serial.print(F("Logging interval: ")); Serial.print(myDevice.timer, DEC);
@@ -213,7 +220,14 @@ void show_info(uint8_t arg_cnt, char **args)
   else {
     Serial.println(F("OFF"));
   }
-}
+  Serial.print(F("Initial dump is "));
+  if (myDevice.initialDump)
+  {
+    Serial.println(F("ON"));
+  }
+  else {
+    Serial.println(F("OFF"));
+  }}
 
 //--------------------------------------------------------------------------------
 //! \brief   Callback to start logging and / or set parameters
@@ -232,6 +246,28 @@ void set_logging(uint8_t arg_cnt, char **args) {
     if (strcmp(args[1], "off") == 0) {
       myDevice.logging = false;
     }
+    EEPROM.update(EE_logging, myDevice.logging);
+    EEPROM.update(EE_logInterval, myDevice.timer);
+  } else {
+    if (arg_cnt == 1) {
+      show_info(arg_cnt, args);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Callback to configure initial dump or not
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void set_initial_dump(uint8_t arg_cnt, char **args) {
+  if (arg_cnt == 1) {
+    if (strcmp(args[1], "on") == 0) {
+      myDevice.initialDump = true;
+    }
+    if (strcmp(args[1], "off") == 0) {
+      myDevice.initialDump = false;
+    }
+    EEPROM.update(EE_IntialDumpAll, myDevice.initialDump);
   } else {
     if (arg_cnt == 1) {
       show_info(arg_cnt, args);
@@ -340,11 +376,21 @@ void cs_sub (uint8_t arg_cnt, char **args) {
 }
 
 //--------------------------------------------------------------------------------
+//! \brief   Callback to program factory defaults into the EEPROM
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void reset_factory_defaults(uint8_t arg_cnt, char **args)
+{
+  ReadGlobalConfig(&myDevice, true);
+}
+
+//--------------------------------------------------------------------------------
 //! \brief   Funcion to check if the VIN in the battery compares to myVIN def.
 //! \return  report status / if present (boolean)
 //--------------------------------------------------------------------------------
 boolean test_BattVIN() {
   BMS.fHAL =  DiagCAN.getBatteryVIN(&BMS, false);
+  //DiagCAN.getCarVIN(&BMS, true);
   return BMS.fHAL;
 }
 

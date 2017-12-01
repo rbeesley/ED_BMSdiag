@@ -10,7 +10,7 @@
 |         | ... Battery Status Flag shows health status of the pack [OK, FAULT].|
 |         | ... Outliners count in box plot now excludes min- / max-values.|
 |         | ... Battery Status Report optimized with hints for better charging / capacity measurement.|
-|v0.9.2   | **Final Release Canidate** with bugfixes and new features. **Please reload all files (including library files) !!!**|
+|v0.9.2   | **Final Release Candidate** with bugfixes and new features. **Please reload all files (including library files) !!!**|
 |         | `all` command in MAIN menue will run all test.|
 |         | `rpt` command will get a Battery Status Report. This completed feature [#12](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/12).|
 |v0.7.1   | Now showing outliners count in the box plot. Feature [#13](https://github.com/MyLab-odyssey/ED_BMSdiag/issues/13) completed. See [Wiki for description](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Data-Overview).|

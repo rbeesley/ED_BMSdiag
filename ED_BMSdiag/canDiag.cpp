@@ -319,9 +319,7 @@ boolean canDiag::Read_FC_Response(int16_t items){
 //--------------------------------------------------------------------------------
 void canDiag::PrintReadBuffer(uint16_t lines) {
   uint16_t pos;
-  char str[8];
 
-  str[7] = 0;
   Serial.println(lines);
   for(uint16_t i = 0; i < lines; i++) {
     Serial.print(F("Data: "));
@@ -335,14 +333,8 @@ void canDiag::PrintReadBuffer(uint16_t lines) {
         }
         Serial.print(data[pos], HEX);
         Serial.print(" ");
-        if (data[pos] >= 0x20 && data[pos] <= 0x7e) {
-          str[n] = data[pos];
-        } else {
-          str[n]='.';
-        } 
       }
     }
-    Serial.print(str);
     Serial.println();
   }
 }

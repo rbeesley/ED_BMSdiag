@@ -328,7 +328,6 @@ void canDiag::PrintReadBuffer(uint16_t lines) {
     for(byte n = 0; n < 7; n++)               // Print each byte of the data.
     {
       pos = n + 7 * i;
-      str[n] = 0;
       if (pos <= DATALENGTH) {
         if(data[pos] < 0x10)             // If data byte is less than 0x10, add a leading zero.
         {

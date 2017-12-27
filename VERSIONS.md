@@ -1,6 +1,8 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
+|v1.0.4   | Feature:|
+|         | ... When battery SOH flags show "DEGRADED", output individual flags|
 |v1.0.3   | Small improvement:|
 |         | ... Experimental/unverified data now configurable at use rather than at compile time|
 |v1.0.2   | Small improvements:|

@@ -13,7 +13,8 @@ Retrieve battery diagnostic data from your smart electric drive EV. Get a Status
 
 >**The software will only work on the third generation Smart electric drive vehicle build from late 2012 to mid 2015.**
 
->**You can buy a pre-assembled version of this tool. More information [here](http://www.sokoloff.com/smart451ED-BMS/).
+>**You can buy a pre-assembled version of this tool. More information [here](http://www.sokoloff.com/smart451ED-BMS/).**
+
 ---
 
 ## You need

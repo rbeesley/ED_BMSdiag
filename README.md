@@ -1,18 +1,19 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v1.0.3-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v1.0.4-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v1.0.3-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v1.0.4-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV. Get a Status Report to rate the health of the battery or dig into more detailed measurements.  
 
 >**Further documentation in the [Wiki](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki).**
 
->**The development is now finished with the final release of v1.0.3 .**  
+>**The development is now basically finished with the final release of v1.0.4 .**  
 
 >**The software will only work on the third generation Smart electric drive vehicle build from late 2012 to mid 2015.**
 
+>**You can buy a pre-assembled version of this tool. More information [here](http://www.sokoloff.com/smart451ED-BMS/).
 ---
 
 ## You need
@@ -50,6 +51,8 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v1.0.4   | Feature:|
+|         | ... When battery SOH flags show "DEGRADED", output individual flags|
 |v1.0.3   | Small improvement:|
 |         | ... Experimental/unverified data now configurable at use rather than at compile time|
 |v1.0.2   | Small improvements:|

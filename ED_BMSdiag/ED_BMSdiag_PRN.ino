@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.3
+//! \version 1.0.4
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -85,7 +85,15 @@ void printBatteryProductionData(boolean fRPT) {
   } else if (BMS.SOH == 0) {
     Serial.println(F("FAULT"));
   } else {
-    Serial.println(F("DEGRADED"));
+    Serial.print(F("DEGRADED: "));
+    for(byte mask = 0x80; mask; mask >>= 1) {
+      if(mask & BMS.SOH) {
+        Serial.print(F("1"));
+      } else {
+        Serial.print(F("0"));
+      }
+    }
+    Serial.println("");
   }
   Serial.println();
   Serial.print(F("Battery Production [Y/M/D]: ")); Serial.print(2000 + BMS.ProdYear); Serial.print(F("/"));

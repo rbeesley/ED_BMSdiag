@@ -93,7 +93,7 @@ typedef struct {
   byte minutes;                  //!< time in car: minutes
   
   float SOC;                     //!< State of Charge, as reported by vehicle dash
-  byte SOH;                      //!< Flag showing if degraded cells are found, or battery failiure present 
+  byte SOH;                      //!< Flag showing if degraded cells are found, or battery failure present 
   uint16_t realSOC;              //!< The internal SOC value in % (x/10)
     
   int16_t Amps;                  //!< battery current in ampere (x/32) reported by by BMS

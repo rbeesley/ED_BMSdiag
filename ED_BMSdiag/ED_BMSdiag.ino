@@ -308,13 +308,13 @@ void ReadGlobalConfig(deviceStatus_t *config, bool force_write)
   // If the EEPROM hasn't been programmed yet, program it
   if (force_write || EEPROM.read(EE_Signature) != kMagicSignature) {
     Serial.println("Setting factory defaults");
-    EEPROM.update(EE_IntialDumpAll, 1); 
+    EEPROM.update(EE_InitialDumpAll, 1); 
     EEPROM.update(EE_logging, 0);
     EEPROM.update(EE_logInterval, 30);
     EEPROM.update(EE_Experimental, 0);
     EEPROM.update(EE_Signature, kMagicSignature);
   }
-  config->initialDump = (EEPROM.read(EE_IntialDumpAll) > 0);
+  config->initialDump = (EEPROM.read(EE_InitialDumpAll) > 0);
   config->logging = (EEPROM.read(EE_logging) > 0);
   config->timer = EEPROM.read(EE_logInterval);
   config->experimental = (EEPROM.read(EE_Experimental) > 0);

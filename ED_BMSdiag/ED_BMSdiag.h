@@ -69,7 +69,7 @@ typedef struct {
 
 deviceStatus_t myDevice;
 
-enum {EE_Signature = 0, EE_IntialDumpAll, EE_logging, EE_logInterval, EE_Experimental};
+enum {EE_Signature = 0, EE_InitialDumpAll, EE_logging, EE_logInterval, EE_Experimental};
 const byte kMagicSignature = 0x55;
 
 void ReadGlobalConfig(deviceStatus_t *config, bool force_write = false);

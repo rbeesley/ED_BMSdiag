@@ -282,7 +282,7 @@ void set_initial_dump(uint8_t arg_cnt, char **args) {
     if (strcmp(args[1], "off") == 0) {
       myDevice.initialDump = false;
     }
-    EEPROM.update(EE_IntialDumpAll, myDevice.initialDump);
+    EEPROM.update(EE_InitialDumpAll, myDevice.initialDump);
   } else {
     if (arg_cnt == 1) {
       show_info(arg_cnt, args);

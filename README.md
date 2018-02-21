@@ -33,7 +33,7 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 
 * Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.  
 
-* **Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).**
+* **Find detailed installation instructions in: [english](wiki/Installation) | [german](wiki/Installation_DE).**
 
 > **Verified to work with Arduino IDE 1.8.4 (on OS X 10.12 and WIN-Systems)**
 
@@ -42,7 +42,7 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
 
-This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [Wiki for further details of the CLI](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Command-Line-Interface).
+This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [Wiki for further details of the CLI](wiki/Command-Line-Interface).
 
 
 >**You need to open the serial monitor of the Arduino-IDE.  Verify that it is set to CR = Carriage Return and the baud rate is 115200.**

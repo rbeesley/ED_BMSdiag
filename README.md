@@ -36,6 +36,7 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 * **Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).**
 
 > **Verified to work with Arduino IDE 1.8.4 (on OS X 10.12 and WIN-Systems)**
+
 > **Verified to work with Arduino IDE 1.8.5 (on OS X 10.13)**
 
 ## Usage >on your own risk<

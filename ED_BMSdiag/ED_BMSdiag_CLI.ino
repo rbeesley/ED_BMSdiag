@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// (c) 2015-2017 by MyLab-odyssey
+// (c) 2015-2018 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2017-December
+//! \date    2018-February
 //! \author  MyLab-odyssey
-//! \version 1.0.3
+//! \version 1.0.5
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -56,6 +56,7 @@ void setupMenu() {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void get_all (uint8_t arg_cnt, char **args) {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   switch (myDevice.menu) {
     case subBMS:
       printBMSall();
@@ -80,6 +81,7 @@ void get_all (uint8_t arg_cnt, char **args) {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void get_rpt (uint8_t arg_cnt, char **args) {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   printRPT();
 }
 
@@ -88,6 +90,7 @@ void get_rpt (uint8_t arg_cnt, char **args) {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void get_temperatures (uint8_t arg_cnt, char **args) {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   switch (myDevice.menu) {
     case subBMS:
       if (DiagCAN.getBatteryTemperature(&BMS, false)){
@@ -112,6 +115,7 @@ void get_temperatures (uint8_t arg_cnt, char **args) {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void get_voltages (uint8_t arg_cnt, char **args) {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   switch (myDevice.menu) {
     case subBMS:
       if (DiagCAN.getBatteryADCref(&BMS, false)){
@@ -139,6 +143,7 @@ void get_voltages (uint8_t arg_cnt, char **args) {
 #ifdef HELP
 void help(uint8_t arg_cnt, char **args)
 {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   switch (myDevice.menu) {
     case MAIN:
       Serial.println(F("* Main Menu:"));
@@ -196,6 +201,7 @@ void help(uint8_t arg_cnt, char **args)
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void show_splash(uint8_t arg_cnt, char **args) {
+   (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
    //Read CAN-Bus IDs related to BMS (sniff traffic)
    byte selected[] = {0,1,2,3,4,5,6,7};
    ReadCANtraffic_BMS(selected, sizeof(selected));
@@ -222,6 +228,7 @@ void print_on_off(bool on)
 //--------------------------------------------------------------------------------
 void show_info(uint8_t arg_cnt, char **args)
 {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   //Serial.print(F("Usable Memory: ")); Serial.println(getFreeRam());
   //Serial.print(F("Menu: ")); Serial.println(myDevice.menu);
 //  Serial.print(F("    Car VIN: ")); Serial.println(BMS.CarVIN);
@@ -275,7 +282,7 @@ void set_initial_dump(uint8_t arg_cnt, char **args) {
     if (strcmp(args[1], "off") == 0) {
       myDevice.initialDump = false;
     }
-    EEPROM.update(EE_IntialDumpAll, myDevice.initialDump);
+    EEPROM.update(EE_InitialDumpAll, myDevice.initialDump);
   } else {
     if (arg_cnt == 1) {
       show_info(arg_cnt, args);
@@ -317,6 +324,7 @@ void init_cmd_prompt() {
 //! \param   Argument count (int) and argument-list (char*) from Cmd.h
 //--------------------------------------------------------------------------------
 void main_menu (uint8_t arg_cnt, char **args) {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   myDevice.menu = MAIN;
   init_cmd_prompt();
 }
@@ -409,6 +417,7 @@ void cs_sub (uint8_t arg_cnt, char **args) {
 //--------------------------------------------------------------------------------
 void reset_factory_defaults(uint8_t arg_cnt, char **args)
 {
+  (void) arg_cnt, (void) args;  // avoid -Wunusedparameter warning
   ReadGlobalConfig(&myDevice, true);
 }
 

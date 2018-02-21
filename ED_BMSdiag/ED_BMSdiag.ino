@@ -1,8 +1,8 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v1.0.3
+// ED BMSdiag, v1.0.5
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
-// (c) 2015-2017 by MyLab-odyssey
+// (c) 2015-2018 by MyLab-odyssey
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -22,9 +22,9 @@
 //! \brief   Only usable for third gen. model build from late 2012 to mid 2015!!!
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2017-December
+//! \date    2018-February
 //! \author  MyLab-odyssey
-//! \version 1.0.3
+//! \version 1.0.5
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 
@@ -84,7 +84,7 @@ void setup() {
   // For convenience of users, dump all data first (same as "all" from top-level menu)
   // Do this after the setupMenu() call.
   if (myDevice.initialDump)
-    get_all(0, (void**) 0L);
+    get_all(0, (char**) 0L);
 
   //Print standard data set as overview
   printSplashScreen();
@@ -303,18 +303,18 @@ boolean getCLSdata() {
 }
 
 
-boolean ReadGlobalConfig(deviceStatus_t *config, bool force_write = false)
+void ReadGlobalConfig(deviceStatus_t *config, bool force_write)
 {
   // If the EEPROM hasn't been programmed yet, program it
   if (force_write || EEPROM.read(EE_Signature) != kMagicSignature) {
     Serial.println("Setting factory defaults");
-    EEPROM.update(EE_IntialDumpAll, 1); 
+    EEPROM.update(EE_InitialDumpAll, 1); 
     EEPROM.update(EE_logging, 0);
     EEPROM.update(EE_logInterval, 30);
     EEPROM.update(EE_Experimental, 0);
     EEPROM.update(EE_Signature, kMagicSignature);
   }
-  config->initialDump = (EEPROM.read(EE_IntialDumpAll) > 0);
+  config->initialDump = (EEPROM.read(EE_InitialDumpAll) > 0);
   config->logging = (EEPROM.read(EE_logging) > 0);
   config->timer = EEPROM.read(EE_logInterval);
   config->experimental = (EEPROM.read(EE_Experimental) > 0);

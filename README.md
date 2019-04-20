@@ -41,6 +41,8 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 
 > **Verified to work with Arduino IDE 1.8.5 (on OS X 10.14)**
 
+> **Verified to work with Arduino IDE 1.8.9 (on OS X 10.14)**
+
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
 

@@ -18,7 +18,7 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.2
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 #ifndef CANDIAG_H
 #define CANDIAG_H
@@ -40,6 +40,8 @@
 #include "_NLG6_dfs.h"
 #include "_CS_dfs.h"
 #include "_DRV_dfs.h"
+
+extern uint16_t g_failure;
 
 class canDiag { 
  

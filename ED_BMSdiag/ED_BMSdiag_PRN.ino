@@ -18,7 +18,7 @@
 //! \brief   Functions for serial printing the datasets
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.4
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -37,7 +37,9 @@ void printWelcomeScreen() {
   Serial.println(); PrintSPACER();
   Serial.println(F("--- ED Battery Management Diagnostics ---"));
   Serial.print(F("--- v")); Serial.print(version);
-  for (byte i = 0; i < (41 - 5 - vLength - 3); i++) {
+  Serial.print(F(" (451) "));
+  
+  for (byte i = 0; i < (41 - 5 - vLength - 3 - 7); i++) {
     Serial.print(" ");
   }
   Serial.println(F("---"));
@@ -580,6 +582,7 @@ void printBMSall() {
   if (getBMSdata(selected, 12)) {
     printBMSdata();
   } else {
+    g_failure++;
     Serial.println();
     Serial.println(FAILURE);
   }
@@ -597,6 +600,7 @@ void printNLG6all() {
   if (getNLG6data()) {
     printNLG6data();
   } else {
+    g_failure++;
     Serial.println();
     Serial.println(FAILURE);
   }
@@ -610,6 +614,7 @@ void printCLSall() {
   if (getCLSdata()) {
     printCLSdata();
   } else {
+    g_failure++;
     Serial.println();
     Serial.println(FAILURE);
   }
@@ -641,6 +646,7 @@ void printRPT() {
   if (getBMSdata(selected, 12)) {
     printRPTdata();
   } else {
+    g_failure++;
     Serial.println();
     Serial.println(FAILURE);
   }

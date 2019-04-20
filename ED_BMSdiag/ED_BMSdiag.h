@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
 //! \date    2018-February
 //! \author  MyLab-odyssey
-//! \version 1.0.5
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -35,8 +35,9 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = (char *) "1.0.5";
+char* const PROGMEM version = (char *) "1.0.7";
 #define FAILURE F("* Measurement failed *")
+#define ALL_OK F("* All measurements captured *")
 #define MSG_OK F("OK")
 #define MSG_FAIL F("F")
 #define MSG_DOT F(".")

@@ -16,9 +16,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_CLI.ino
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2018-February
+//! \date    2018-November
 //! \author  MyLab-odyssey
-//! \version 1.0.5
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -73,6 +73,10 @@ void get_all (uint8_t arg_cnt, char **args) {
       printNLG6all();
       printCLSall();
       break;
+  }
+  if (g_failure == 0) {
+    Serial.println();
+    Serial.println(ALL_OK);
   }
 }
 

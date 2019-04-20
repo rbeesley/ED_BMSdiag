@@ -18,9 +18,11 @@
 //! \brief   Library module for retrieving diagnostic data.
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.2
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
+
+uint16_t g_failure = 0;
 
 //--------------------------------------------------------------------------------
 //! \brief   Standard constructor / destructor
@@ -123,12 +125,12 @@ void canDiag::setCAN_Filter(unsigned long filter){
 void canDiag::setCAN_Filter_DRV(){
   myCAN0->init_Mask(0, 0, 0x07FF0000);
   myCAN0->init_Mask(1, 0, 0x07FF0000);
-  myCAN0->init_Filt(0, 0, (0x200 << 16));
-  myCAN0->init_Filt(1, 0, (0x318 << 16));
-  myCAN0->init_Filt(2, 0, (0x3CE << 16));
-  myCAN0->init_Filt(3, 0, (0x3F2 << 16));
-  myCAN0->init_Filt(4, 0, (0x3D7 << 16));
-  myCAN0->init_Filt(5, 0, (0x504 << 16));
+  myCAN0->init_Filt(0, 0, (0x2000000));
+  myCAN0->init_Filt(1, 0, (0x3180000));
+  myCAN0->init_Filt(2, 0, (0x3CE0000));
+  myCAN0->init_Filt(3, 0, (0x3F20000));
+  myCAN0->init_Filt(4, 0, (0x3D70000));
+  myCAN0->init_Filt(5, 0, (0x5040000));
   //delay(100);
   myCAN0->setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 }
@@ -265,7 +267,7 @@ boolean canDiag::Read_FC_Response(int16_t items){
     
     byte i;
     int16_t n = 7;
-    int16_t rspLine = 0;
+    uint16_t rspLine = 0;
     int16_t FC_count = 0;
     byte FC_length = rqFlowControl[1];
     boolean fDiagOK = false;
@@ -947,6 +949,7 @@ boolean canDiag::NLG6ChargerInstalled(ChargerDiag_t *myNLG6, boolean debug_verbo
 boolean canDiag::printNLG6ChargerSWrev(ChargerDiag_t *myNLG6, boolean debug_verbose) {
   debug_verbose = debug_verbose & VERBOSE_ENABLE;
   uint16_t items;
+  (void) myNLG6;
   
   this->setCAN_ID(0x61A, 0x483);
   items = this->Request_Diagnostics(rqChargerSWrev);

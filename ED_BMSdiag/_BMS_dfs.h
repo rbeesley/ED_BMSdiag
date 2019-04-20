@@ -18,7 +18,7 @@
 //! \brief   Definitions and structures for the BMS module.
 //! \date    2017-December
 //! \author  MyLab-odyssey
-//! \version 1.0.4
+//! \version 1.0.7
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -30,7 +30,7 @@
 #define IQR_FACTOR 1.5           //!< Factor to define Outliners-Range, 1.5 for suspected outliners, 3 for definitive outliners
 
 //Easter Egg from the HAL Laboratories in Urbana, Illinois
-#define myVIN "WME4514921K756772" //example: enter your VIN to get a reminder from a paranoid, holonomic brain
+#define myVIN "" //example: enter your VIN to get a reminder from a paranoid, holonomic brain
 //#define myVIN ""                //empty myVIN will disable easter egg ;-)
 
 //Data structure soft-/hardware-revision
@@ -120,28 +120,33 @@ typedef struct {
   boolean fHAL = false;
 } BatteryDiag_t; 
 
-const PROGMEM byte rqBattHWrev[4]                 = {0x03, 0x22, 0xF1, 0x50};
-const PROGMEM byte rqBattSWrev[4]                 = {0x03, 0x22, 0xF1, 0x51};
-const PROGMEM byte rqBattVIN[4]                   = {0x03, 0x22, 0xF1, 0x90};
-const PROGMEM byte rqBattTemperatures[4]          = {0x03, 0x22, 0x02, 0x01}; 
-const PROGMEM byte rqBattModuleTemperatures[4]    = {0x03, 0x22, 0x02, 0x02};
-const PROGMEM byte rqBattHVstatus[4]              = {0x03, 0x22, 0x02, 0x04};
-const PROGMEM byte rqBattADCref[4]                = {0x03, 0x22, 0x02, 0x07};
-const PROGMEM byte rqBattVolts[6]                 = {0x03, 0x22, 0x02, 0x08, 28, 57};
-const PROGMEM byte rqBattIsolation[4]             = {0x03, 0x22, 0x02, 0x09};
-const PROGMEM byte rqBattAmps[4]                  = {0x03, 0x22, 0x02, 0x03};
-const PROGMEM byte rqBattDate[4]                  = {0x03, 0x22, 0x03, 0x04};
-const PROGMEM byte rqBattProdDate[4]              = {0x03, 0x22, 0xF1, 0x8C};
-const PROGMEM byte rqBattCapacity[6]              = {0x03, 0x22, 0x03, 0x10, 31, 59};
-const PROGMEM byte rqBattHVContactorCyclesLeft[4] = {0x03, 0x22, 0x03, 0x0B};
-const PROGMEM byte rqBattHVContactorMax[4]        = {0x03, 0x22, 0x03, 0x0C};
-const PROGMEM byte rqBattHVContactorState[4]      = {0x03, 0x22, 0xD0, 0x00};
+const PROGMEM byte rqBattHWrev[4]                 = {0x03, 0x22, 0xF1, 0x50};  // 3 bytes (Y-2000, week, PL)
+const PROGMEM byte rqBattSWrev[4]                 = {0x03, 0x22, 0xF1, 0x51};  // 3 bytes (Y-2000, week, PL)
+const PROGMEM byte rqBattVIN[4]                   = {0x03, 0x22, 0xF1, 0x90};  // 17 (compressible)
+const PROGMEM byte rqBattTemperatures[4]          = {0x03, 0x22, 0x02, 0x01};  // 17 bytes
+const PROGMEM byte rqBattModuleTemperatures[4]    = {0x03, 0x22, 0x02, 0x02};  // 63 bytes
+const PROGMEM byte rqBattHVstatus[4]              = {0x03, 0x22, 0x02, 0x04};  // 5-6 bytes
+const PROGMEM byte rqBattADCref[4]                = {0x03, 0x22, 0x02, 0x07};  // 6 bytes max, min, mean [4,6,8]
+const PROGMEM byte rqBattVolts[6]                 = {0x03, 0x22, 0x02, 0x08, 28, 57}; // 93*2 raw voltage (starting at 4) typical range is +/- 8 (0xfc1-0xfc9)
+const PROGMEM byte rqBattIsolation[4]             = {0x03, 0x22, 0x02, 0x09};  // 3 bytes, 2 for isolation [45], 1 for flags [6]
+const PROGMEM byte rqBattAmps[4]                  = {0x03, 0x22, 0x02, 0x03};  //
+const PROGMEM byte rqBattDate[4]                  = {0x03, 0x22, 0x03, 0x04};  // 3 bytes [46] -> Factory Acceptance Date
+const PROGMEM byte rqBattProdDate[4]              = {0x03, 0x22, 0xF1, 0x8C};  // 6 bytes data [49] -> ASCII format? 14 bytes raw data
+const PROGMEM byte rqBattCapacity[6]              = {0x03, 0x22, 0x03, 0x10, 31, 59}; // 430 bytes raw; 207 used; 93*2 raw capacity (start at 25) + 3 HVOffTime [57] + 3 lowCurrent [9-11] + 2 OCVtimer [12-13] + 1 SOH [14] + 6 min, max, mean (21, 17, 23) + 2 lastMeasurementDays [224] + 2 measurementQual [226] + 2 overallQuality [222]
+// 0x45c0 - 0x4762 range on cabrio
+// 
+// 0x4512 - 0x45fb on peadpod as range, was a 0x44c6, 0x45fb,  
+// 0x4697 on peapod was maybe highest ever? (not in this data dump, but was in 22 03 18) 
+// Give 10 bits to capacity and 6 bits to voltage differential?
+const PROGMEM byte rqBattHVContactorCyclesLeft[4] = {0x03, 0x22, 0x03, 0x0B};  // 3 bytes raw [46] - seemed absent on cabrio and peapod
+const PROGMEM byte rqBattHVContactorMax[4]        = {0x03, 0x22, 0x03, 0x0C};  // 3 bytes raw [46] - seemed absent on cabrio and peapod
+const PROGMEM byte rqBattHVContactorState[4]      = {0x03, 0x22, 0xD0, 0x00};  // 1 byte [3]
 
-const PROGMEM byte rqCarVIN[4]                   = {0x02, 0x09, 0x02, 0x00};
+const PROGMEM byte rqCarVIN[4]                   = {0x02, 0x09, 0x02, 0x00};   //
 
 //Experimental readouts
-const PROGMEM byte rqBattCapInit[4]               = {0x03, 0x22, 0x03, 0x05};
-const PROGMEM byte rqBattCapLoss[4]               = {0x03, 0x22, 0x03, 0x09};
-const PROGMEM byte rqBattUnknownCounter[4]        = {0x03, 0x22, 0x01, 0x01};
+const PROGMEM byte rqBattCapInit[4]               = {0x03, 0x22, 0x03, 0x05};  //
+const PROGMEM byte rqBattCapLoss[4]               = {0x03, 0x22, 0x03, 0x09};  //
+const PROGMEM byte rqBattUnknownCounter[4]        = {0x03, 0x22, 0x01, 0x01};  //
 
 #endif // of #ifndef BMS_DFS_H

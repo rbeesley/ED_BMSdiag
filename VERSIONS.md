@@ -1,6 +1,8 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
+|v1.0.5   | Internal:|
+|         | ... Eliminate compiler warnings throughout the code. Two warnings remain, but are in the EEPROM library|
 |v1.0.4   | Feature:|
 |         | ... When battery SOH flags show "DEGRADED", output individual flags|
 |v1.0.3   | Small improvement:|

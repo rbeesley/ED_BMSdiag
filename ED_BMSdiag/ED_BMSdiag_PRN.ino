@@ -168,7 +168,7 @@ void printBMS_CellVoltages() {
   Serial.print(F(", dV = ")); Serial.print(BMS.ADCCvolts.max - BMS.ADCCvolts.min); Serial.println(F(" mV"));
   Serial.print(F("CV min  : ")); Serial.print(BMS.ADCCvolts.min); Serial.println(F(" mV"));
   Serial.print(F("CV max  : ")); Serial.print(BMS.ADCCvolts.max); Serial.println(F(" mV"));
-  if ((BMS.ADCCvolts.max - BMS.ADCCvolts.min) > 25) Serial.println(F("WARNING - cell deviation over 25mV"));
+  if ((BMS.ADCCvolts.max - BMS.ADCCvolts.min) > 25) Serial.println(F("WARNING - cell deviation over 25mV - use car and monitor"));
   Serial.print(F("OCVtimer: ")); Serial.print(BMS.OCVtimer); Serial.println(F(" s"));
 }
 

@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2018 by MyLab-odyssey
+// (c) 2017-2018 by Jim Sokoloff
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -497,4 +498,3 @@ void logdata(){
   Serial.print(CLS.CoolingPumpTemp - 50);
   Serial.println();
 }
-

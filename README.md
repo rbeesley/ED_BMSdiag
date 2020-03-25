@@ -1,8 +1,8 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v1.0.7-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v1.0.8-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v1.0.7-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v1.0.8-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV. Get a Status Report to rate the health of the battery or dig into more detailed measurements.  
@@ -43,6 +43,10 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 
 > **Verified to work with Arduino IDE 1.8.9 (on OS X 10.14)**
 
+> **Verified to work with Arduino IDE 1.8.10 (on OS X 10.14)**
+
+> **Verified to work with Arduino IDE 1.8.12 (on OS X 10.14)**
+
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
 
@@ -58,6 +62,10 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v1.0.8   | Feature:|
+|	  | Print a judgment/recommendation about the 12V battery status|
+|         | Internal:|
+|         | ... Several changes to free up memory to allow for the above feature to fit|
 |v1.0.7   | Feature:|
 |	  | Show clear "* All measurements captured *" message upon successful download of all data|
 |         | Internal:|

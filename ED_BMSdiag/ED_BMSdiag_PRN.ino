@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2017 by MyLab-odyssey
+// (c) 2017-2020 by Jim Sokoloff
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +17,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2017-December
+//! \date    2020-March
 //! \author  MyLab-odyssey
-//! \version 1.0.7
+//! \version 1.0.8
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -81,7 +82,7 @@ void printHeaderData() {
 //! \brief   Output battery production data and battery status SOH flag
 //--------------------------------------------------------------------------------
 void printBatteryProductionData(boolean fRPT) {
-  Serial.print(F("Battery Status   : "));
+  Serial.print(F("HV Battery Status: "));
   if (BMS.SOH == 0xFF) {
     Serial.println(MSG_OK);
   } else if (BMS.SOH == 0) {
@@ -141,7 +142,22 @@ void printStandardDataset() {
   } else {
     Serial.println(F("0.00 kW"));
   }
-  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V"));
+  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V  :"));
+  if (BMS.HVcontactState == 0x00) {
+    if (BMS.LV >= 12.5) {
+      Serial.print("OK [>= 12.5 V]");
+    } else if (BMS.LV >= 12.3) {
+      Serial.print("MARGINAL [12.3 or 12.4 V]");
+    } else {
+      Serial.print("CAUTION: Low voltage battery very low [< 12.3 V]");
+    }
+    if (BMS.HVoff_time < 3600) {
+      Serial.print("-RECHECK after 60 mins");
+    }
+    Serial.print(F("-Car off for: ")); Serial.print(BMS.HVoff_time/60,0); Serial.println(F(" minutes"));
+  } else {
+    Serial.println("No LV check done because car is ON.");
+  }
 }
 
 //--------------------------------------------------------------------------------
@@ -152,6 +168,7 @@ void printBMS_CellVoltages() {
   Serial.print(F(", dV = ")); Serial.print(BMS.ADCCvolts.max - BMS.ADCCvolts.min); Serial.println(F(" mV"));
   Serial.print(F("CV min  : ")); Serial.print(BMS.ADCCvolts.min); Serial.println(F(" mV"));
   Serial.print(F("CV max  : ")); Serial.print(BMS.ADCCvolts.max); Serial.println(F(" mV"));
+  if (BMS.ADCCvolts.max > 25) Serial.println(F("WARNING"));
   Serial.print(F("OCVtimer: ")); Serial.print(BMS.OCVtimer); Serial.println(F(" s"));
 }
 
@@ -655,4 +672,3 @@ void printRPT() {
   DiagCAN.freeMem_CellVoltage();
   DiagCAN.freeMem_CellCapacity();
 }
-

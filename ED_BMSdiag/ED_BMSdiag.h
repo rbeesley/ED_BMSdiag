@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2018 by MyLab-odyssey
+// (c) 2017-2020 by Jim Sokoloff
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +17,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
 //! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2018-February
+//! \date    2020-March
 //! \author  MyLab-odyssey
-//! \version 1.0.7
+//! \version 1.0.8
 //--------------------------------------------------------------------------------
 
 #define VERBOSE 1                //!< VERBOSE mode will output individual cell data
@@ -35,7 +36,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = (char *) "1.0.7";
+char* const PROGMEM version = (char *) "1.0.8";
 #define FAILURE F("* Measurement failed *")
 #define ALL_OK F("* All measurements captured *")
 #define MSG_OK F("OK")
@@ -74,4 +75,3 @@ enum {EE_Signature = 0, EE_InitialDumpAll, EE_logging, EE_logInterval, EE_Experi
 const byte kMagicSignature = 0x55;
 
 void ReadGlobalConfig(deviceStatus_t *config, bool force_write = false);
-

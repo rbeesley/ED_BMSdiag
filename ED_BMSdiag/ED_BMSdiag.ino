@@ -1,8 +1,9 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v1.0.7
+// ED BMSdiag, v1.0.8
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2015-2018 by MyLab-odyssey
+// (c) 2017-2020 by Jim Sokoloff
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -22,9 +23,9 @@
 //! \brief   Only usable for third gen. model build from late 2012 to mid 2015!!!
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2018-February
+//! \date    2020-March
 //! \author  MyLab-odyssey
-//! \version 1.0.7
+//! \version 1.0.8
 //--------------------------------------------------------------------------------
 #include "ED_BMSdiag.h"
 
@@ -319,4 +320,3 @@ void ReadGlobalConfig(deviceStatus_t *config, bool force_write)
   config->timer = EEPROM.read(EE_logInterval);
   config->experimental = (EEPROM.read(EE_Experimental) > 0);
 }
-

@@ -145,20 +145,20 @@ void printStandardDataset() {
   Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V"));
   if (BMS.HVcontactState == 0x00) {
     if (BMS.LV >= 12.5) {
-      Serial.print(F("GOOD [>= 12.5 V]"));
+      Serial.println(F("GOOD [>= 12.5 V]"));
     } else if (BMS.LV >= 12.4) {
-      Serial.print(F("OK-75% [12.4 V]"));
+      Serial.println(F("OK-75% [12.4 V]"));
     } else if (BMS.LV >= 12.2) {
-      Serial.print(F("MARGINAL-50% [12.2-12.3 V]"));
+      Serial.println(F("MARGINAL-50% [12.2-12.3 V]"));
     } else {
-      Serial.print(F("CAUTION: Low voltage battery very low [< 12.2 V]"));
+      Serial.println(F("CAUTION: Low voltage battery very low [< 12.2 V]"));
     }
     if (BMS.HVoff_time < 3600) {
-      Serial.print(F("-RECHECK after car off for >60 mins"));
+      Serial.println(F("-RECHECK after car off for >60 mins"));
     }
-    Serial.print(F("-Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
+    Serial.println(F("Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
   } else {
-    Serial.println(F("No LV check done because car is ON."));
+    Serial.println(F("No LV health info because car is ON."));
   }
 }
 

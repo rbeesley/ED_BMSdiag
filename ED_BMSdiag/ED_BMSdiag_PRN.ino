@@ -156,7 +156,7 @@ void printStandardDataset() {
     if (BMS.HVoff_time < 3600) {
       Serial.println(F("-RECHECK after car off for >60 mins"));
     }
-    Serial.println(F("Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
+    Serial.print(F("Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
   } else {
     Serial.println(F("No LV health info because car is ON."));
   }

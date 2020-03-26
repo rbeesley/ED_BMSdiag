@@ -145,9 +145,11 @@ void printStandardDataset() {
   Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V"));
   if (BMS.HVcontactState == 0x00) {
     if (BMS.LV >= 12.5) {
-      Serial.print(F("OK [>= 12.5 V]"));
+      Serial.print(F("GOOD [>= 12.5 V]"));
+    } else if (BMS.LV >= 12.4) {
+      Serial.print(F("OK-75% [12.4 V]"));
     } else if (BMS.LV >= 12.2) {
-      Serial.print(F("MARGINAL [12.2-12.4 V]"));
+      Serial.print(F("MARGINAL-50% [12.2-12.3 V]"));
     } else {
       Serial.print(F("CAUTION: Low voltage battery very low [< 12.2 V]"));
     }

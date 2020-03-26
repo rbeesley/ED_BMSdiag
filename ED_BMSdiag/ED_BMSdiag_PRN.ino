@@ -142,7 +142,7 @@ void printStandardDataset() {
   } else {
     Serial.println(F("0.00 kW"));
   }
-  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V  :"));
+  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.print(F(" V  :"));
   if (BMS.HVcontactState == 0x00) {
     if (BMS.LV >= 12.5) {
       Serial.print(F("OK [>= 12.5 V]"));
@@ -154,7 +154,7 @@ void printStandardDataset() {
     if (BMS.HVoff_time < 3600) {
       Serial.print(F("-RECHECK after 60 mins"));
     }
-    Serial.print(F("-Car off for: ")); Serial.print(BMS.HVoff_time/60,0); Serial.println(F(" minutes"));
+    Serial.print(F("-Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
   } else {
     Serial.println(F("No LV check done because car is ON."));
   }

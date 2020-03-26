@@ -142,7 +142,7 @@ void printStandardDataset() {
   } else {
     Serial.println(F("0.00 kW"));
   }
-  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.print(F(" V  :"));
+  Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V"));
   if (BMS.HVcontactState == 0x00) {
     if (BMS.LV >= 12.5) {
       Serial.print(F("OK [>= 12.5 V]"));
@@ -152,7 +152,7 @@ void printStandardDataset() {
       Serial.print(F("CAUTION: Low voltage battery very low [< 12.2 V]"));
     }
     if (BMS.HVoff_time < 3600) {
-      Serial.print(F("-RECHECK after 60 mins"));
+      Serial.print(F("-RECHECK after car off for >60 mins"));
     }
     Serial.print(F("-Car off for: ")); Serial.print(((float)BMS.HVoff_time)/60.0,1); Serial.println(F(" minutes"));
   } else {

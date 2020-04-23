@@ -17,9 +17,9 @@
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag_PRN.ino
 //! \brief   Functions for serial printing the datasets
-//! \date    2020-March
+//! \date    2020-April
 //! \author  MyLab-odyssey
-//! \version 1.0.8
+//! \version 1.0.8b
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -144,14 +144,14 @@ void printStandardDataset() {
   }
   Serial.print(F("LV  : ")); Serial.print(BMS.LV,1); Serial.println(F(" V"));
   if (BMS.HVcontactState == 0x00) {
-    if (BMS.LV >= 12.5) {
-      Serial.println(F("GOOD [>= 12.5 V]"));
-    } else if (BMS.LV >= 12.4) {
-      Serial.println(F("OK-75% [12.4 V]"));
+    if (BMS.LV >= 12.4) {
+      Serial.println(F("GOOD [>= 12.4 V]"));
     } else if (BMS.LV >= 12.2) {
-      Serial.println(F("MARGINAL-50% [12.2-12.3 V]"));
+      Serial.println(F("OK [12.2-12.3 V]"));
+    } else if (BMS.LV >= 12.0) {
+      Serial.println(F("INFO [12.0-12.1 V]. Consider verifying with an actual meter."));
     } else {
-      Serial.println(F("CAUTION: Low voltage battery very low [< 12.2 V]"));
+      Serial.println(F("CAUTION: Low voltage battery very low [< 12.0 V]. Check with an actual meter."));
     }
     if (BMS.HVoff_time < 3600) {
       Serial.println(F("RECHECK after car off for >60 mins"));

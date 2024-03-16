@@ -1,8 +1,8 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v1.0.8-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v1.0.8.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v1.0.8-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
+[![release](https://img.shields.io/badge/release-v1.0.8.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV. Get a Status Report to rate the health of the battery or dig into more detailed measurements.  
@@ -27,25 +27,23 @@ Get the hardware and use an appropriate cable for the physical connection. See t
 <p/>
 
 ## Get started
-* Download the [repo-ZIP](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip), then copy the files to your **Arduino folder** (location depends on OS). The folder structure should look like this:
+* Install PlatformIO into VSCode.
+
+* Clone this repo into a folder. The folder structure used to look like this, but libraries have been moved to a lib directory and the include files have been moved to their own library:
 <p align="left">
 <img  src="https://github.com/MyLab-odyssey/ED_BMSdiag/raw/master/pictures/Arduino_folder_structure.png" /><p/>
 
-* Open the ED_BMSdiag.ino file and compile / upload it to the Arduino board.  
+* There is an external library dependency on Arduino's SD library which should be automatically installed by PlatformIO as part of the configuration.
+
+* Open the ED_BMSdiag project and update the configuration to match the board you are using.
+
+* Change the PIN configuration in ED_BMSdiag.h to reflect your board and shield configuration.
+
+* Verify and Upload the project to the Arduino board.  
 
 * **Find detailed installation instructions in: [english](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation) | [german](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Installation_DE).**
 
-> **Verified to work with Arduino IDE 1.8.4 (on OS X 10.12 and WIN-Systems)**
-
-> **Verified to work with Arduino IDE 1.8.5 (on OS X 10.13)**
-
-> **Verified to work with Arduino IDE 1.8.5 (on OS X 10.14)**
-
-> **Verified to work with Arduino IDE 1.8.9 (on OS X 10.14)**
-
-> **Verified to work with Arduino IDE 1.8.10 (on OS X 10.14)**
-
-> **Verified to work with Arduino IDE 1.8.12 (on OS X 10.14)**
+> **Verified to work with PlatformIO v3.3.3 (on Windows 10 - x64, Arduino R4 WiFi, and Seeed CAN Shield v2.0)**
 
 ## Usage >on your own risk<
 Connect the CAN shield to the OBDII-connector and power up the car.
@@ -53,7 +51,7 @@ Connect the CAN shield to the OBDII-connector and power up the car.
 This simple tool will display the diagnostics via a serial USB connection. The readout will be started by entering commands after the prompt. See the [Wiki for further details of the CLI](https://github.com/MyLab-odyssey/ED_BMSdiag/wiki/Command-Line-Interface).
 
 
->**You need to open the serial monitor of the Arduino-IDE.  Verify that it is set to CR = Carriage Return and the baud rate is 115200.**
+>**You need to open the serial port to configure the first time. Verify that the port is set to 115200-8-n-1.**
 
 <p align="center">
 <img  src="https://raw.githubusercontent.com/MyLab-odyssey/ED_BMSdiag/master/pictures/Arduino%20-IDE_serial_monitor.png" />
@@ -62,6 +60,10 @@ This simple tool will display the diagnostics via a serial USB connection. The r
 ## Version history
 |version  | comment|
 |-------- | --------|
+|v1.0.9   | Feature:|
+|         | Save the logging data to an SD Card file|
+|v1.0.8.1 | Internal:|
+|         | Moved the project from Arduino IDE to Platform IO|
 |v1.0.8   | Feature:|
 |	  | Print a judgment/recommendation about the 12V battery status|
 |         | Internal:|

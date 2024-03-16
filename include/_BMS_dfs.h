@@ -1,5 +1,6 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2017 by MyLab-odyssey
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,9 +17,9 @@
 //--------------------------------------------------------------------------------
 //! \file    BMS_dfs.h
 //! \brief   Definitions and structures for the BMS module.
-//! \date    2017-December
-//! \author  MyLab-odyssey
-//! \version 1.0.7
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
 #ifndef BMS_DFS_H
 #define BMS_DFS_H
@@ -31,8 +32,8 @@
 #define IQR_FACTOR 1.5           //!< Factor to define Outliners-Range, 1.5 for suspected outliners, 3 for definitive outliners
 
 //Easter Egg from the HAL Laboratories in Urbana, Illinois
-#define myVIN "WMEEJ9AA7EK737739" //example: enter your VIN to get a reminder from a paranoid, holonomic brain
-//#define myVIN ""                //empty myVIN will disable easter egg ;-)
+// BUGBUG: Currently disabled
+#define myVIN "WMEEJ9AA7EJ000000" //example: enter your VIN to get a reminder from a paranoid, holonomic brain. An empty myVIN will disable easter egg ;-)
 
 //Data structure soft-/hardware-revision
 typedef struct {

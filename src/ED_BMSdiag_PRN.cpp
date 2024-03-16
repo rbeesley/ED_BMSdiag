@@ -1,6 +1,7 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2017 by MyLab-odyssey
 // (c) 2017-2020 by Jim Sokoloff
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -15,11 +16,11 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--------------------------------------------------------------------------------
-//! \file    ED_BMSdiag_PRN.ino
+//! \file    ED_BMSdiag_PRN.cpp
 //! \brief   Functions for serial printing the datasets
-//! \date    2020-April
-//! \author  MyLab-odyssey
-//! \version 1.0.8b
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------
@@ -441,7 +442,7 @@ void printSplashScreen() {
 //--------------------------------------------------------------------------------
 void printBMSdata() {
   Serial.println(MSG_OK);
-  digitalWrite(CS, HIGH);
+  digitalWrite(CS_PIN, HIGH);
   PrintSPACER();
   printHeaderData();
   PrintSPACER();
@@ -478,7 +479,7 @@ void printBMSdata() {
 //--------------------------------------------------------------------------------
 void printNLG6data() {
   Serial.println(MSG_OK);
-  digitalWrite(CS, HIGH);
+  digitalWrite(CS_PIN, HIGH);
   PrintSPACER();
   printNLG6_Status();
   PrintSPACER();
@@ -495,7 +496,7 @@ void printNLG6data() {
 //--------------------------------------------------------------------------------
 void printCLSdata() {
   Serial.println(MSG_OK);
-  digitalWrite(CS, HIGH);
+  digitalWrite(CS_PIN, HIGH);
   PrintSPACER();
   printCLS_Status();
   PrintSPACER();
@@ -506,7 +507,7 @@ void printCLSdata() {
 //--------------------------------------------------------------------------------
 void printRPTdata() {
   Serial.println(MSG_OK);
-  digitalWrite(CS, HIGH);
+  digitalWrite(CS_PIN, HIGH);
   PrintSPACER();
   Serial.println(F("---       Battery Status Report       ---"));
   PrintSPACER();

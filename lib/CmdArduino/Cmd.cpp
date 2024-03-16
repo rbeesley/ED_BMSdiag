@@ -1,5 +1,6 @@
 /*******************************************************************
     Copyright (C) 2009 FreakLabs
+    Copyright (c) 2024 Ryan Beesley
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -33,9 +34,9 @@
 //! \file    Cmd.cpp
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2017-August
-//! \author  My-Lab-odyssey
-//! \version 0.6.2
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 0.6.2.1
 //--------------------------------------------------------------------------------
 
 *******************************************************************/
@@ -125,25 +126,26 @@ void cmd_parse(char *cmd)
     char *argv[30];
     char buf[50];
     cmd_t *cmd_entry;
-    if (!strcmp(myCMD, "HAL >>")) {
-       switch (HALcount) {
-          case 0:
-	     Serial.println(F("I'm sorry, Dave. I'm afraid I can't do that."));
-             HALcount++;
-             break;
-          case 1:
-	     Serial.println(F("This mission is too important for me to allow you to jeopardize it."));
-             HALcount++;
-             break;
-          case 2:
-	     Serial.println(F("Dave, this conversation can serve no purpose any more. Goodbye."));
-             HALcount++;
-             break;
-          default:
-             break;
-       }
-       return;
-    }
+    // BUGBUG: Doesn't seem to work as expected.
+    // if (!strcmp(myCMD, "HAL >>")) {
+    //    switch (HALcount) {
+    //       case 0:
+	//      Serial.println(F("I'm sorry, Dave. I'm afraid I can't do that."));
+    //          HALcount++;
+    //          break;
+    //       case 1:
+	//      Serial.println(F("This mission is too important for me to allow you to jeopardize it."));
+    //          HALcount++;
+    //          break;
+    //       case 2:
+	//      Serial.println(F("Dave, this conversation can serve no purpose any more. Goodbye."));
+    //          HALcount++;
+    //          break;
+    //       default:
+    //          break;
+    //    }
+    //    return;
+    // }
 
     //fflush(stdout);  //not reliable on all boards ?!
 

@@ -1,6 +1,7 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2017 by MyLab-odyssey
 // (c) 2017-2020 by Jim Sokoloff
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -17,9 +18,9 @@
 //--------------------------------------------------------------------------------
 //! \file    canDiag.cpp
 //! \brief   Library module for retrieving diagnostic data.
-//! \date    2020-March
-//! \author  MyLab-odyssey
-//! \version 1.0.8
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
 #include "canDiag.h"
 #include "ED_BMSdiag.h"
@@ -198,7 +199,7 @@ uint16_t canDiag::Request_Diagnostics(const byte* rqQuery){
 
   myCAN_Timeout->Reset();                     // Reset Timeout-Timer
   
-  //digitalWrite(CS_SD, HIGH);                // Disable SD card, or other SPI devices if nessesary
+  //digitalWrite(SD_CS_PIN, HIGH);                // Disable SD card, or other SPI devices if nessesary
   
   //--- Diag Request Message ---
   DEBUG_UPDATE(F("Send Diag Request\n\r"));

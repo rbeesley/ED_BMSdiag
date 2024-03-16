@@ -1,5 +1,6 @@
 /*
  * Copyright (c) , Majenko Technologies
+ * Copyright (c) 2024 Ryan Beesley
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, 
@@ -30,9 +31,9 @@
 //--------------------------------------------------------------------------------
 //! \file    AvgNew.h
 //! \brief   Modified version of Average.h (no template, small footprint).
-//! \date    2017-July
-//! \author  My-Lab-odyssey
-//! \version 0.3.0
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 0.3.0.1
 //--------------------------------------------------------------------------------
 
 #ifndef AVERAGE_NEW_H
@@ -87,7 +88,6 @@ class Average {
         uint16_t sum();
         void clear();
         void bubble_sort();
-        // int16_t percentile(int pos);
         int16_t percentile(int16_t pos);
         //Average<T> &operator=(Average<T> &a);
 

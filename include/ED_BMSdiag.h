@@ -1,6 +1,7 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2018 by MyLab-odyssey
 // (c) 2017-2020 by Jim Sokoloff
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -16,18 +17,18 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--------------------------------------------------------------------------------
 //! \file    ED_BMSdiag.h
-//! \brief   Definitions and structures for the main program ED_BMSdiag.ino
-//! \date    2020-April
-//! \author  MyLab-odyssey
-//! \version 1.0.8.1
+//! \brief   Definitions and structures for the main program ED_BMSdiag.c
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
 #pragma once
 
 #ifndef _ED_BMSDIAG_H_
 #define _ED_BMSDIAG_H_
 
-#define CS            9         //!< chip select pin of MCP2515 CAN-Controller
-#define CS_SD         4         //!< CS for SD card, if you plan to use a logger...
+#define CS_PIN        9         //!< chip select pin of MCP2515 CAN-Controller
+#define SD_CS_PIN     4         //!< CS for SD card, if you plan to use a logger...
 #define CAN_INT_PIN   2         //!< INT pin on the OBD-II/CAN Shield
 
 #define VERBOSE       1         //!< VERBOSE mode will output individual cell data
@@ -44,7 +45,7 @@
 #include "canDiag.h"
 
 //Global definitions
-char* const PROGMEM version = (char *) "1.0.8.1";
+char* const PROGMEM version = (char *) "1.0.9";
 #define FAILURE F("* Measurement failed *")
 #define ALL_OK F("* All measurements captured *")
 #define MSG_OK F("OK")
@@ -59,13 +60,15 @@ typedef struct {
   submenu_t menu = MAIN;
   uint16_t timer = 30;
   bool logging = false;
+  bool logFile = false;
   uint16_t logCount = 0;
   bool initialDump = true;
   bool experimental = false;
+  bool cardPresent = false;
 } deviceStatus_t;
 
-enum {EE_Signature = 0, EE_InitialDumpAll, EE_logging, EE_logInterval, EE_Experimental};
-const byte kMagicSignature = 0x55;
+enum {EE_Signature = 0, EE_InitialDumpAll, EE_logging, EE_logFile, EE_logInterval, EE_Experimental};
+const byte kMagicSignature = 0xAA;
 
 void ReadGlobalConfig(deviceStatus_t *config, bool force_write = false);
 boolean getNLG6data();

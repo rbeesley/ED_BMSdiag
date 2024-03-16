@@ -1,6 +1,7 @@
 //--------------------------------------------------------------------------------
 // (c) 2015-2018 by MyLab-odyssey
 // (c) 2017-2018 by Jim Sokoloff
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -15,20 +16,24 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--------------------------------------------------------------------------------
-//! \file    ED_BMSdiag_CLI.ino
+//! \file    ED_BMSdiag_CLI.cpp
 //! \brief   Functions for the Command Line Interface (CLI) menu system
-//! \date    2018-November
-//! \author  MyLab-odyssey
-//! \version 1.0.7
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
+#include <memory>
 
 #include <Arduino.h>
 #include <Cmd.h>
 #include <EEPROM.h>
+#include <SD.h>
 
 #include "ED_BMSdiag.h"
 #include "ED_BMSdiag_CLI.h"
 #include "ED_BMSdiag_PRN.h"
+
+std::unique_ptr<SDFile> file;
 
 //--------------------------------------------------------------------------------
 //! \brief   Setup menu items
@@ -54,6 +59,7 @@ void setupMenu() {
   cmdAdd("all", get_all);
   cmdAdd("rpt", get_rpt);
   cmdAdd("log", set_logging);
+  cmdAdd("logfile", set_log_file);
   cmdAdd("info", show_info);
   cmdAdd("reset", reset_factory_defaults);
   cmdAdd("initial", set_initial_dump);
@@ -174,6 +180,8 @@ void help(uint8_t arg_cnt, char **args)
       Serial.println(F("  info         Show logging state"));
       Serial.println(F("  log          Logging"));
       Serial.println(F("               [on/off] or [on/off] [time/s]"));
+      Serial.println(F("  logfile      Log to SDCard"));
+      Serial.println(F("               [on/off] or [on/off] [time/s]"));
       Serial.println(F("  reset        Reset to factory defaults (initial dump, logging off)"));
       Serial.println(F("  initial      Configure initial dump on or off"));
       Serial.println(F("               [on/off]"));
@@ -202,7 +210,7 @@ void help(uint8_t arg_cnt, char **args)
       Serial.println(F("  t     Get temperatures"));
       break;
     case subCS:
-     Serial.println(F("* CS Menu:"));
+     Serial.println(F("* CS_PIN Menu:"));
       Serial.println(F("  all   Get complete dataset"));
       break;
   }   
@@ -251,6 +259,8 @@ void show_info(uint8_t arg_cnt, char **args)
   Serial.println(F(" s"));
   Serial.print(F("Logging is "));
   print_on_off(myDevice.logging);
+  Serial.print(F("Log to file is "));
+  print_on_off(myDevice.logFile);
   Serial.print(F("Initial dump is "));
   print_on_off (myDevice.initialDump);
   Serial.print(F("Experimental data is "));
@@ -275,6 +285,32 @@ void set_logging(uint8_t arg_cnt, char **args) {
       myDevice.logging = false;
     }
     EEPROM.update(EE_logging, myDevice.logging);
+    EEPROM.update(EE_logInterval, myDevice.timer);
+  } else {
+    if (arg_cnt == 1) {
+      show_info(arg_cnt, args);
+    }
+  }
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Callback to start logging and / or set parameters
+//! \param   Argument count (int) and argument-list (char*) from Cmd.h
+//--------------------------------------------------------------------------------
+void set_log_file(uint8_t arg_cnt, char **args) {
+  if (arg_cnt > 2) {
+    myDevice.timer = (unsigned int) cmdStr2Num(args[2], 10);
+  } 
+  if (arg_cnt > 1) {
+    if (strcmp(args[1], "on") == 0) {
+      myDevice.logFile = true;
+      LOG_Timeout.Reset(myDevice.timer * 1000);
+      myDevice.logCount = 0;
+    }
+    if (strcmp(args[1], "off") == 0) {
+      myDevice.logFile = false;
+    }
+    EEPROM.update(EE_logFile, myDevice.logFile);
     EEPROM.update(EE_logInterval, myDevice.timer);
   } else {
     if (arg_cnt == 1) {
@@ -416,7 +452,7 @@ void obl_sub (uint8_t arg_cnt, char **args) {
 //--------------------------------------------------------------------------------
 void cs_sub (uint8_t arg_cnt, char **args) {
   myDevice.menu = subCS;
-  set_cmd_display("CS >>");
+  set_cmd_display("CS_PIN >>");
   if (arg_cnt == 2) {
     if (strcmp(args[1], "all") == 0) get_all(arg_cnt, args);
   } else {
@@ -505,4 +541,55 @@ void logdata(){
   Serial.print(CLS.CoolingPumpRPM / 255.0 * 100.0, 1); Serial.print(F(";"));
   Serial.print(CLS.CoolingPumpTemp - 50);
   Serial.println();
+}
+
+//--------------------------------------------------------------------------------
+//! \brief   Logging data to file. Call queryfunctions and output the data
+//--------------------------------------------------------------------------------
+void log_file()
+{
+  //Read CAN-Bus IDs related to BMS (sniff traffic)
+  byte selected[] = {0,1,2,3,4};
+  ReadCANtraffic_BMS(selected, sizeof(selected));
+
+  byte selected2[] ={5,8,11};
+  getBMSdata(selected2, sizeof(selected2));
+  getNLG6data();
+  getCLSdata();
+
+  auto file = std::make_unique<SDFile>(SD.open("can.csv", FILE_WRITE));
+
+  if (myDevice.logCount == 0) {
+    //Print Header
+    myDevice.logCount++;
+    file->println(F("SOC;rSOC;A;kW;V;Vc,min;Vc,max;Ri;Tb/C;L1/V;L1/A;L2/V;L2/A;L3/V;L3/A;HV/V;HV/A;Tr/C;Tpl/C;Ti/C;Tc/C;P/%;Tp/C"));
+  }
+
+  //Print logged values
+  file->print(BMS.SOC,1); file->print(F(";"));
+  file->print((float) BMS.realSOC / 10.0, 1); file->print(F(";"));
+  file->print((float) BMS.Amps2, 2); file->print(F(";"));
+  if (BMS.Power != 0) {
+    file->print((float) BMS.Power, 2); file->print(F(";"));
+  } else {
+    file->print(F("0.00")); file->print(F(";"));
+  }
+  file->print(BMS.HV,1); file->print(F(";"));
+  file->print(BMS.ADCCvolts.min); file->print(F(";"));
+  file->print(BMS.ADCCvolts.max); file->print(F(";"));
+  file->print(BMS.Isolation); file->print(F(";"));
+  file->print((float) BMS.Temps[9] / 64, 1); file->print(F(";"));
+  file->print(NLG6.MainsVoltage[0] / 10.0, 1); file->print(F(";")); file->print(NLG6.MainsAmps[0] / 10.0, 1); file->print(F(";"));
+  file->print(NLG6.MainsVoltage[1] / 10.0, 1); file->print(F(";")); file->print(NLG6.MainsAmps[1] / 10.0, 1); file->print(F(";"));
+  file->print(NLG6.MainsVoltage[2] / 10.0, 1); file->print(F(";")); file->print(NLG6.MainsAmps[2] / 10.0, 1); file->print(F(";"));
+  file->print(NLG6.DC_HV / 10.0, 1); file->print(F(";")); file->print(NLG6.DC_Current / 10.0, 1); file->print(F(";"));
+  file->print(NLG6.ReportedTemp - TEMP_OFFSET, DEC); file->print(F(";"));
+  file->print(NLG6.CoolingPlateTemp - TEMP_OFFSET, DEC); file->print(F(";"));
+  file->print(NLG6.SocketTemp - TEMP_OFFSET, DEC); file->print(F(";"));
+  file->print(CLS.CoolingTemp / 8.0,1); file->print(F(";"));
+  file->print(CLS.CoolingPumpRPM / 255.0 * 100.0, 1); file->print(F(";"));
+  file->print(CLS.CoolingPumpTemp - 50);
+  file->println();
+
+  file->close();
 }

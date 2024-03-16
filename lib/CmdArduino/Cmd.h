@@ -1,5 +1,6 @@
 /*******************************************************************
     Copyright (C) 2009 FreakLabs
+    Copyright (c) 2024 Ryan Beesley
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -33,9 +34,9 @@
 //! \file    Cmd.h
 //! \brief   Simple Command Line Interface for Arduino
 //! \brief   Modified to support multiple command prompts
-//! \date    2017-August
-//! \author  My-Lab-odyssey
-//! \version 0.6.2
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 0.6.2.1
 //--------------------------------------------------------------------------------
 
 *******************************************************************/

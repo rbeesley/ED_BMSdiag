@@ -1,9 +1,10 @@
 //--------------------------------------------------------------------------------
-// ED BMSdiag, v1.0.8
+// ED BMSdiag, v1.0.9
 // Retrieve battery diagnostic data from your smart electric drive EV.
 //
 // (c) 2015-2018 by MyLab-odyssey
 // (c) 2017-2020 by Jim Sokoloff
+// (c) 2024 by Ryan Beesley
 //
 // Licensed under "MIT License (MIT)", see license file for more information.
 //
@@ -18,24 +19,25 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //--------------------------------------------------------------------------------
-//! \file    ED_BMSdiag.ino
+//! \file    ED_BMSdiag.cpp
 //! \brief   Retrieve battery diagnostic data from your smart electric drive EV.
 //! \brief   Only usable for third gen. model build from late 2012 to mid 2015!!!
 //! \brief   Build a diagnostic tool with the MCP2515 CAN controller and Arduino
 //! \brief   compatible hardware.
-//! \date    2020-March
-//! \author  MyLab-odyssey
-//! \version 1.0.8
+//! \date    2024-March
+//! \author  Ryan Beesley
+//! \version 1.0.9
 //--------------------------------------------------------------------------------
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <SD.h>
 
 #include "ED_BMSdiag.h"
 
 #include "ED_BMSdiag_PRN.h"
 #include "ED_BMSdiag_CLI.h"
 
-MCP_CAN CAN0(CS);                //!< Set CS pin
+MCP_CAN CAN0(CS_PIN);                //!< Set CS_PIN pin
 
 canDiag DiagCAN;
 BatteryDiag_t BMS;
@@ -47,6 +49,8 @@ CTimeout CLI_Timeout(500);      //!< Timeout value for CLI polling in millis
 CTimeout LOG_Timeout(30000);    //!< Timeout value for LOG activity in millis
 
 deviceStatus_t myDevice;
+
+Sd2Card card;
 
 //--------------------------------------------------------------------------------
 //! \brief   SETUP()
@@ -66,17 +70,28 @@ void setup() {
   // Read configuration from EEPROM
   ReadGlobalConfig(&myDevice);
 
-  pinMode(CS, OUTPUT);
-  pinMode(CS_SD, OUTPUT);
-  digitalWrite(CS_SD, HIGH);
+  // Initialize the SD card
+  if (!card.init(SPI_HALF_SPEED, SD_CS_PIN))
+  {
+    Serial.print("SD Card error: "); Serial.println(card.errorCode());
+    Serial.print("               "); Serial.println(card.errorData());
+  } else {
+    myDevice.cardPresent = true;
+    Serial.println("SD Card present");
+    SD.begin(SD_CS_PIN);
+  }
+
+  pinMode(CS_PIN, OUTPUT);
+  // pinMode(SD_CS_PIN, OUTPUT);
+  // digitalWrite(SD_CS_PIN, HIGH);
 
   // Initialize MCP2515 and clear filters
   DiagCAN.begin(&CAN0, &CAN_Timeout);
   DiagCAN.clearCAN_Filter();
 
-  digitalWrite(CS, HIGH);
+  digitalWrite(CS_PIN, HIGH);
 
-  // MCP2515 read buffer: setting pin 2 for input, LOW if CAN messages are received
+  // MCP2515 read buffer: setting can int pin for input, LOW if CAN messages are received
   pinMode(CAN_INT_PIN, INPUT);
 
   //Serial.println(getFreeRam());
@@ -110,7 +125,6 @@ void setup() {
   // Prompt user for what to do next
   cmd_display();
   set_local_echo(ECHO);
-  
 }
 
 //--------------------------------------------------------------------------------
@@ -120,8 +134,12 @@ void loop() {
    if (CLI_Timeout.Expired(true)) {
       cmdPoll();                                   //Poll CLI status
    }
-   if (myDevice.logging && LOG_Timeout.Expired(true)){
-      logdata();
+   if (myDevice.logging && LOG_Timeout.Expired(true)) {
+      if (myDevice.logFile && myDevice.cardPresent) {
+        log_file();
+      } else {
+        logdata();
+      }
    }
 }
 
@@ -328,12 +346,14 @@ void ReadGlobalConfig(deviceStatus_t *config, bool force_write)
     Serial.println(F("Setting factory defaults"));
     EEPROM.update(EE_InitialDumpAll, 1); 
     EEPROM.update(EE_logging, 0);
+    EEPROM.update(EE_logFile, 0);
     EEPROM.update(EE_logInterval, 30);
     EEPROM.update(EE_Experimental, 0);
     EEPROM.update(EE_Signature, kMagicSignature);
   }
   config->initialDump = (EEPROM.read(EE_InitialDumpAll) > 0);
   config->logging = (EEPROM.read(EE_logging) > 0);
+  config->logFile = (EEPROM.read(EE_logFile) > 0);
   config->timer = EEPROM.read(EE_logInterval);
   config->experimental = (EEPROM.read(EE_Experimental) > 0);
 }

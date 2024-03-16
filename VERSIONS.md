@@ -1,6 +1,18 @@
 ## ED BMSdiag version history
 |version  | comment|
 |-------- | --------|
+|v1.0.9   | Feature:|
+|         | Save the logging data to an SD Card file|
+|v1.0.8.1 | Internal:|
+|         | Moved the project from Arduino IDE to Platform IO|
+|v1.0.8   | Feature:|
+|	  | Print a judgment/recommendation about the 12V battery status|
+|         | Internal:|
+|         | ... Several changes to free up memory to allow for the above feature to fit|
+|v1.0.7   | Feature:|
+|	  | Show clear "* All measurements captured *" message upon successful download of all data|
+|         | Internal:|
+|         | ... Several comments internally about the logical contents of different CAN messages|
 |v1.0.5   | Internal:|
 |         | ... Eliminate compiler warnings throughout the code. Two warnings remain, but are in the EEPROM library|
 |v1.0.4   | Feature:|

@@ -1,8 +1,7 @@
 # ED BMSdiag
 
-[![version](https://img.shields.io/badge/version-v1.0.8.1-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
+[![version](https://img.shields.io/badge/version-v1.0.9-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/archive/master.zip)
 [![version](https://img.shields.io/badge/issues-none-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/issues)
-[![release](https://img.shields.io/badge/release-v1.0.8.1-brightgreen.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MyLab-odyssey/ED_BMSdiag/blob/master/LICENSE.txt)
 
 Retrieve battery diagnostic data from your smart electric drive EV. Get a Status Report to rate the health of the battery or dig into more detailed measurements.  
